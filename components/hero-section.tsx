@@ -64,11 +64,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-white max-w-4xl"
+            className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tighter text-balance max-w-4xl text-white font-[family-name:var(--font-heading)] leading-[1.15]"
           >
-            Welcome to{" "}
-            <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              IDEA Lab FISAT
+            Welcome to <br />
+            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              FISAT AICTE IDEA Lab
             </span>
           </motion.h1>
 
