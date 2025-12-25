@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
-import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import LoginRequiredModal from "@/components/auth/LoginRequiredModal"
 import { useRouter } from "next/navigation"
@@ -71,8 +70,11 @@ export function InventorySection() {
     <section className="w-full py-20 bg-background">
       <div className="max-w-6xl mx-auto px-6">
 
+        {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-5">IDEA Lab Inventory</h2>
+          <h2 className="text-4xl font-bold mb-5">
+            IDEA Lab Inventory
+          </h2>
           <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
           <p className="text-muted-foreground mt-3">
             Grab what you need. Build something cool.
@@ -91,6 +93,7 @@ export function InventorySection() {
           </p>
         )}
 
+        {/* Inventory Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((item) => {
             const availability = getAvailability(item.quantity_available)
@@ -101,12 +104,16 @@ export function InventorySection() {
                 whileHover={{ y: -4 }}
                 className="bg-card border border-border rounded-lg overflow-hidden"
               >
-                <div className="relative h-40 bg-muted">
-                  <Image
-                    src={item.image_url || "/placeholder.svg"}
+                {/* IMAGE — switched to <img> */}
+                <div className="h-40 bg-muted flex items-center justify-center">
+                  <img
+                    src={
+                      item.image_url && item.image_url.startsWith("http")
+                        ? item.image_url
+                        : "/placeholder.svg"
+                    }
                     alt={item.name}
-                    fill
-                    className="object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
 
@@ -119,6 +126,7 @@ export function InventorySection() {
                     <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent border border-accent/30">
                       {item.category}
                     </span>
+
                     <span
                       className={`text-xs px-2 py-1 rounded border ${availabilityStyles[availability]}`}
                     >
@@ -131,6 +139,7 @@ export function InventorySection() {
           })}
         </div>
 
+        {/* CTA */}
         <div className="flex justify-center mt-12">
           <button
             onClick={handleViewInventory}
