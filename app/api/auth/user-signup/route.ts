@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-server"
+import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json()
+  const { email, password, role } = await req.json()
 
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
@@ -10,9 +10,17 @@ export async function POST(req: Request) {
     email_confirm: true,
   })
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error || !data.user) {
+    return NextResponse.json(
+      { error: error?.message || "User creation failed" },
+      { status: 400 }
+    )
   }
 
-  return NextResponse.json({ user: data.user })
+  await supabaseAdmin.from("user_roles").insert({
+    user_id: data.user.id,
+    role,
+  })
+
+  return NextResponse.json({ success: true })
 }

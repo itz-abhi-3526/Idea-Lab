@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-server"
+import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function getUserInventoryRequests(userId: string) {
   const { data, error } = await supabaseAdmin

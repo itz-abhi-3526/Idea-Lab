@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { createSupabaseServerClient } from "@/lib/supabase-server-client"
+import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { getUserRole } from "@/lib/get-user-role"
 
 export default async function AdminLayout({
@@ -7,21 +7,21 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabaseServerClient()
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect("/login")
   }
 
-  const role = await getUserRole(session.user.id)
+  const role = await getUserRole(user.id)
 
   if (role !== "admin") {
     redirect("/unauthorized")
   }
 
-  return children
+  return <>{children}</>
 }

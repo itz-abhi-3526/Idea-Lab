@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-server"
+import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function POST(req: Request) {
   const { email, password } = await req.json()
@@ -13,8 +13,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 401 })
   }
 
-  return NextResponse.json({
-    session: data.session,
-    user: data.user,
-  })
+  return NextResponse.json({ user: data.user })
 }

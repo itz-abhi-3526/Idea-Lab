@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-server"
+import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function POST(req: Request) {
   const { userId } = await req.json()
 
   const { data, error } = await supabaseAdmin
-    .from("profiles")
+    .from("user_roles")
     .select("role")
-    .eq("id", userId)
+    .eq("user_id", userId)
     .single()
 
   if (error) {
