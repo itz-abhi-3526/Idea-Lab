@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function GET() {
+  const { supabaseAdmin } = await import("@/lib/supabase-admin")
+
   const { data, error } = await supabaseAdmin
     .from("inventory_requests")
     .select(`

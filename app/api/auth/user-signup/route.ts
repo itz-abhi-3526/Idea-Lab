@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-admin"
 
 export async function POST(req: Request) {
+  const { supabaseAdmin } = await import("@/lib/supabase-admin")
+
   const { email, password, role } = await req.json()
 
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
