@@ -79,8 +79,8 @@ export function EventSection() {
         {/* Heading */}
         <div className="mb-20 text-center space-y-4">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
-            Events
-          </h2>
+              Events
+            </h2>
           <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
           <p className="text-lg text-muted-foreground">
             Moments where ideas meet action

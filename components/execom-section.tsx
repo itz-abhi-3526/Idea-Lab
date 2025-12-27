@@ -93,7 +93,7 @@ export function ExecomSection() {
           className="mb-16"
         >
           <div className="flex flex-col items-center text-center space-y-4">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
               Executive Committee
             </h2>
 

@@ -60,7 +60,9 @@ export function IdeaSubmissionSection() {
       <section id="idea-submission" className="py-24 bg-background">
         <div className="text-center space-y-6">
           <Lightbulb className="mx-auto h-12 w-12 text-accent" />
-          <h2 className="text-4xl font-bold">Have an Idea?</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
+              Have an Idea?
+            </h2>
           <p className="text-muted-foreground">
             Got an idea worth exploring? Submit it to us and get the support you need to turn it into reality.
           </p>

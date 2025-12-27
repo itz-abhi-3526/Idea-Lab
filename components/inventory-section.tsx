@@ -72,9 +72,9 @@ export function InventorySection() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-5">
-            IDEA Lab Inventory
-          </h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] mb-5">
+              IDEA Lab Inventory
+            </h2>
           <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
           <p className="text-muted-foreground mt-3">
             Grab what you need. Build something cool.

@@ -71,6 +71,11 @@ export function Footer() {
                   ExeCom
                 </Link>
               </li>
+              <li>
+                <Link href="#coordinator" className="hover:text-accent transition">
+                  Incubation Request
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -86,7 +86,7 @@ export function AboutSection() {
           className="mb-20"
         >
           <div className="flex flex-col items-center text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
               About IDEA Lab
             </h2>
 
