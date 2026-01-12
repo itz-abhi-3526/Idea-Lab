@@ -59,12 +59,8 @@ export function InventorySection() {
   }, [])
 
   const handleViewInventory = () => {
-    if (!user) {
-      setShowLoginModal(true)
-      return
-    }
-    router.push("/inventory")
-  }
+  router.push("/inventory")
+}
 
   return (
     <section className="w-full py-20 bg-background">

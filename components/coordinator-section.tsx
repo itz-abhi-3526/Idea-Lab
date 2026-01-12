@@ -2,6 +2,7 @@
 import { motion } from "framer-motion"
 import { Mail, Phone, ExternalLink, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SlotReservationSection } from "./slot-reservation-section"
 
 function ContactItem({ icon: Icon, label, href }: { icon: any; label: string; href?: string }) {
   const content = (
@@ -99,6 +100,7 @@ export function CoordinatorSection() {
             </div>
           </div>
         </motion.div>
+        <SlotReservationSection />
       </div>
     </section>
   )

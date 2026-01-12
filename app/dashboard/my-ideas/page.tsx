@@ -1,83 +1,184 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
 import IdeaTimeline from "@/components/ideas/IdeaTimeline"
-import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+/* ----------------------------- */
+/* Types                         */
+/* ----------------------------- */
+
+type IdeaStatus =
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "completed"
+  | "cancelled"
 
 type Idea = {
   id: string
   idea_title: string
   idea_description: string
   domain: string | null
-  status: "submitted" | "approved" | "rejected" | "completed"
+  status: IdeaStatus
   created_at: string
 }
 
+/* ----------------------------- */
+/* Page                          */
+/* ----------------------------- */
+
 export default function MyIdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([])
+  const [activeTab, setActiveTab] = useState<
+    "current" | "previous"
+  >("current")
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const loadIdeas = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+  /* ----------------------------- */
+  /* Fetch Ideas                   */
+  /* ----------------------------- */
 
-      if (!user) {
-        setLoading(false)
-        return
-      }
+  const fetchIdeas = async () => {
+    setLoading(true)
 
-      const { data } = await supabase
-        .from("idea_submissions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-      setIdeas(data || [])
+    if (!user) {
+      setIdeas([])
       setLoading(false)
+      return
     }
 
-    loadIdeas()
+    const { data } = await supabase
+      .from("idea_submissions")
+      .select(
+        "id, idea_title, idea_description, domain, status, created_at"
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .returns<Idea[]>()
+
+    setIdeas(data ?? [])
+    setLoading(false)
+  }
+
+  /* ----------------------------- */
+  /* Cancel Idea                   */
+  /* ----------------------------- */
+
+  const cancelIdea = async (id: string) => {
+    const { error } = await supabase
+      .from("idea_submissions")
+      .update({ status: "cancelled" })
+      .eq("id", id)
+
+    if (!error) {
+      setIdeas((prev) =>
+        prev.map((idea) =>
+          idea.id === id
+            ? { ...idea, status: "cancelled" }
+            : idea
+        )
+      )
+    }
+  }
+
+  /* ----------------------------- */
+  /* Effects                       */
+  /* ----------------------------- */
+
+  useEffect(() => {
+    fetchIdeas()
   }, [])
 
+  const current = ideas.filter(
+    (i) => i.status === "submitted"
+  )
+  const previous = ideas.filter(
+    (i) => i.status !== "submitted"
+  )
+
+  /* ----------------------------- */
+  /* UI                            */
+  /* ----------------------------- */
+
+  if (loading) {
+    return (
+      <div className="p-10">
+        <p className="text-muted-foreground">
+          Loading your ideas...
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-background px-6 py-12 md:px-12">
-      {/* header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight">
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-heading">
           My Ideas
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Track the status of ideas you’ve submitted to IDEA Lab.
+        <p className="text-muted-foreground mt-2">
+          Track the status of ideas you’ve submitted
         </p>
       </div>
 
-      {/* content */}
-      {loading ? (
-        <p className="text-sm text-muted-foreground">
-          Loading your ideas…
-        </p>
-      ) : ideas.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            You haven’t submitted any ideas yet.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6">
-          {ideas.map((idea) => (
-            <div
-              key={idea.id}
-              className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6"
-            >
-              <div className="flex flex-col gap-2">
-                <h3 className="text-lg font-medium">
+      {/* Tabs (MATCHES INVENTORY PAGE) */}
+      <div className="flex gap-4">
+        <button
+          onClick={() => setActiveTab("current")}
+          className={`px-4 py-2 rounded-xl transition ${
+            activeTab === "current"
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Current Ideas
+        </button>
+
+        <button
+          onClick={() => setActiveTab("previous")}
+          className={`px-4 py-2 rounded-xl transition ${
+            activeTab === "previous"
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Previous Ideas
+        </button>
+      </div>
+
+      {/* Ideas */}
+      <div className="space-y-6">
+        {(activeTab === "current"
+          ? current
+          : previous).length === 0 && (
+          <div className="glass-surface rounded-2xl p-10 text-center">
+            <p className="text-muted-foreground">
+              No{" "}
+              {activeTab === "current"
+                ? "active"
+                : "previous"}{" "}
+              ideas.
+            </p>
+          </div>
+        )}
+
+        {(activeTab === "current"
+          ? current
+          : previous
+        ).map((idea) => (
+          <div
+            key={idea.id}
+            className="glass-surface rounded-2xl p-6 soft-shadow space-y-4"
+          >
+            <div className="flex justify-between gap-4">
+              <div className="space-y-2">
+                <h3 className="font-medium text-lg">
                   {idea.idea_title}
                 </h3>
 
@@ -86,17 +187,39 @@ export default function MyIdeasPage() {
                 </p>
 
                 {idea.domain && (
-                  <span className="mt-1 w-fit rounded-full bg-accent/10 px-3 py-1 text-xs text-accent">
+                  <span className="inline-block text-xs rounded-full bg-accent/15 px-3 py-1 text-accent">
                     {idea.domain}
                   </span>
                 )}
               </div>
 
-              <IdeaTimeline status={idea.status} />
+              <span className="text-sm capitalize text-muted-foreground">
+                {idea.status}
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+
+            <IdeaTimeline status={idea.status} />
+
+            {idea.status === "submitted" && (
+              <div className="pt-3 text-right">
+                <button
+                  onClick={() => cancelIdea(idea.id)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition"
+                >
+                  Cancel Idea
+                </button>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Submitted on{" "}
+              {new Date(
+                idea.created_at
+              ).toLocaleString()}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

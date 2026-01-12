@@ -6,7 +6,7 @@ import { EventSection } from "@/components/event-section"
 import { Footer } from "@/components/footer"
 import { IdeaSubmissionSection } from "@/components/idea-submission-section"
 import { CoordinatorSection } from "@/components/coordinator-section"
-
+import { ProjectPortalComingSoonSection } from "@/components/project-portal-3d-section"
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -16,6 +16,7 @@ export default function Home() {
       <IdeaSubmissionSection />
       <CoordinatorSection />
       <InventorySection />
+      <ProjectPortalComingSoonSection />
       <ExecomSection />
       <Footer />
     </main>
