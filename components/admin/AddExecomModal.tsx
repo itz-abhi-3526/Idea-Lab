@@ -108,29 +108,29 @@ export default function AddExecomModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="glass-surface rounded-2xl w-full max-w-lg p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 sm:px-6">
+      <div className="glass-surface rounded-2xl w-full max-w-md sm:max-w-lg p-5 sm:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-heading">
+          <h2 className="text-lg sm:text-xl font-heading">
             {member ? 'Edit Execom Member' : 'Add Execom Member'}
           </h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground transition"
           >
             ✕
           </button>
         </div>
 
         {/* Form */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <input
             name="name"
             placeholder="Name"
             value={form.name}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 outline-none"
+            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
           />
 
           <input
@@ -138,7 +138,7 @@ export default function AddExecomModal({
             placeholder="Designation"
             value={form.designation}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 outline-none"
+            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
           />
 
           <input
@@ -146,7 +146,7 @@ export default function AddExecomModal({
             placeholder="Role (eg: Co-ordinator)"
             value={form.role}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 outline-none"
+            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
           />
 
           <input
@@ -154,7 +154,7 @@ export default function AddExecomModal({
             placeholder="Image URL (Cloudinary)"
             value={form.image_url}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 outline-none"
+            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
           />
 
           <input
@@ -163,15 +163,15 @@ export default function AddExecomModal({
             placeholder="Display Order"
             value={form.display_order}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 outline-none"
+            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-3 sm:pt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-muted text-muted-foreground"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-muted text-muted-foreground text-sm sm:text-base"
           >
             Cancel
           </button>
@@ -179,19 +179,15 @@ export default function AddExecomModal({
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="
-              px-5 py-2 rounded-xl
-              bg-accent text-accent-foreground
-              hover:opacity-90 transition
-            "
+            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-accent text-accent-foreground hover:opacity-90 transition text-sm sm:text-base"
           >
             {loading
               ? member
                 ? 'Updating...'
                 : 'Adding...'
               : member
-                ? 'Update Member'
-                : 'Add Member'}
+              ? 'Update Member'
+              : 'Add Member'}
           </button>
         </div>
       </div>

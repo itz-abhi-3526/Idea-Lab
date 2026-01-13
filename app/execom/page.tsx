@@ -41,9 +41,7 @@ export default function ExecomPage() {
           schema: "public",
           table: "execom_members",
         },
-        () => {
-          fetchExecom()
-        }
+        fetchExecom
       )
       .subscribe()
 
@@ -55,36 +53,42 @@ export default function ExecomPage() {
   if (loading) return null
 
   return (
-    <section className="relative w-full min-h-screen py-24 bg-background">
-      <div className="mx-auto max-w-5xl px-6">
-
+    <section className="relative w-full min-h-screen py-20 sm:py-24 bg-background">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-16 text-center"
+          className="mb-12 sm:mb-16 text-center"
         >
-          <h1 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
             Executive Committee
           </h1>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-sm sm:text-base text-muted-foreground">
             Organised. Driven. Committed.
           </p>
         </motion.div>
 
-        {/* List */}
-        <div className="space-y-6">
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {members.map((member, index) => (
             <motion.div
               key={member.id}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: index * 0.04 }}
-              className="flex items-center gap-6 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-md"
+              className="
+                flex items-center gap-4
+                rounded-xl
+                border border-white/10
+                bg-white/5
+                p-4
+                backdrop-blur-md
+              "
             >
               {/* Photo */}
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-accent/10">
+              <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-full bg-accent/10">
                 <img
                   src={member.image_url ?? "/placeholder-avatar.png"}
                   alt={member.name}
@@ -93,34 +97,24 @@ export default function ExecomPage() {
               </div>
 
               {/* Text */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-center sm:text-left">
-                <span className="font-semibold">
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="font-semibold text-sm sm:text-base truncate">
                   {member.name}
                 </span>
 
-                <span className="hidden sm:inline text-muted-foreground">
-                  |
-                </span>
-
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground truncate">
                   {member.designation}
                 </span>
 
                 {member.role && (
-                  <>
-                    <span className="hidden sm:inline text-muted-foreground">
-                      |
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {member.role}
-                    </span>
-                  </>
+                  <span className="text-xs sm:text-sm text-muted-foreground truncate">
+                    {member.role}
+                  </span>
                 )}
               </div>
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   )

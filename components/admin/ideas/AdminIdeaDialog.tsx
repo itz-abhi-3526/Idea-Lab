@@ -51,17 +51,34 @@ export default function AdminIdeaDialog({
         View
       </summary>
 
-      <div className="absolute right-0 z-50 mt-2 w-[420px] glass-surface rounded-2xl p-6 soft-shadow space-y-4">
-        <div>
-          <h3 className="text-lg font-medium">
+      <div
+        className="
+          fixed sm:absolute
+          inset-x-0 sm:inset-auto
+          bottom-0 sm:bottom-auto
+          right-0
+          z-50
+          mt-2
+          w-full sm:w-[420px]
+          max-h-[85vh]
+          overflow-y-auto
+          glass-surface
+          rounded-t-2xl sm:rounded-2xl
+          p-4 sm:p-6
+          soft-shadow
+          space-y-4
+        "
+      >
+        <div className="space-y-2">
+          <h3 className="text-base sm:text-lg font-medium">
             {idea.idea_title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {idea.idea_description}
           </p>
 
           {idea.domain && (
-            <span className="inline-block mt-3 text-xs rounded-full bg-accent/15 px-3 py-1 text-accent">
+            <span className="inline-block text-xs rounded-full bg-accent/15 px-3 py-1 text-accent w-fit">
               {idea.domain}
             </span>
           )}
@@ -75,11 +92,11 @@ export default function AdminIdeaDialog({
         </div>
 
         {idea.status === "submitted" && (
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
             <button
               disabled={loading}
               onClick={() => updateStatus("rejected")}
-              className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition text-sm"
             >
               Reject
             </button>
@@ -87,7 +104,7 @@ export default function AdminIdeaDialog({
             <button
               disabled={loading}
               onClick={() => updateStatus("approved")}
-              className="px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition text-sm"
             >
               Approve
             </button>

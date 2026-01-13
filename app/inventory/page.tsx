@@ -77,18 +77,12 @@ export default function InventoryPage() {
     purpose: "",
   })
 
-  /* -----------------------------
-     Auth
-  ----------------------------- */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
     })
   }, [])
 
-  /* -----------------------------
-     Fetch inventory
-  ----------------------------- */
   useEffect(() => {
     supabase
       .from("inventory_items")
@@ -108,31 +102,17 @@ export default function InventoryPage() {
     fn()
   }
 
-  /* -----------------------------
-     Cart logic
-  ----------------------------- */
   const addToCart = (item: InventoryItem) => {
-    if (item.quantity_available === 0) {
-      alert("Item is unavailable")
-      return
-    }
+    if (item.quantity_available === 0) return
 
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id)
-
       if (existing) {
-        if (existing.quantity >= item.quantity_available) {
-          alert("Requested quantity exceeds availability")
-          return prev
-        }
-
+        if (existing.quantity >= item.quantity_available) return prev
         return prev.map(i =>
-          i.id === item.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         )
       }
-
       return [...prev, { ...item, quantity: 1 }]
     })
   }
@@ -141,15 +121,8 @@ export default function InventoryPage() {
     setCart(prev =>
       prev.map(i => {
         if (i.id !== id) return i
-
         const next = i.quantity + delta
-        if (next < 1) return i
-
-        if (next > i.quantity_available) {
-          alert("Requested quantity exceeds availability")
-          return i
-        }
-
+        if (next < 1 || next > i.quantity_available) return i
         return { ...i, quantity: next }
       })
     )
@@ -159,22 +132,13 @@ export default function InventoryPage() {
     setCart(prev => prev.filter(i => i.id !== id))
   }
 
-  /* -----------------------------
-     Submit request
-  ----------------------------- */
   const submitRequest = async () => {
     if (!user) return
-
     const { name, department, phone, purpose } = form
-
-    if (!name || !department || !phone || !purpose) {
-      alert("Fill all fields")
-      return
-    }
+    if (!name || !department || !phone || !purpose) return
 
     try {
       setSubmitting(true)
-
       const res = await fetch("/api/inventory-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -188,14 +152,7 @@ export default function InventoryPage() {
         }),
       })
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        alert(data.error || "Failed")
-        return
-      }
-
-      alert("Request submitted successfully")
+      if (!res.ok) return
       setCart([])
       setShowCart(false)
       setShowForm(false)
@@ -204,9 +161,6 @@ export default function InventoryPage() {
     }
   }
 
-  /* -----------------------------
-     Derived
-  ----------------------------- */
   const categories = [
     "all",
     ...Array.from(new Set(items.map(i => i.category))),
@@ -214,32 +168,27 @@ export default function InventoryPage() {
 
   const filteredItems = items
     .filter(item => {
-      const matchSearch =
-        `${item.name} ${item.category}`
-          .toLowerCase()
-          .includes(search.toLowerCase())
-
+      const matchSearch = `${item.name} ${item.category}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
       const matchCategory =
         category === "all" || item.category === category
-
       return matchSearch && matchCategory
     })
-    .sort((a, b) => {
-      if (sort === "availability") {
-        return b.quantity_available - a.quantity_available
-      }
-      return a.name.localeCompare(b.name)
-    })
+    .sort((a, b) =>
+      sort === "availability"
+        ? b.quantity_available - a.quantity_available
+        : a.name.localeCompare(b.name)
+    )
 
-  /* -----------------------------
-     UI
-  ----------------------------- */
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b bg-card px-6 py-4 space-y-4">
+      <div className="sticky top-0 z-40 border-b bg-card px-4 sm:px-6 py-4 space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Lab Inventory</h1>
+          <h1 className="text-lg sm:text-xl font-semibold">
+            Lab Inventory
+          </h1>
 
           <button
             onClick={() => requireAuth(() => setShowCart(true))}
@@ -254,17 +203,17 @@ export default function InventoryPage() {
           </button>
         </div>
 
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-          <input
-            placeholder="Search inventory..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full bg-input rounded-xl pl-9 pr-4 py-2 outline-none"
-          />
-        </div>
+        <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+            <input
+              placeholder="Search inventory..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-input rounded-xl pl-9 pr-4 py-2 outline-none"
+            />
+          </div>
 
-        <div className="flex gap-4 max-w-md">
           <select
             value={category}
             onChange={e => setCategory(e.target.value)}
@@ -282,29 +231,30 @@ export default function InventoryPage() {
             onChange={e => setSort(e.target.value)}
             className="bg-input rounded-xl px-3 py-2 text-sm"
           >
-            <option value="name">Sort: Name</option>
-            <option value="availability">Sort: Availability</option>
+            <option value="name">Name</option>
+            <option value="availability">Availability</option>
           </select>
         </div>
       </div>
 
       {/* Inventory Grid */}
-      <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {filteredItems.map(item => {
           const a = availability(item.quantity_available)
-
           return (
             <motion.div
               key={item.id}
               whileHover={{ y: -4 }}
-              className="glass-surface rounded-xl p-5 soft-shadow flex flex-col justify-between"
+              className="glass-surface rounded-xl p-4 sm:p-5 soft-shadow flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
                   <Box className="w-5 h-5 text-accent" />
                 </div>
 
-                <h3 className="font-medium">{item.name}</h3>
+                <h3 className="font-medium text-sm sm:text-base">
+                  {item.name}
+                </h3>
 
                 <span className="inline-block text-xs px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/30">
                   {item.category}
@@ -312,7 +262,7 @@ export default function InventoryPage() {
               </div>
 
               <div className="pt-4 space-y-3">
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className={`px-3 py-1 rounded-full ${a.class}`}>
                     {a.text}
                   </span>
@@ -323,6 +273,7 @@ export default function InventoryPage() {
 
                 <Button
                   className="w-full"
+                  size="sm"
                   disabled={item.quantity_available === 0}
                   onClick={() => requireAuth(() => addToCart(item))}
                 >
@@ -340,7 +291,7 @@ export default function InventoryPage() {
         )}
       </div>
 
-      {/* CART */}
+      {/* Cart Drawer */}
       <AnimatePresence>
         {showCart && (
           <>
@@ -353,7 +304,7 @@ export default function InventoryPage() {
               initial={{ x: 400 }}
               animate={{ x: 0 }}
               exit={{ x: 400 }}
-              className="fixed right-0 top-0 h-full w-96 bg-card p-6 space-y-6 z-50"
+              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-card p-4 sm:p-6 space-y-6 z-50"
             >
               <h2 className="text-lg font-semibold">Request Cart</h2>
 
@@ -407,10 +358,10 @@ export default function InventoryPage() {
         )}
       </AnimatePresence>
 
-      {/* FORM */}
+      {/* Request Form */}
       <AnimatePresence>
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div className="bg-card rounded-xl p-6 w-full max-w-md space-y-4">
               <h3 className="font-semibold">Requester Details</h3>
 

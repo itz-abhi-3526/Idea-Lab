@@ -111,42 +111,81 @@ export default function AddInventoryModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="glass-surface rounded-2xl w-full max-w-lg p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 sm:px-6">
+      <div className="glass-surface rounded-2xl w-full max-w-md sm:max-w-lg p-5 sm:p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-heading">
+          <h2 className="text-lg sm:text-xl font-heading">
             {item ? 'Edit Inventory Item' : 'Add Inventory Item'}
           </h2>
-          <button onClick={onClose}>✕</button>
-        </div>
-
-        <div className="space-y-4">
-          <input name="name" placeholder="Item name" value={form.name} onChange={handleChange} className="w-full bg-input px-4 py-2 rounded-xl" />
-          <input name="category" placeholder="Category" value={form.category} onChange={handleChange} className="w-full bg-input px-4 py-2 rounded-xl" />
-          <input name="description" placeholder="Description" value={form.description} onChange={handleChange} className="w-full bg-input px-4 py-2 rounded-xl" />
-          <input name="quantity_total" type="number" placeholder="Total quantity" value={form.quantity_total} onChange={handleChange} className="w-full bg-input px-4 py-2 rounded-xl" />
-          <input name="quantity_available" type="number" placeholder="Available quantity" value={form.quantity_available} onChange={handleChange} className="w-full bg-input px-4 py-2 rounded-xl" />
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-muted"
+            className="text-muted-foreground hover:text-foreground transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-3 sm:space-y-4">
+          <input
+            name="name"
+            placeholder="Item name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full bg-input px-4 py-2 rounded-xl text-sm sm:text-base"
+          />
+          <input
+            name="category"
+            placeholder="Category"
+            value={form.category}
+            onChange={handleChange}
+            className="w-full bg-input px-4 py-2 rounded-xl text-sm sm:text-base"
+          />
+          <input
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full bg-input px-4 py-2 rounded-xl text-sm sm:text-base"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <input
+              name="quantity_total"
+              type="number"
+              placeholder="Total quantity"
+              value={form.quantity_total}
+              onChange={handleChange}
+              className="w-full bg-input px-4 py-2 rounded-xl text-sm sm:text-base"
+            />
+            <input
+              name="quantity_available"
+              type="number"
+              placeholder="Available quantity"
+              value={form.quantity_available}
+              onChange={handleChange}
+              className="w-full bg-input px-4 py-2 rounded-xl text-sm sm:text-base"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 sm:pt-4">
+          <button
+            onClick={onClose}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-muted text-sm sm:text-base"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-accent text-accent-foreground"
+            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-accent text-accent-foreground text-sm sm:text-base"
           >
             {loading
               ? item
                 ? 'Updating...'
                 : 'Adding...'
               : item
-                ? 'Update Item'
-                : 'Add Item'}
+              ? 'Update Item'
+              : 'Add Item'}
           </button>
         </div>
       </div>

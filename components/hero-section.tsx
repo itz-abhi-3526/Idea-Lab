@@ -20,17 +20,17 @@ export function HeroSection() {
       </div>
 
       {/* Auth header */}
-      <div className="absolute top-6 right-6 z-20">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
         <AuthHeader />
       </div>
 
       {/* Main content */}
-      <div className="container px-4 md:px-6 relative z-10">
+      <div className="relative z-10 w-full px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center text-center space-y-8"
+          className="flex flex-col items-center text-center space-y-6 sm:space-y-8"
         >
           {/* Logo */}
           <motion.div
@@ -41,7 +41,7 @@ export function HeroSection() {
             <img
               src="https://res.cloudinary.com/dudp2imxs/image/upload/v1766672158/IDEA_LAB_LOGO_high_n9bjgo.png"
               alt="IDEA Lab Logo"
-              className="h-24 md:h-32 w-auto object-contain drop-shadow-2xl"
+              className="h-20 sm:h-24 md:h-32 w-auto object-contain drop-shadow-2xl"
             />
           </motion.div>
 
@@ -52,11 +52,11 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex items-center gap-3"
           >
-            <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-white/40" />
-            <span className="text-xs md:text-sm font-medium tracking-[0.2em] uppercase text-white/70">
+            <div className="h-[1px] w-6 sm:w-8 bg-gradient-to-r from-transparent to-white/40" />
+            <span className="text-xs sm:text-sm font-medium tracking-[0.2em] uppercase text-white/70">
               Where Ideas Come to Life
             </span>
-            <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-white/40" />
+            <div className="h-[1px] w-6 sm:w-8 bg-gradient-to-l from-transparent to-white/40" />
           </motion.div>
 
           {/* Heading */}
@@ -64,7 +64,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tighter text-balance max-w-4xl text-white font-[family-name:var(--font-heading)] leading-[1.15]"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tighter text-balance max-w-4xl text-white font-[family-name:var(--font-heading)] leading-tight"
           >
             Welcome to <br />
             <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
@@ -72,25 +72,25 @@ export function HeroSection() {
             </span>
           </motion.h1>
 
-          <p className="text-lg md:text-xl text-gray-200 max-w-2xl leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-200 max-w-2xl leading-relaxed px-2 sm:px-0">
             A collaborative innovation space where students design, build,
             and transform ideas into impactful solutions
           </p>
 
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <a href="#about">
-              <Button size="lg" className="bg-white text-black group">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
+            <a href="#about" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-black group">
                 Explore the Lab
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </a>
 
-            <a href="#idea-submission">
+            <a href="#idea-submission" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
-                className="bg-transparent text-white border-white/30 hover:bg-white/10"
+                className="w-full sm:w-auto bg-transparent text-white border-white/30 hover:bg-white/10"
               >
                 Submit Your Idea
               </Button>
@@ -100,7 +100,7 @@ export function HeroSection() {
       </div>
 
       {/* Bottom gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
     </section>
   )
 }

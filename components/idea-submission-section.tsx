@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Lightbulb, ArrowRight, X } from "lucide-react"
+import { Lightbulb, X } from "lucide-react"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -57,66 +57,143 @@ export function IdeaSubmissionSection() {
 
   return (
     <>
-      <section id="idea-submission" className="py-24 bg-background">
-        <div className="text-center space-y-6">
-          <Lightbulb className="mx-auto h-12 w-12 text-accent" />
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
-              Have an Idea?
-            </h2>
-          <p className="text-muted-foreground">
-            Got an idea worth exploring? Submit it to us and get the support you need to turn it into reality.
+      {/* SECTION */}
+      <section
+        id="idea-submission"
+        className="py-16 sm:py-20 lg:py-24 bg-background"
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center space-y-5 sm:space-y-6">
+          <Lightbulb className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-accent" />
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
+            Have an Idea?
+          </h2>
+
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Got an idea worth exploring? Submit it to us and get the support you
+            need to turn it into reality.
           </p>
 
           <button
             onClick={() => setOpen(true)}
-            className="px-6 py-3 bg-accent text-accent-foreground rounded-lg"
+            className="inline-flex items-center justify-center px-6 py-3 bg-accent text-accent-foreground rounded-lg text-base sm:text-sm"
           >
             Submit Your Idea
           </button>
 
-          <p className="text-sm text-muted-foreground">
-            Ideas are reviewed by IDEA Lab coordinators. Shortlisted teams will be contacted.
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Ideas are reviewed by IDEA Lab coordinators. Shortlisted teams will be
+            contacted.
           </p>
         </div>
       </section>
 
+      {/* MODAL */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center"
             onClick={() => setOpen(false)}
           >
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              className="bg-background p-8 rounded-xl w-full max-w-xl"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.25 }}
+              className="
+                bg-background
+                w-full
+                sm:max-w-xl
+                h-[90vh] sm:h-auto
+                rounded-t-2xl sm:rounded-xl
+                p-5 sm:p-8
+                relative
+                overflow-y-auto
+              "
             >
+              {/* Close */}
               <button
-                className="absolute top-4 right-4"
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
                 onClick={() => setOpen(false)}
               >
                 <X />
               </button>
 
-              <h3 className="text-2xl font-semibold mb-4">Idea Submission</h3>
+              <h3 className="text-xl sm:text-2xl font-semibold mb-4">
+                Idea Submission
+              </h3>
 
-              {error && <p className="text-red-500">{error}</p>}
-              {success && <p className="text-green-500">Idea submitted successfully!</p>}
+              {error && (
+                <p className="text-red-500 text-sm mb-2">{error}</p>
+              )}
+              {success && (
+                <p className="text-green-500 text-sm mb-2">
+                  Idea submitted successfully!
+                </p>
+              )}
 
               {!success && (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input name="student_name" required placeholder="Your Name" className="input" />
-                  <input name="email" value={email} readOnly className="input opacity-70" />
-                  <input name="phone" placeholder="Phone Number" className="input" />
-                  <input name="department" required placeholder="Department" className="input" />
-                  <input name="year" placeholder="Semester" className="input" />
-                  <input name="idea_title" required placeholder="Idea Title" className="input" />
-                  <textarea name="idea_description" required placeholder="Describe your idea" className="input" />
-                  <input name="domain" placeholder="Domain (AI, IoT, etc.)" className="input" />
-                  <input name="team_size" type="number" min={1} placeholder="Team Size" className="input" />
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-3 sm:space-y-4"
+                >
+                  <input
+                    name="student_name"
+                    required
+                    placeholder="Your Name"
+                    className="input text-base sm:text-sm"
+                  />
+                  <input
+                    name="email"
+                    value={email}
+                    readOnly
+                    className="input opacity-70 text-base sm:text-sm"
+                  />
+                  <input
+                    name="phone"
+                    placeholder="Phone Number"
+                    className="input text-base sm:text-sm"
+                  />
+                  <input
+                    name="department"
+                    required
+                    placeholder="Department"
+                    className="input text-base sm:text-sm"
+                  />
+                  <input
+                    name="year"
+                    placeholder="Semester"
+                    className="input text-base sm:text-sm"
+                  />
+                  <input
+                    name="idea_title"
+                    required
+                    placeholder="Idea Title"
+                    className="input text-base sm:text-sm"
+                  />
+                  <textarea
+                    name="idea_description"
+                    required
+                    placeholder="Describe your idea"
+                    className="input min-h-[120px] text-base sm:text-sm"
+                  />
+                  <input
+                    name="domain"
+                    placeholder="Domain (AI, IoT, etc.)"
+                    className="input text-base sm:text-sm"
+                  />
+                  <input
+                    name="team_size"
+                    type="number"
+                    min={1}
+                    placeholder="Team Size"
+                    className="input text-base sm:text-sm"
+                  />
 
                   <button
                     disabled={loading}
-                    className="w-full bg-accent text-accent-foreground py-3 rounded-lg"
+                    className="w-full bg-accent text-accent-foreground py-3 rounded-lg text-base sm:text-sm"
                   >
                     {loading ? "Submitting..." : "Submit Idea"}
                   </button>

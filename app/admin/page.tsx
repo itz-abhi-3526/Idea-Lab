@@ -49,10 +49,6 @@ export default function AdminDashboard() {
   const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
 
-  /* ----------------------------- */
-  /* Fetch Dashboard Data          */
-  /* ----------------------------- */
-
   const fetchDashboard = async () => {
     setLoading(true)
     const now = new Date().toISOString()
@@ -66,78 +62,50 @@ export default function AdminDashboard() {
       eventsActive,
       eventsUpcoming,
     ] = await Promise.all([
-      supabase.from("execom_members").select("*", {
-        count: "exact",
-        head: true,
-      }),
+      supabase.from("execom_members").select("*", { count: "exact", head: true }),
       supabase
         .from("execom_members")
         .select("*", { count: "exact", head: true })
         .eq("is_active", true),
-
-      supabase.from("idea_submissions").select("*", {
-        count: "exact",
-        head: true,
-      }),
-
+      supabase.from("idea_submissions").select("*", { count: "exact", head: true }),
       supabase.from("inventory_items").select("quantity_available"),
-
-      supabase.from("events").select("*", {
-        count: "exact",
-        head: true,
-      }),
-
+      supabase.from("events").select("*", { count: "exact", head: true }),
       supabase
         .from("events")
         .select("*", { count: "exact", head: true })
         .eq("is_active", true),
-
       supabase
         .from("events")
         .select("*", { count: "exact", head: true })
         .gt("start_datetime", now),
     ])
 
-    /* ----------------------------- */
-    /* Ideas per Month               */
-    /* ----------------------------- */
-
     const { data: ideas } = await supabase
       .from("idea_submissions")
       .select("created_at")
 
     const monthMap: Record<string, number> = {}
-
     ideas?.forEach(i => {
-      const month = new Date(i.created_at).toLocaleString(
-        "default",
-        { month: "short" }
-      )
+      const month = new Date(i.created_at).toLocaleString("default", {
+        month: "short",
+      })
       monthMap[month] = (monthMap[month] || 0) + 1
     })
 
-    const ideasChart = Object.keys(monthMap).map(m => ({
-      month: m,
-      count: monthMap[m],
-    }))
+    setIdeasByMonth(
+      Object.keys(monthMap).map(m => ({
+        month: m,
+        count: monthMap[m],
+      }))
+    )
 
-    /* ----------------------------- */
-    /* Execom Split                  */
-    /* ----------------------------- */
-
-    const execomPie = [
+    setExecomSplit([
       { name: "Active", value: execomActive.count ?? 0 },
       {
         name: "Inactive",
-        value:
-          (execomTotal.count ?? 0) -
-          (execomActive.count ?? 0),
+        value: (execomTotal.count ?? 0) - (execomActive.count ?? 0),
       },
-    ]
-
-    /* ----------------------------- */
-    /* Inventory Health              */
-    /* ----------------------------- */
+    ])
 
     let criticallyLow = 0
     let low = 0
@@ -149,21 +117,15 @@ export default function AdminDashboard() {
       else available++
     })
 
-    const inventoryPie = [
+    setInventoryHealth([
       { name: "Critically Low", value: criticallyLow },
       { name: "Low", value: low },
       { name: "Available", value: available },
-    ]
-
-    /* ----------------------------- */
-    /* Upcoming Events (Calendar)    */
-    /* ----------------------------- */
+    ])
 
     const { data: events } = await supabase
       .from("events")
-      .select(
-        "id, title, start_datetime, venue, is_featured, is_active"
-      )
+      .select("id, title, start_datetime, venue, is_featured, is_active")
       .gte("start_datetime", now)
       .order("start_datetime", { ascending: true })
       .limit(5)
@@ -180,15 +142,8 @@ export default function AdminDashboard() {
       eventsUpcoming: eventsUpcoming.count ?? 0,
     })
 
-    setIdeasByMonth(ideasChart)
-    setExecomSplit(execomPie)
-    setInventoryHealth(inventoryPie)
     setLoading(false)
   }
-
-  /* ----------------------------- */
-  /* Realtime Updates              */
-  /* ----------------------------- */
 
   useEffect(() => {
     fetchDashboard()
@@ -222,25 +177,20 @@ export default function AdminDashboard() {
     }
   }, [])
 
-  /* ----------------------------- */
-  /* UI                            */
-  /* ----------------------------- */
-
   if (loading) {
     return (
-      <p className="text-muted-foreground">
-        Loading dashboard...
-      </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <p className="text-muted-foreground">Loading dashboard...</p>
+      </div>
     )
   }
 
   if (!stats) return null
 
   return (
-    <div className="space-y-12">
-      {/* Header */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-12">
       <div>
-        <h1 className="text-3xl font-heading">
+        <h1 className="text-2xl sm:text-3xl font-heading">
           Admin Dashboard
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -248,7 +198,6 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <Stat label="Total Execom" value={stats.execomTotal} />
         <Stat label="Active Execom" value={stats.execomActive} accent />
@@ -259,7 +208,6 @@ export default function AdminDashboard() {
         <Stat label="Upcoming Events" value={stats.eventsUpcoming} />
       </div>
 
-      {/* Upcoming Events Calendar */}
       <div className="glass-surface rounded-2xl p-6 soft-shadow">
         <h3 className="font-medium mb-4">Upcoming Events</h3>
 
@@ -277,24 +225,24 @@ export default function AdminDashboard() {
                   key={event.id}
                   className="flex gap-4 border-b border-border pb-3 last:border-0"
                 >
-                  <div className="w-12 text-center">
+                  <div className="w-12 text-center shrink-0">
                     <p className="text-lg font-bold">
                       {date.getDate()}
                     </p>
                     <p className="text-xs text-muted-foreground uppercase">
-                      {date.toLocaleString("default", {
-                        month: "short",
-                      })}
+                      {date.toLocaleString("default", { month: "short" })}
                     </p>
                   </div>
 
-                  <div className="flex-1">
-                    <p className="font-medium">{event.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {event.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {event.venue}
                     </p>
 
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex flex-wrap gap-2 mt-1">
                       {event.is_featured && (
                         <span className="text-xs px-2 py-0.5 rounded bg-accent/15 text-accent">
                           Featured
@@ -314,14 +262,13 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="glass-surface rounded-2xl p-6 soft-shadow xl:col-span-2">
           <h3 className="mb-4 font-medium">
             Ideas Submitted (Monthly)
           </h3>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={ideasByMonth}>
               <XAxis dataKey="month" />
               <YAxis />
@@ -332,18 +279,16 @@ export default function AdminDashboard() {
         </div>
 
         <div className="glass-surface rounded-2xl p-6 soft-shadow">
-          <h3 className="mb-4 font-medium">
-            Execom Status
-          </h3>
+          <h3 className="mb-4 font-medium">Execom Status</h3>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={execomSplit}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={50}
+                outerRadius={90}
                 paddingAngle={4}
               >
                 <Cell fill="#f97316" />
@@ -359,14 +304,14 @@ export default function AdminDashboard() {
             Inventory Health
           </h3>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={inventoryHealth}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={50}
+                outerRadius={90}
                 paddingAngle={4}
               >
                 <Cell fill="#991b1b" />

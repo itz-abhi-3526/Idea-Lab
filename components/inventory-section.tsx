@@ -60,38 +60,38 @@ export function InventorySection() {
   }, [])
 
   return (
-    <section className="w-full py-20 bg-background">
-      <div className="max-w-6xl mx-auto px-6 space-y-12">
+    <section className="w-full py-16 sm:py-20 bg-background">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
 
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-heading">
             IDEA Lab Inventory
           </h2>
 
-          <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+          <div className="h-1 w-20 sm:w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
 
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
             Tools, components, and equipment available for your ideas.
           </p>
         </div>
 
         {/* Loading */}
         {loading && (
-          <p className="text-center text-muted-foreground">
+          <p className="text-center text-sm sm:text-base text-muted-foreground">
             Loading inventory…
           </p>
         )}
 
         {/* Empty */}
         {!loading && items.length === 0 && (
-          <p className="text-center text-muted-foreground">
+          <p className="text-center text-sm sm:text-base text-muted-foreground">
             No inventory available
           </p>
         )}
 
         {/* Inventory Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {items.map((item) => {
             const availability = getAvailability(item.quantity_available)
 
@@ -102,21 +102,21 @@ export function InventorySection() {
                 className="
                   glass-surface
                   rounded-xl
-                  p-6
+                  p-4 sm:p-6
                   soft-shadow
                   flex flex-col
                   justify-between
                 "
               >
                 {/* Top */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Icon */}
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <Box className="w-5 h-5 text-accent" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Box className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                   </div>
 
                   {/* Name */}
-                  <h3 className="font-semibold text-lg leading-snug line-clamp-2">
+                  <h3 className="font-semibold text-base sm:text-lg leading-snug line-clamp-2">
                     {item.name}
                   </h3>
 
@@ -127,7 +127,7 @@ export function InventorySection() {
                 </div>
 
                 {/* Bottom */}
-                <div className="pt-6 flex items-center justify-between text-sm">
+                <div className="pt-4 sm:pt-6 flex items-center justify-between text-xs sm:text-sm">
                   <span
                     className={`px-3 py-1 rounded-full border ${availabilityStyles[availability]}`}
                   >
@@ -144,10 +144,18 @@ export function InventorySection() {
         </div>
 
         {/* CTA */}
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-2 sm:pt-0">
           <button
             onClick={() => router.push("/inventory")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition"
+            className="
+              w-full sm:w-auto
+              inline-flex items-center justify-center gap-2
+              px-6 py-3
+              bg-accent text-accent-foreground
+              rounded-lg
+              hover:opacity-90 transition
+              text-sm sm:text-base
+            "
           >
             View Full Inventory
             <ArrowRight className="w-4 h-4" />

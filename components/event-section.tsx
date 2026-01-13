@@ -73,28 +73,28 @@ export function EventSection() {
   )
 
   return (
-    <section className="relative w-full py-24 md:py-32 bg-background/50">
-      <div className="w-full px-6 sm:px-8 lg:px-16 xl:px-24">
+    <section className="relative w-full py-16 sm:py-24 md:py-32 bg-background/50">
+      <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-24">
 
         {/* Heading */}
-        <div className="mb-20 text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
-              Events
-            </h2>
-          <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
-          <p className="text-lg text-muted-foreground">
+        <div className="mb-12 sm:mb-20 text-center space-y-3 sm:space-y-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
+            Events
+          </h2>
+          <div className="h-1 w-20 sm:w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+          <p className="text-sm sm:text-lg text-muted-foreground">
             Moments where ideas meet action
           </p>
         </div>
 
         {loading && (
-          <p className="text-center text-muted-foreground">
+          <p className="text-center text-sm sm:text-base text-muted-foreground">
             Loading events…
           </p>
         )}
 
         {!loading && !featuredEvent && upcomingEvents.length === 0 && (
-          <p className="text-center text-muted-foreground mb-12">
+          <p className="text-center text-sm sm:text-base text-muted-foreground mb-10 sm:mb-12">
             No events right now. Stay tuned!
           </p>
         )}
@@ -105,27 +105,27 @@ export function EventSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 bg-accent/10 border border-accent/30 rounded-2xl overflow-hidden"
+            className="mb-12 sm:mb-16 bg-accent/10 border border-accent/30 rounded-2xl overflow-hidden"
           >
             {featuredEvent.poster_url && (
               <img
                 src={featuredEvent.poster_url}
                 alt={featuredEvent.title}
-                className="h-72 w-full object-cover"
+                className="h-56 sm:h-72 w-full object-cover"
               />
             )}
 
-            <div className="p-8 space-y-4">
-              <div className="flex items-center gap-2 text-accent">
-                <Star className="w-5 h-5" />
+            <div className="p-5 sm:p-8 space-y-4">
+              <div className="flex items-center gap-2 text-accent text-sm sm:text-base">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5" />
                 Featured Event
               </div>
 
-              <h3 className="text-2xl font-semibold">
+              <h3 className="text-xl sm:text-2xl font-semibold">
                 {featuredEvent.title}
               </h3>
 
-              <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   {new Date(featuredEvent.start_datetime).toLocaleString()}
@@ -144,12 +144,12 @@ export function EventSection() {
                   href={normalizeUrl(featuredEvent.registration_link)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-accent font-medium hover:underline"
+                  className="inline-flex items-center gap-2 text-accent font-medium hover:underline text-sm sm:text-base"
                 >
                   Register Now <ArrowRight className="w-4 h-4" />
                 </a>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Registration Closed
                 </p>
               )}
@@ -159,7 +159,7 @@ export function EventSection() {
 
         {/* UPCOMING EVENTS */}
         {!loading && upcomingEvents.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-10 sm:mb-14">
             {upcomingEvents.slice(0, 3).map((event) => (
               <div
                 key={event.id}
@@ -169,11 +169,11 @@ export function EventSection() {
                   <img
                     src={event.poster_url}
                     alt={event.title}
-                    className="h-48 w-full object-cover"
+                    className="h-40 sm:h-48 w-full object-cover"
                   />
                 )}
 
-                <div className="p-5 space-y-4">
+                <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                   {event.event_type && (
                     <span
                       className={`text-xs px-3 py-1 rounded-full border ${
@@ -185,9 +185,11 @@ export function EventSection() {
                     </span>
                   )}
 
-                  <h3 className="font-semibold">{event.title}</h3>
+                  <h3 className="font-semibold text-sm sm:text-base">
+                    {event.title}
+                  </h3>
 
-                  <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       {new Date(event.start_datetime).toLocaleDateString()}
@@ -206,7 +208,7 @@ export function EventSection() {
                       href={normalizeUrl(event.registration_link)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-accent hover:underline"
                     >
                       Register <ArrowRight className="w-4 h-4" />
                     </a>
@@ -224,7 +226,7 @@ export function EventSection() {
         <div className="flex justify-center">
           <Link
             href="/events"
-            className="group flex items-center gap-2 px-6 py-3 border border-accent/30 rounded-lg bg-accent/20 hover:bg-accent/30 transition"
+            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-6 py-3 border border-accent/30 rounded-lg bg-accent/20 hover:bg-accent/30 transition text-sm sm:text-base"
           >
             View All Events
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -73,43 +73,43 @@ export default function EventsPage() {
   )
 
   return (
-    <section className="py-24 px-6 max-w-6xl mx-auto">
-
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold font-[family-name:var(--font-heading)]">
+    <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Heading */}
+      <div className="text-center mb-12 sm:mb-16">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
           Events
         </h1>
-        <div className="h-1 w-28 mx-auto mt-4 bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+        <div className="h-1 w-24 sm:w-28 mx-auto mt-4 bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
       </div>
 
       {/* FEATURED */}
       {featuredEvent && (
-        <div className="mb-20 bg-accent/10 border border-accent/30 rounded-2xl overflow-hidden">
+        <div className="mb-16 sm:mb-20 bg-accent/10 border border-accent/30 rounded-2xl overflow-hidden">
           {featuredEvent.poster_url && (
             <img
               src={featuredEvent.poster_url}
-              className="h-72 w-full object-cover"
+              className="h-56 sm:h-72 w-full object-cover"
               alt={featuredEvent.title}
             />
           )}
 
-          <div className="p-8 space-y-4">
-            <div className="flex items-center gap-2 text-accent">
-              <Star className="w-5 h-5" />
+          <div className="p-5 sm:p-8 space-y-4">
+            <div className="flex items-center gap-2 text-accent text-sm">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
               Featured Event
             </div>
 
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-xl sm:text-2xl font-semibold">
               {featuredEvent.title}
             </h2>
 
             {featuredEvent.description && (
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {featuredEvent.description}
               </p>
             )}
 
-            <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 {new Date(featuredEvent.start_datetime).toLocaleString()}
@@ -128,7 +128,7 @@ export default function EventsPage() {
                 href={normalizeUrl(featuredEvent.registration_link)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-accent font-medium hover:underline"
+                className="inline-flex items-center gap-2 text-accent font-medium text-sm hover:underline"
               >
                 Register Now <ArrowRight className="w-4 h-4" />
               </a>
@@ -142,50 +142,42 @@ export default function EventsPage() {
       )}
 
       {/* TABS */}
-      <div className="flex justify-center gap-6 mb-12">
-        <button
-          onClick={() => setActiveTab("upcoming")}
-          className={`px-4 py-2 rounded-lg text-sm ${
-            activeTab === "upcoming"
-              ? "bg-accent/20 text-accent"
-              : "text-muted-foreground"
-          }`}
-        >
-          Upcoming Events
-        </button>
-
-        <button
-          onClick={() => setActiveTab("past")}
-          className={`px-4 py-2 rounded-lg text-sm ${
-            activeTab === "past"
-              ? "bg-accent/20 text-accent"
-              : "text-muted-foreground"
-          }`}
-        >
-          Past Events
-        </button>
+      <div className="flex justify-center gap-4 sm:gap-6 mb-10 sm:mb-12">
+        {(["upcoming", "past"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-lg text-xs sm:text-sm transition ${
+              activeTab === tab
+                ? "bg-accent/20 text-accent"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab === "upcoming" ? "Upcoming Events" : "Past Events"}
+          </button>
+        ))}
       </div>
 
       {/* GRID */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {(activeTab === "upcoming" ? upcomingEvents : pastEvents).map(
           (event) => (
             <div
               key={event.id}
-              className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden"
+              className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col"
             >
               {event.poster_url && (
                 <img
                   src={event.poster_url}
-                  className="h-48 w-full object-cover"
+                  className="h-44 sm:h-48 w-full object-cover"
                   alt={event.title}
                 />
               )}
 
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col">
                 {event.event_type && (
                   <span
-                    className={`inline-block text-xs px-3 py-1 rounded-full border ${
+                    className={`self-start text-xs px-3 py-1 rounded-full border ${
                       EVENT_TYPE_STYLES[event.event_type] ??
                       "bg-muted text-muted-foreground border-white/10"
                     }`}
@@ -194,9 +186,11 @@ export default function EventsPage() {
                   </span>
                 )}
 
-                <h3 className="font-semibold">{event.title}</h3>
+                <h3 className="font-semibold text-sm sm:text-base">
+                  {event.title}
+                </h3>
 
-                <div className="text-sm text-muted-foreground space-y-1">
+                <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {new Date(event.start_datetime).toLocaleString()}
@@ -210,26 +204,28 @@ export default function EventsPage() {
                   )}
                 </div>
 
-                {activeTab === "upcoming" ? (
-                  event.is_registration_open ? (
-                    <a
-                      href={normalizeUrl(event.registration_link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
-                    >
-                      Register Now <ArrowRight className="w-4 h-4" />
-                    </a>
+                <div className="mt-auto">
+                  {activeTab === "upcoming" ? (
+                    event.is_registration_open ? (
+                      <a
+                        href={normalizeUrl(event.registration_link)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-accent hover:underline"
+                      >
+                        Register Now <ArrowRight className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Registration Closed
+                      </p>
+                    )
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      Registration Closed
+                      Event Ended
                     </p>
-                  )
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Event Ended
-                  </p>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )

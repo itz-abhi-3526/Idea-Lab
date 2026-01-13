@@ -23,7 +23,7 @@ export default function RequestTimeline({
   )
 
   return (
-    <div className="mt-4 flex items-center gap-4 text-xs">
+    <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4 text-xs sm:text-sm">
       {STEPS.map((step, index) => {
         const isCompleted =
           status !== "rejected" &&
@@ -50,7 +50,7 @@ export default function RequestTimeline({
 
             {/* LABEL */}
             <span
-              className={`whitespace-nowrap ${
+              className={`whitespace-nowrap font-medium ${
                 isCompleted
                   ? "text-foreground"
                   : isRejected
@@ -65,7 +65,7 @@ export default function RequestTimeline({
 
             {/* CONNECTOR */}
             {index < STEPS.length - 1 && (
-              <div className="h-px w-8 bg-border" />
+              <div className="hidden sm:block h-px w-10 bg-border" />
             )}
           </div>
         )

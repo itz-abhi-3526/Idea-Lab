@@ -36,31 +36,19 @@ export default function AdminIdeasPage() {
     "all" | "pending" | "ongoing" | "completed"
   >("all")
 
-  /* ----------------------------- */
-  /* Fetch Ideas                   */
-  /* ----------------------------- */
-
   const fetchIdeas = async () => {
     setLoading(true)
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("idea_submissions")
       .select(
         "id, idea_title, idea_description, domain, status, created_at"
       )
       .order("created_at", { ascending: false })
-      .returns<Idea[]>()
 
-    if (!error) {
-      setIdeas(data ?? [])
-    }
-
+    setIdeas(data ?? [])
     setLoading(false)
   }
-
-  /* ----------------------------- */
-  /* Realtime Updates              */
-  /* ----------------------------- */
 
   useEffect(() => {
     fetchIdeas()
@@ -74,9 +62,7 @@ export default function AdminIdeasPage() {
           schema: "public",
           table: "idea_submissions",
         },
-        () => {
-          fetchIdeas()
-        }
+        fetchIdeas
       )
       .subscribe()
 
@@ -84,10 +70,6 @@ export default function AdminIdeasPage() {
       supabase.removeChannel(channel)
     }
   }, [])
-
-  /* ----------------------------- */
-  /* Derived Data                  */
-  /* ----------------------------- */
 
   const filteredIdeas = ideas.filter((idea) => {
     const matchesSearch =
@@ -112,63 +94,42 @@ export default function AdminIdeasPage() {
 
   const stats = {
     total: ideas.length,
-    pending: ideas.filter(
-      (i) => i.status === "submitted"
-    ).length,
-    ongoing: ideas.filter(
-      (i) => i.status === "approved"
-    ).length,
-    completed: ideas.filter(
-      (i) => i.status === "completed"
-    ).length,
+    pending: ideas.filter((i) => i.status === "submitted").length,
+    ongoing: ideas.filter((i) => i.status === "approved").length,
+    completed: ideas.filter((i) => i.status === "completed").length,
   }
 
-  /* ----------------------------- */
-  /* UI                            */
-  /* ----------------------------- */
-
   return (
-    <div className="space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-heading">
+      <div className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-heading">
           Ideas
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Review and manage ideas submitted to IDEA Lab
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard label="Total" value={stats.total} />
-        <StatCard
-          label="Pending"
-          value={stats.pending}
-        />
-        <StatCard
-          label="Ongoing"
-          value={stats.ongoing}
-        />
-        <StatCard
-          label="Completed"
-          value={stats.completed}
-        />
+        <StatCard label="Pending" value={stats.pending} />
+        <StatCard label="Ongoing" value={stats.ongoing} />
+        <StatCard label="Completed" value={stats.completed} />
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between">
+      <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
         <input
           type="text"
           placeholder="Search ideas..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="w-full md:w-80 rounded-xl bg-background border border-border px-4 py-2 text-sm"
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full lg:w-80 rounded-xl bg-background border border-border px-4 py-2 text-sm"
         />
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {[
             ["all", "All"],
             ["pending", "Pending"],
@@ -186,7 +147,7 @@ export default function AdminIdeasPage() {
                     | "completed"
                 )
               }
-              className={`px-4 py-2 rounded-xl text-sm transition ${
+              className={`px-4 py-2 rounded-xl text-sm transition whitespace-nowrap ${
                 filter === key
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -236,11 +197,11 @@ function StatCard({
   value: number
 }) {
   return (
-    <div className="glass-surface rounded-2xl p-5 soft-shadow">
-      <p className="text-sm text-muted-foreground">
+    <div className="glass-surface rounded-2xl p-4 sm:p-5 soft-shadow">
+      <p className="text-xs sm:text-sm text-muted-foreground">
         {label}
       </p>
-      <p className="text-2xl font-semibold mt-1">
+      <p className="text-xl sm:text-2xl font-semibold mt-1">
         {value}
       </p>
     </div>

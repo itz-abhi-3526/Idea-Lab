@@ -32,9 +32,6 @@ export default function InventoryRequestsPage() {
     useState<InventoryRequest[]>([])
   const [loading, setLoading] = useState(true)
 
-  /* ----------------------------
-     Fetch Requests
-  ----------------------------- */
   const fetchRequests = async () => {
     setLoading(true)
 
@@ -58,30 +55,26 @@ export default function InventoryRequestsPage() {
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("Fetch error:", error)
+      console.error(error)
       setRequests([])
       setLoading(false)
       return
     }
 
-    const normalized: InventoryRequest[] = (data ?? []).map(
-      (r: any) => ({
+    setRequests(
+      (data ?? []).map((r: any) => ({
         id: r.id,
         requester_name: r.requester_name,
         created_at: r.created_at,
         status: r.status,
         inventory_request_items:
           r.inventory_request_items ?? [],
-      })
+      }))
     )
 
-    setRequests(normalized)
     setLoading(false)
   }
 
-  /* ----------------------------
-     Realtime Subscription
-  ----------------------------- */
   useEffect(() => {
     fetchRequests()
 
@@ -89,20 +82,12 @@ export default function InventoryRequestsPage() {
       .channel("inventory-requests-realtime")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "inventory_requests",
-        },
+        { event: "*", schema: "public", table: "inventory_requests" },
         fetchRequests
       )
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "inventory_items",
-        },
+        { event: "*", schema: "public", table: "inventory_items" },
         fetchRequests
       )
       .subscribe()
@@ -112,73 +97,43 @@ export default function InventoryRequestsPage() {
     }
   }, [])
 
-  /* ----------------------------
-     Approve Request
-  ----------------------------- */
   const approveRequest = async (req: InventoryRequest) => {
-    // 1️⃣ Validate stock
     for (const item of req.inventory_request_items) {
-      const inv = item.inventory_items
-
-      if (inv.quantity_available < item.quantity) {
-        alert(`Insufficient stock for ${inv.name}`)
+      if (
+        item.inventory_items.quantity_available <
+        item.quantity
+      ) {
+        alert(
+          `Insufficient stock for ${item.inventory_items.name}`
+        )
         return
       }
     }
 
-    // 2️⃣ Deduct inventory
     for (const item of req.inventory_request_items) {
-      const inv = item.inventory_items
-
-      const { error } = await supabase
+      await supabase
         .from("inventory_items")
         .update({
           quantity_available:
-            inv.quantity_available - item.quantity,
+            item.inventory_items.quantity_available -
+            item.quantity,
         })
-        .eq("id", inv.id)
-
-      if (error) {
-        alert(`Failed updating ${inv.name}`)
-        return
-      }
+        .eq("id", item.inventory_items.id)
     }
 
-    // 3️⃣ Mark request approved
-    const { error } = await supabase
+    await supabase
       .from("inventory_requests")
       .update({ status: "approved" })
       .eq("id", req.id)
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    // ❗ No local state mutation
-    // Realtime will refetch & sync UI
   }
 
-  /* ----------------------------
-     Reject Request
-  ----------------------------- */
   const rejectRequest = async (id: string) => {
-    const { error } = await supabase
+    await supabase
       .from("inventory_requests")
       .update({ status: "rejected" })
       .eq("id", id)
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    // ❗ No local state mutation
   }
 
-  /* ----------------------------
-     UI
-  ----------------------------- */
   if (loading) {
     return (
       <p className="text-muted-foreground">
@@ -203,7 +158,7 @@ export default function InventoryRequestsPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-heading">
+        <h1 className="text-2xl sm:text-3xl font-heading">
           Inventory Requests
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -211,13 +166,13 @@ export default function InventoryRequestsPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      {/* DESKTOP */}
+      <div className="hidden lg:block space-y-6">
         {requests.map((req) => (
           <div
             key={req.id}
             className="glass-surface rounded-2xl p-6 soft-shadow space-y-4"
           >
-            {/* Header */}
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium text-lg">
@@ -231,45 +186,91 @@ export default function InventoryRequestsPage() {
               <StatusPill status={req.status} />
             </div>
 
-            {/* Items */}
             <div className="space-y-2">
-              {req.inventory_request_items.map(
-                (item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between text-sm"
-                  >
-                    <span className="text-muted-foreground">
-                      {
-                        item.inventory_items
-                          .name
-                      }
-                    </span>
-                    <span className="font-medium">
-                      × {item.quantity}
-                    </span>
-                  </div>
-                )
-              )}
+              {req.inventory_request_items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm"
+                >
+                  <span className="text-muted-foreground">
+                    {item.inventory_items.name}
+                  </span>
+                  <span className="font-medium">
+                    × {item.quantity}
+                  </span>
+                </div>
+              ))}
             </div>
 
-            {/* Actions */}
             {req.status === "submitted" && (
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  onClick={() =>
-                    rejectRequest(req.id)
-                  }
-                  className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition"
+                  onClick={() => rejectRequest(req.id)}
+                  className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400"
                 >
                   Reject
                 </button>
 
                 <button
-                  onClick={() =>
-                    approveRequest(req)
-                  }
-                  className="px-4 py-2 rounded-xl bg-accent text-accent-foreground hover:opacity-90 transition"
+                  onClick={() => approveRequest(req)}
+                  className="px-4 py-2 rounded-xl bg-accent text-accent-foreground"
+                >
+                  Approve
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* MOBILE / TABLET */}
+      <div className="grid gap-4 lg:hidden">
+        {requests.map((req) => (
+          <div
+            key={req.id}
+            className="glass-surface rounded-2xl p-5 space-y-4"
+          >
+            <div className="flex justify-between items-start gap-4">
+              <div>
+                <p className="font-medium">
+                  {req.requester_name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(req.created_at).toLocaleString()}
+                </p>
+              </div>
+
+              <StatusPill status={req.status} />
+            </div>
+
+            <div className="space-y-2 text-sm">
+              {req.inventory_request_items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between"
+                >
+                  <span className="text-muted-foreground truncate">
+                    {item.inventory_items.name}
+                  </span>
+                  <span className="font-medium">
+                    × {item.quantity}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {req.status === "submitted" && (
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => rejectRequest(req.id)}
+                  className="px-3 py-1.5 rounded-xl text-sm bg-rose-500/15 text-rose-400"
+                >
+                  Reject
+                </button>
+
+                <button
+                  onClick={() => approveRequest(req)}
+                  className="px-3 py-1.5 rounded-xl text-sm bg-accent text-accent-foreground"
                 >
                   Approve
                 </button>
@@ -301,7 +302,7 @@ function StatusPill({
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-sm ${styles[status]}`}
+      className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${styles[status]}`}
     >
       {status.charAt(0).toUpperCase() +
         status.slice(1)}

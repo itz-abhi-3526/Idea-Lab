@@ -47,6 +47,11 @@ export default function AuthHeader() {
     user.email?.charAt(0).toUpperCase() ||
     "U"
 
+  // 🔐 ADMIN CHECK (UI ONLY)
+  const isAdmin =
+    user.user_metadata?.role === "admin" ||
+    user.user_metadata?.is_admin === true
+
   return (
     <div className="relative">
       {/* Avatar */}
@@ -59,7 +64,7 @@ export default function AuthHeader() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-40 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden">
+        <div className="absolute right-0 mt-2 w-44 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden">
           <Link
             href="/dashboard"
             className="block px-4 py-2 text-sm text-white hover:bg-white/10"
@@ -67,6 +72,17 @@ export default function AuthHeader() {
           >
             Dashboard
           </Link>
+
+          {/* 🔑 ADMIN PANEL (admins only) */}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="block px-4 py-2 text-sm text-emerald-400 hover:bg-white/10"
+              onClick={() => setOpen(false)}
+            >
+              Admin Panel
+            </Link>
+          )}
 
           <button
             onClick={async () => {

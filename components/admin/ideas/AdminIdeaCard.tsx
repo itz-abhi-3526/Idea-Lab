@@ -49,39 +49,38 @@ export default function AdminIdeaCard({
   }
 
   return (
-    <div className="glass-surface rounded-2xl p-6 soft-shadow space-y-4">
+    <div className="glass-surface rounded-2xl p-4 sm:p-6 soft-shadow space-y-4">
       {/* Header */}
-      <div className="flex justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-medium">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4">
+        <div className="space-y-2">
+          <h3 className="text-base sm:text-lg font-medium">
             {idea.idea_title}
           </h3>
 
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {idea.idea_description}
           </p>
 
           {idea.domain && (
-            <span className="inline-block mt-2 text-xs rounded-full bg-accent/15 px-3 py-1 text-accent">
+            <span className="inline-block text-xs rounded-full bg-accent/15 px-3 py-1 text-accent w-fit">
               {idea.domain}
             </span>
           )}
         </div>
 
-        <span className="text-sm capitalize text-muted-foreground">
+        <span className="text-xs sm:text-sm capitalize text-muted-foreground self-start sm:self-center">
           {idea.status}
         </span>
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3">
-        {/* Submitted → Approve / Reject */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
         {idea.status === "submitted" && (
           <>
             <button
               disabled={loading}
               onClick={() => updateStatus("rejected")}
-              className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 transition text-sm"
             >
               Reject
             </button>
@@ -89,19 +88,18 @@ export default function AdminIdeaCard({
             <button
               disabled={loading}
               onClick={() => updateStatus("approved")}
-              className="px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition text-sm"
             >
               Approve
             </button>
           </>
         )}
 
-        {/* Approved → Mark Completed */}
         {idea.status === "approved" && (
           <button
             disabled={loading}
             onClick={() => updateStatus("completed")}
-            className="px-4 py-2 rounded-xl bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition text-sm"
           >
             Mark as Completed
           </button>

@@ -23,16 +23,18 @@ export default function EventCard({
   }
 
   return (
-    <div className="glass-surface rounded-2xl p-6 soft-shadow space-y-4">
-      <div className="flex justify-between">
-        <div>
-          <h3 className="text-lg font-medium">{event.title}</h3>
-          <p className="text-sm text-muted-foreground">
+    <div className="glass-surface rounded-2xl p-4 sm:p-6 soft-shadow space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="space-y-1">
+          <h3 className="text-base sm:text-lg font-medium leading-snug">
+            {event.title}
+          </h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {event.event_type} • {event.venue}
           </p>
         </div>
 
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground sm:text-right">
           {new Date(event.start_datetime).toLocaleString()}
         </span>
       </div>
@@ -57,17 +59,17 @@ export default function EventCard({
         </Badge>
       </div>
 
-      <div className="flex justify-end gap-4 text-sm">
+      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 text-sm pt-2">
         <button
           onClick={onEdit}
-          className="text-muted-foreground hover:text-accent"
+          className="w-full sm:w-auto text-muted-foreground hover:text-accent transition"
         >
           Edit
         </button>
 
         <button
           onClick={remove}
-          className="text-red-400 hover:underline"
+          className="w-full sm:w-auto text-red-400 hover:underline transition"
         >
           Delete
         </button>
@@ -88,11 +90,16 @@ function Badge({
   return (
     <span
       onClick={onClick}
-      className={`px-3 py-1 rounded-full cursor-pointer ${
-        active
-          ? "bg-accent/15 text-accent"
-          : "bg-muted text-muted-foreground"
-      }`}
+      className={`
+        px-3 py-1 rounded-full text-xs
+        transition
+        ${onClick ? "cursor-pointer" : "cursor-default"}
+        ${
+          active
+            ? "bg-accent/15 text-accent"
+            : "bg-muted text-muted-foreground"
+        }
+      `}
     >
       {children}
     </span>

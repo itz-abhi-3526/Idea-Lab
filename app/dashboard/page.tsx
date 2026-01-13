@@ -25,8 +25,8 @@ export default function DashboardPage() {
 
       setName(
         data.user.user_metadata?.display_name ||
-        data.user.email?.split("@")[0] ||
-        "there"
+          data.user.email?.split("@")[0] ||
+          "there"
       )
     }
 
@@ -34,11 +34,11 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background px-6 py-12 md:px-12">
+    <div className="min-h-screen bg-background px-4 py-8 sm:px-6 md:px-12">
       {/* HEADER */}
-      <div className="mb-14 flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight">
+      <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
             Good {getGreeting()}, {name} 👋
           </h1>
 
@@ -47,15 +47,15 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="self-start rounded-full border border-border/60 bg-card/60 backdrop-blur-md px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:border-border transition">
+        <div className="w-fit rounded-full border border-border/60 bg-card/60 backdrop-blur-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:border-border transition">
           <LogoutButton />
         </div>
       </div>
 
       {/* DASHBOARD CARDS */}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* MY IDEAS */}
-        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
+        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-5 sm:p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
           <h3 className="text-base font-medium">My Ideas</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             View and track your submitted ideas.
@@ -63,14 +63,14 @@ export default function DashboardPage() {
 
           <a
             href="/dashboard/my-ideas"
-            className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
+            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
           >
             View ideas →
           </a>
         </div>
 
         {/* INVENTORY */}
-        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
+        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-5 sm:p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
           <h3 className="text-base font-medium">
             Inventory Requests
           </h3>
@@ -80,14 +80,14 @@ export default function DashboardPage() {
 
           <a
             href="/dashboard/my-requests"
-            className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
+            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
           >
             View requests →
           </a>
         </div>
 
         {/* ACCOUNT */}
-        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
+        <div className="group rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-5 sm:p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
           <h3 className="text-base font-medium">
             Account Settings
           </h3>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
           <a
             href="/dashboard/account"
-            className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
+            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-accent transition group-hover:gap-2"
           >
             Manage account →
           </a>

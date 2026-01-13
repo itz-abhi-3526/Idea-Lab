@@ -39,30 +39,87 @@ export default function AdminRequestsPage() {
   }, [])
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Inventory Requests</h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+      <h1 className="text-xl sm:text-2xl font-bold">
+        Inventory Requests
+      </h1>
+
+      {requests.length === 0 && (
+        <div className="glass-surface rounded-2xl p-8 text-center text-muted-foreground">
+          No requests found
+        </div>
+      )}
 
       {requests.map(req => (
-        <div key={req.id} className="border rounded p-4 mb-4">
-          <p><b>Name:</b> {req.requester_name}</p>
-          <p><b>Department:</b> {req.department}</p>
-          <p><b>Purpose:</b> {req.purpose}</p>
+        <div
+          key={req.id}
+          className="
+            glass-surface
+            rounded-2xl
+            p-5
+            sm:p-6
+            soft-shadow
+            space-y-4
+          "
+        >
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="font-medium">
+                {req.requester_name}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {req.department}
+              </p>
+            </div>
 
-          <ul className="ml-4 list-disc">
+            <span className="text-xs capitalize text-muted-foreground">
+              {req.status}
+            </span>
+          </div>
+
+          {/* Purpose */}
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">
+              Purpose:
+            </span>{" "}
+            {req.purpose}
+          </p>
+
+          {/* Items */}
+          <ul className="space-y-1 text-sm">
             {req.inventory_request_items.map((i, idx) => (
-              <li key={idx}>
-                {i.inventory_items.name} × {i.quantity}
+              <li
+                key={idx}
+                className="flex justify-between gap-4"
+              >
+                <span className="truncate">
+                  {i.inventory_items.name}
+                </span>
+                <span className="text-muted-foreground shrink-0">
+                  × {i.quantity}
+                </span>
               </li>
             ))}
           </ul>
 
-          <div className="flex gap-2 mt-4">
-            <Button onClick={() => updateStatus(req.id, "approved")}>
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:justify-end">
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() =>
+                updateStatus(req.id, "approved")
+              }
+            >
               Approve
             </Button>
+
             <Button
               variant="destructive"
-              onClick={() => updateStatus(req.id, "rejected")}
+              className="w-full sm:w-auto"
+              onClick={() =>
+                updateStatus(req.id, "rejected")
+              }
             >
               Reject
             </Button>

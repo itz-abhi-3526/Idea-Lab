@@ -19,9 +19,7 @@ interface IdeaTimelineProps {
 /* Component                     */
 /* ----------------------------- */
 
-export default function IdeaTimeline({
-  status,
-}: IdeaTimelineProps) {
+export default function IdeaTimeline({ status }: IdeaTimelineProps) {
   const steps = [
     { key: "submitted", label: "Submitted" },
     { key: "approved", label: "Approved" },
@@ -56,30 +54,26 @@ export default function IdeaTimeline({
   /* Normal Timeline               */
   /* ----------------------------- */
 
-  const currentIndex = steps.findIndex(
-    (s) => s.key === status
-  )
+  const currentIndex = steps.findIndex((s) => s.key === status)
 
   return (
-    <div className="mt-4 flex items-center gap-4">
+    <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
       {steps.map((step, idx) => {
         const isCompleted = idx <= currentIndex
 
         return (
           <div
             key={step.key}
-            className="flex items-center gap-2"
+            className="flex items-center gap-3 sm:gap-2"
           >
             <div
-              className={`h-2 w-2 rounded-full ${
-                isCompleted
-                  ? "bg-accent"
-                  : "bg-muted"
+              className={`h-2.5 w-2.5 rounded-full ${
+                isCompleted ? "bg-accent" : "bg-muted"
               }`}
             />
 
             <span
-              className={`text-xs ${
+              className={`text-xs sm:text-sm font-medium ${
                 isCompleted
                   ? "text-foreground"
                   : "text-muted-foreground"
@@ -89,7 +83,7 @@ export default function IdeaTimeline({
             </span>
 
             {idx < steps.length - 1 && (
-              <div className="mx-2 h-px w-6 bg-border" />
+              <div className="hidden sm:block mx-3 h-px w-8 bg-border" />
             )}
           </div>
         )

@@ -31,9 +31,6 @@ export default function AddEditEventModal({
   const [form, setForm] = useState<FormState | null>(null)
   const [saving, setSaving] = useState(false)
 
-  /* -----------------------------
-     Init form
-  ----------------------------- */
   useEffect(() => {
     if (!open) return
 
@@ -60,9 +57,6 @@ export default function AddEditEventModal({
 
   if (!open || !form) return null
 
-  /* -----------------------------
-     Validation
-  ----------------------------- */
   const validate = () => {
     const missing = Object.entries(form).filter(
       ([, v]) =>
@@ -80,9 +74,6 @@ export default function AddEditEventModal({
     return true
   }
 
-  /* -----------------------------
-     Save
-  ----------------------------- */
   const save = async () => {
     if (!validate()) return
 
@@ -111,28 +102,24 @@ export default function AddEditEventModal({
     onClose()
   }
 
-  /* -----------------------------
-     UI
-  ----------------------------- */
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-  <div
-    className="
-      glass-surface
-      rounded-2xl
-      w-full
-      max-w-xl
-      max-h-[90vh]
-      overflow-y-auto
-      p-6
-      space-y-4
-    "
-  >
-        <h2 className="text-xl font-heading">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center px-3 sm:px-6">
+      <div
+        className="
+          glass-surface
+          rounded-t-2xl sm:rounded-2xl
+          w-full
+          max-w-lg
+          max-h-[90vh]
+          overflow-y-auto
+          p-4 sm:p-6
+          space-y-4
+        "
+      >
+        <h2 className="text-lg sm:text-xl font-heading">
           {event ? "Edit Event" : "Add Event"}
         </h2>
 
-        {/* Text inputs */}
         {[
           ["title", "Title"],
           ["event_type", "Event Type"],
@@ -151,12 +138,11 @@ export default function AddEditEventModal({
                 [key]: e.target.value,
               })
             }
-            className="w-full bg-input px-4 py-2 rounded-xl outline-none"
+            className="w-full bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
           />
         ))}
 
-        {/* Datetime */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <input
             type="datetime-local"
             required
@@ -167,7 +153,7 @@ export default function AddEditEventModal({
                 start_datetime: e.target.value,
               })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none"
+            className="bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
           />
 
           <input
@@ -180,11 +166,10 @@ export default function AddEditEventModal({
                 end_datetime: e.target.value,
               })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none"
+            className="bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
           />
         </div>
 
-        {/* Description */}
         <textarea
           required
           placeholder="Description"
@@ -195,11 +180,10 @@ export default function AddEditEventModal({
               description: e.target.value,
             })
           }
-          className="w-full bg-input px-4 py-2 rounded-xl outline-none min-h-[100px]"
+          className="w-full bg-input px-4 py-2 rounded-xl outline-none min-h-[90px] text-sm sm:text-base"
         />
 
-        {/* Booleans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <BooleanSelect
             label="Active"
             value={form.is_active}
@@ -228,30 +212,27 @@ export default function AddEditEventModal({
           />
         </div>
 
-        {/* Display order */}
-        <label className="flex flex-col text-sm text-muted-foreground gap-1">
-        Display Order
-        <input
+        <label className="flex flex-col text-xs sm:text-sm text-muted-foreground gap-1">
+          Display Order
+          <input
             type="number"
             required
             placeholder="Lower number = higher priority"
             value={form.display_order}
             onChange={(e) =>
-            setForm({
+              setForm({
                 ...form,
                 display_order: Number(e.target.value),
-            })
+              })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none text-foreground"
-        />
+            className="bg-input px-4 py-2 rounded-xl outline-none text-foreground text-sm sm:text-base"
+          />
         </label>
 
-
-        {/* Actions */}
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 sm:pt-4">
           <button
             onClick={onClose}
-            className="text-muted-foreground"
+            className="w-full sm:w-auto text-muted-foreground text-sm sm:text-base"
           >
             Cancel
           </button>
@@ -259,7 +240,7 @@ export default function AddEditEventModal({
           <button
             onClick={save}
             disabled={saving}
-            className="bg-accent text-accent-foreground px-4 py-2 rounded-xl disabled:opacity-50"
+            className="w-full sm:w-auto bg-accent text-accent-foreground px-4 py-2 rounded-xl disabled:opacity-50 text-sm sm:text-base"
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -269,9 +250,6 @@ export default function AddEditEventModal({
   )
 }
 
-/* -----------------------------
-   Boolean Select
------------------------------ */
 function BooleanSelect({
   label,
   value,
@@ -282,7 +260,7 @@ function BooleanSelect({
   onChange: (v: boolean) => void
 }) {
   return (
-    <label className="flex flex-col text-sm text-muted-foreground gap-1">
+    <label className="flex flex-col text-xs sm:text-sm text-muted-foreground gap-1">
       {label}
       <select
         required
@@ -290,7 +268,7 @@ function BooleanSelect({
         onChange={(e) =>
           onChange(e.target.value === "true")
         }
-        className="bg-input px-3 py-2 rounded-xl text-foreground"
+        className="bg-input px-3 py-2 rounded-xl text-foreground text-sm sm:text-base"
       >
         <option value="true">TRUE</option>
         <option value="false">FALSE</option>
