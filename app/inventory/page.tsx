@@ -77,18 +77,18 @@ export default function InventoryPage() {
     purpose: "",
   })
 
-  /* ----------------------------- */
-  /* Auth                          */
-  /* ----------------------------- */
+  /* -----------------------------
+     Auth
+  ----------------------------- */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
     })
   }, [])
 
-  /* ----------------------------- */
-  /* Fetch inventory               */
-  /* ----------------------------- */
+  /* -----------------------------
+     Fetch inventory
+  ----------------------------- */
   useEffect(() => {
     supabase
       .from("inventory_items")
@@ -108,9 +108,9 @@ export default function InventoryPage() {
     fn()
   }
 
-  /* ----------------------------- */
-  /* Cart logic                    */
-  /* ----------------------------- */
+  /* -----------------------------
+     Cart logic
+  ----------------------------- */
   const addToCart = (item: InventoryItem) => {
     if (item.quantity_available === 0) {
       alert("Item is unavailable")
@@ -155,14 +155,58 @@ export default function InventoryPage() {
     )
   }
 
-  /** ✅ NEW — REMOVE ITEM */
   const removeFromCart = (id: string) => {
     setCart(prev => prev.filter(i => i.id !== id))
   }
 
-  /* ----------------------------- */
-  /* Derived                       */
-  /* ----------------------------- */
+  /* -----------------------------
+     Submit request
+  ----------------------------- */
+  const submitRequest = async () => {
+    if (!user) return
+
+    const { name, department, phone, purpose } = form
+
+    if (!name || !department || !phone || !purpose) {
+      alert("Fill all fields")
+      return
+    }
+
+    try {
+      setSubmitting(true)
+
+      const res = await fetch("/api/inventory-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          requester: form,
+          items: cart.map(i => ({
+            id: i.id,
+            quantity: i.quantity,
+          })),
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        alert(data.error || "Failed")
+        return
+      }
+
+      alert("Request submitted successfully")
+      setCart([])
+      setShowCart(false)
+      setShowForm(false)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  /* -----------------------------
+     Derived
+  ----------------------------- */
   const categories = [
     "all",
     ...Array.from(new Set(items.map(i => i.category))),
@@ -187,12 +231,12 @@ export default function InventoryPage() {
       return a.name.localeCompare(b.name)
     })
 
-  /* ----------------------------- */
-  /* UI                            */
-  /* ----------------------------- */
+  /* -----------------------------
+     UI
+  ----------------------------- */
   return (
     <div className="min-h-screen bg-background">
-      {/* HEADER */}
+      {/* Header */}
       <div className="sticky top-0 z-40 border-b bg-card px-6 py-4 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-semibold">Lab Inventory</h1>
@@ -244,7 +288,7 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* GRID */}
+      {/* Inventory Grid */}
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredItems.map(item => {
           const a = availability(item.quantity_available)
@@ -288,6 +332,12 @@ export default function InventoryPage() {
             </motion.div>
           )
         })}
+
+        {filteredItems.length === 0 && (
+          <p className="text-muted-foreground col-span-full text-center">
+            No items found
+          </p>
+        )}
       </div>
 
       {/* CART */}
@@ -334,7 +384,6 @@ export default function InventoryPage() {
                         <Plus size={14} />
                       </button>
 
-                      {/* ❌ REMOVE */}
                       <button
                         onClick={() => removeFromCart(i.id)}
                         className="text-muted-foreground hover:text-rose-400"
@@ -355,6 +404,37 @@ export default function InventoryPage() {
               </Button>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* FORM */}
+      <AnimatePresence>
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-card rounded-xl p-6 w-full max-w-md space-y-4">
+              <h3 className="font-semibold">Requester Details</h3>
+
+              {["name", "department", "phone", "purpose"].map(k => (
+                <input
+                  key={k}
+                  placeholder={k}
+                  value={(form as any)[k]}
+                  onChange={e =>
+                    setForm({ ...form, [k]: e.target.value })
+                  }
+                  className="w-full bg-input px-4 py-2 rounded-xl outline-none"
+                />
+              ))}
+
+              <Button
+                className="w-full"
+                disabled={submitting}
+                onClick={submitRequest}
+              >
+                {submitting ? "Submitting..." : "Submit Request"}
+              </Button>
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
