@@ -2,25 +2,30 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Box } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import LoginRequiredModal from "@/components/auth/LoginRequiredModal"
 import { useRouter } from "next/navigation"
+
+/* ----------------------------- */
+/* Types                         */
+/* ----------------------------- */
 
 type InventoryItem = {
   id: string
   name: string
   category: string
   quantity_available: number
-  image_url: string | null
 }
 
 type Availability = "Available" | "Limited" | "Unavailable"
 
 const availabilityStyles: Record<Availability, string> = {
-  Available: "bg-green-500/10 text-green-400 border-green-500/30",
-  Limited: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
-  Unavailable: "bg-red-500/10 text-red-400 border-red-500/30",
+  Available:
+    "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+  Limited:
+    "bg-amber-500/10 text-amber-400 border-amber-500/30",
+  Unavailable:
+    "bg-rose-500/10 text-rose-400 border-rose-500/30",
 }
 
 function getAvailability(qty: number): Availability {
@@ -29,24 +34,20 @@ function getAvailability(qty: number): Availability {
   return "Available"
 }
 
+/* ----------------------------- */
+/* Component                     */
+/* ----------------------------- */
+
 export function InventorySection() {
   const router = useRouter()
   const [items, setItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-  const [showLoginModal, setShowLoginModal] = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
-  }, [])
 
   useEffect(() => {
     const fetchInventory = async () => {
       const { data } = await supabase
         .from("inventory_items")
-        .select("id, name, category, quantity_available, image_url")
+        .select("id, name, category, quantity_available")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(4)
@@ -58,31 +59,31 @@ export function InventorySection() {
     fetchInventory()
   }, [])
 
-  const handleViewInventory = () => {
-  router.push("/inventory")
-}
-
   return (
     <section className="w-full py-20 bg-background">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6 space-y-12">
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] mb-5">
-              IDEA Lab Inventory
-            </h2>
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading">
+            IDEA Lab Inventory
+          </h2>
+
           <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
-          <p className="text-muted-foreground mt-3">
-            Grab what you need. Build something cool.
+
+          <p className="text-muted-foreground">
+            Tools, components, and equipment available for your ideas.
           </p>
         </div>
 
+        {/* Loading */}
         {loading && (
           <p className="text-center text-muted-foreground">
             Loading inventory…
           </p>
         )}
 
+        {/* Empty */}
         {!loading && items.length === 0 && (
           <p className="text-center text-muted-foreground">
             No inventory available
@@ -98,37 +99,44 @@ export function InventorySection() {
               <motion.div
                 key={item.id}
                 whileHover={{ y: -4 }}
-                className="bg-card border border-border rounded-lg overflow-hidden"
+                className="
+                  glass-surface
+                  rounded-xl
+                  p-6
+                  soft-shadow
+                  flex flex-col
+                  justify-between
+                "
               >
-                {/* IMAGE — switched to <img> */}
-                <div className="h-40 bg-muted flex items-center justify-center">
-                  <img
-                    src={
-                      item.image_url && item.image_url.startsWith("http")
-                        ? item.image_url
-                        : "/placeholder.svg"
-                    }
-                    alt={item.name}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
+                {/* Top */}
+                <div className="space-y-4">
+                  {/* Icon */}
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Box className="w-5 h-5 text-accent" />
+                  </div>
 
-                <div className="p-4 space-y-3">
-                  <h3 className="font-semibold truncate">
+                  {/* Name */}
+                  <h3 className="font-semibold text-lg leading-snug line-clamp-2">
                     {item.name}
                   </h3>
 
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent border border-accent/30">
-                      {item.category}
-                    </span>
+                  {/* Category */}
+                  <span className="inline-block w-fit text-xs px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/30">
+                    {item.category}
+                  </span>
+                </div>
 
-                    <span
-                      className={`text-xs px-2 py-1 rounded border ${availabilityStyles[availability]}`}
-                    >
-                      {availability}
-                    </span>
-                  </div>
+                {/* Bottom */}
+                <div className="pt-6 flex items-center justify-between text-sm">
+                  <span
+                    className={`px-3 py-1 rounded-full border ${availabilityStyles[availability]}`}
+                  >
+                    {availability}
+                  </span>
+
+                  <span className="text-muted-foreground">
+                    Qty: {item.quantity_available}
+                  </span>
                 </div>
               </motion.div>
             )
@@ -136,21 +144,16 @@ export function InventorySection() {
         </div>
 
         {/* CTA */}
-        <div className="flex justify-center mt-12">
+        <div className="flex justify-center">
           <button
-            onClick={handleViewInventory}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg"
+            onClick={() => router.push("/inventory")}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition"
           >
             View Full Inventory
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
-
-      <LoginRequiredModal
-        open={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
     </section>
   )
 }

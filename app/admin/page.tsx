@@ -28,6 +28,15 @@ type Stats = {
   eventsUpcoming: number
 }
 
+type CalendarEvent = {
+  id: string
+  title: string
+  start_datetime: string
+  venue: string
+  is_featured: boolean
+  is_active: boolean
+}
+
 /* ----------------------------- */
 /* Page                          */
 /* ----------------------------- */
@@ -37,6 +46,7 @@ export default function AdminDashboard() {
   const [ideasByMonth, setIdeasByMonth] = useState<any[]>([])
   const [execomSplit, setExecomSplit] = useState<any[]>([])
   const [inventoryHealth, setInventoryHealth] = useState<any[]>([])
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
 
   /* ----------------------------- */
@@ -45,12 +55,8 @@ export default function AdminDashboard() {
 
   const fetchDashboard = async () => {
     setLoading(true)
-
     const now = new Date().toISOString()
 
-    /* -----------------------------
-       COUNTS
-    ----------------------------- */
     const [
       execomTotal,
       execomActive,
@@ -74,9 +80,7 @@ export default function AdminDashboard() {
         head: true,
       }),
 
-      supabase
-        .from("inventory_items")
-        .select("quantity_available"),
+      supabase.from("inventory_items").select("quantity_available"),
 
       supabase.from("events").select("*", {
         count: "exact",
@@ -94,16 +98,17 @@ export default function AdminDashboard() {
         .gt("start_datetime", now),
     ])
 
-    /* -----------------------------
-       IDEAS PER MONTH
-    ----------------------------- */
+    /* ----------------------------- */
+    /* Ideas per Month               */
+    /* ----------------------------- */
+
     const { data: ideas } = await supabase
       .from("idea_submissions")
       .select("created_at")
 
     const monthMap: Record<string, number> = {}
 
-    ideas?.forEach((i) => {
+    ideas?.forEach(i => {
       const month = new Date(i.created_at).toLocaleString(
         "default",
         { month: "short" }
@@ -111,21 +116,17 @@ export default function AdminDashboard() {
       monthMap[month] = (monthMap[month] || 0) + 1
     })
 
-    const ideasChart = Object.keys(monthMap).map(
-      (m) => ({
-        month: m,
-        count: monthMap[m],
-      })
-    )
+    const ideasChart = Object.keys(monthMap).map(m => ({
+      month: m,
+      count: monthMap[m],
+    }))
 
-    /* -----------------------------
-       EXECOM SPLIT
-    ----------------------------- */
+    /* ----------------------------- */
+    /* Execom Split                  */
+    /* ----------------------------- */
+
     const execomPie = [
-      {
-        name: "Active",
-        value: execomActive.count ?? 0,
-      },
+      { name: "Active", value: execomActive.count ?? 0 },
       {
         name: "Inactive",
         value:
@@ -134,18 +135,17 @@ export default function AdminDashboard() {
       },
     ]
 
-    /* -----------------------------
-       INVENTORY HEALTH
-    ----------------------------- */
+    /* ----------------------------- */
+    /* Inventory Health              */
+    /* ----------------------------- */
+
     let criticallyLow = 0
     let low = 0
     let available = 0
 
-    inventoryItems.data?.forEach((item) => {
-      if (item.quantity_available < 5)
-        criticallyLow++
-      else if (item.quantity_available < 10)
-        low++
+    inventoryItems.data?.forEach(item => {
+      if (item.quantity_available < 5) criticallyLow++
+      else if (item.quantity_available < 10) low++
       else available++
     })
 
@@ -154,6 +154,21 @@ export default function AdminDashboard() {
       { name: "Low", value: low },
       { name: "Available", value: available },
     ]
+
+    /* ----------------------------- */
+    /* Upcoming Events (Calendar)    */
+    /* ----------------------------- */
+
+    const { data: events } = await supabase
+      .from("events")
+      .select(
+        "id, title, start_datetime, venue, is_featured, is_active"
+      )
+      .gte("start_datetime", now)
+      .order("start_datetime", { ascending: true })
+      .limit(5)
+
+    setUpcomingEvents(events ?? [])
 
     setStats({
       execomTotal: execomTotal.count ?? 0,
@@ -236,24 +251,71 @@ export default function AdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <Stat label="Total Execom" value={stats.execomTotal} />
-        <Stat
-          label="Active Execom"
-          value={stats.execomActive}
-          accent
-        />
+        <Stat label="Active Execom" value={stats.execomActive} accent />
         <Stat label="Ideas Submitted" value={stats.ideasTotal} />
         <Stat label="Inventory Items" value={stats.inventoryTotal} />
         <Stat label="Total Events" value={stats.eventsTotal} />
         <Stat label="Active Events" value={stats.eventsActive} />
-        <Stat
-          label="Upcoming Events"
-          value={stats.eventsUpcoming}
-        />
+        <Stat label="Upcoming Events" value={stats.eventsUpcoming} />
       </div>
 
-      {/* Charts (unchanged) */}
+      {/* Upcoming Events Calendar */}
+      <div className="glass-surface rounded-2xl p-6 soft-shadow">
+        <h3 className="font-medium mb-4">Upcoming Events</h3>
+
+        {upcomingEvents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No upcoming events
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {upcomingEvents.map(event => {
+              const date = new Date(event.start_datetime)
+
+              return (
+                <div
+                  key={event.id}
+                  className="flex gap-4 border-b border-border pb-3 last:border-0"
+                >
+                  <div className="w-12 text-center">
+                    <p className="text-lg font-bold">
+                      {date.getDate()}
+                    </p>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {date.toLocaleString("default", {
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="font-medium">{event.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.venue}
+                    </p>
+
+                    <div className="flex gap-2 mt-1">
+                      {event.is_featured && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-accent/15 text-accent">
+                          Featured
+                        </span>
+                      )}
+                      {event.is_active && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-500/15 text-green-400">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Ideas chart */}
         <div className="glass-surface rounded-2xl p-6 soft-shadow xl:col-span-2">
           <h3 className="mb-4 font-medium">
             Ideas Submitted (Monthly)
@@ -269,7 +331,6 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Execom */}
         <div className="glass-surface rounded-2xl p-6 soft-shadow">
           <h3 className="mb-4 font-medium">
             Execom Status
@@ -293,7 +354,6 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Inventory */}
         <div className="glass-surface rounded-2xl p-6 soft-shadow">
           <h3 className="mb-4 font-medium">
             Inventory Health
