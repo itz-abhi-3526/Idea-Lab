@@ -64,13 +64,17 @@ export function CoordinatorSection() {
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight leading-tight">
                 IDEA Lab <br />
-                <span className="text-neutral-500">Incubation Request</span>
+                <span className="text-neutral-500">
+                  Incubation & Fabrication Support
+                </span>
               </h2>
             </div>
 
             <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md mx-auto lg:mx-0 font-light">
-              Access our specialized incubation facilities for professional 3D
-              printing and precision laser printing services.
+              Open to <span className="text-white font-medium">FISAT students</span>, startups,
+              innovators, and industry partners — leverage IDEA Lab’s incubation
+              ecosystem for prototyping, 3D printing, laser cutting, and
+              product development support.
             </p>
 
             <Button
@@ -82,7 +86,7 @@ export function CoordinatorSection() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Submit Project Request
+                Submit Incubation Request
                 <ExternalLink className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
             </Button>
