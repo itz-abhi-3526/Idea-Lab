@@ -144,7 +144,7 @@ export function InventorySection() {
         </div>
 
         {/* CTA */}
-        <div className="flex justify-center pt-2 sm:pt-0">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 sm:pt-0">
           <button
             onClick={() => router.push("/inventory")}
             className="
@@ -158,6 +158,23 @@ export function InventorySection() {
             "
           >
             View Full Inventory
+            <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => router.push("/machinery")}
+            className="
+              w-full sm:w-auto
+              inline-flex items-center justify-center gap-2
+              px-6 py-3
+              border border-accent/40
+              text-accent
+              rounded-lg
+              hover:bg-accent/10 transition
+              text-sm sm:text-base
+            "
+          >
+            Explore Lab Machinery
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
