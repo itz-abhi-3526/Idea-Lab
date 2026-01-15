@@ -32,7 +32,7 @@ const MACHINES = [
     chapter: "Chapter 2",
     name: "Creality K1 Max",
     headline: "Expanded workspace for large-scale production components.",
-    image: "https://robu.in/wp-content/uploads/2023/08/k1-chassis.png",
+    image: "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/k1-chassis_t6epbg.png",
     description:
       "The Creality K1 Max extends additive manufacturing with an exceptional 420×420×500mm build volume, enabling single-run production of large structural components and complete assemblies without segmentation.",
     features: [
@@ -51,7 +51,7 @@ const MACHINES = [
     chapter: "Chapter 3",
     name: "Elegoo Saturn 4 Ultra 16K",
     headline: "Monochrome 4K resolution printing with unmatched surface quality.",
-    image: "https://robu.in/wp-content/uploads/2024/08/404.jpg",
+    image: "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/404_tm2qvy.jpg",
     description:
       "The Elegoo Saturn 4 introduces monochrome 4K resolution with 16K pixel density, delivering unprecedented surface finish quality and micro-detail preservation for optical and mechanical precision.",
     features: [
