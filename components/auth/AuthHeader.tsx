@@ -6,23 +6,50 @@ import { supabase } from "@/lib/supabase"
 
 export default function AuthHeader() {
   const [user, setUser] = useState<any>(null)
+  const [avatar, setAvatar] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser()
       setUser(data.user)
-    })
+
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("avatar_url")
+          .eq("id", data.user.id)
+          .single()
+
+        setAvatar(profile?.avatar_url ?? null)
+      }
+    }
+
+    loadUser()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+
+      if (session?.user) {
+        supabase
+          .from("users")
+          .select("avatar_url")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data }) => {
+            setAvatar(data?.avatar_url ?? null)
+          })
+      } else {
+        setAvatar(null)
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  // Logged OUT
+  /* ---------------- LOGGED OUT ---------------- */
   if (!user) {
     return (
       <div className="flex items-center gap-3">
@@ -41,60 +68,81 @@ export default function AuthHeader() {
     )
   }
 
-  // Logged IN
+  /* ---------------- LOGGED IN ---------------- */
   const name =
     user.user_metadata?.display_name ||
     user.email?.charAt(0).toUpperCase() ||
     "U"
 
-  // 🔐 ADMIN CHECK (UI ONLY)
   const isAdmin =
     user.user_metadata?.role === "admin" ||
     user.user_metadata?.is_admin === true
 
   return (
     <div className="relative">
-      {/* Avatar */}
+      {/* AVATAR */}
       <button
         onClick={() => setOpen(!open)}
-        className="h-9 w-9 rounded-full bg-white/20 text-white flex items-center justify-center font-medium backdrop-blur-md border border-white/30 hover:bg-white/30 transition"
+        className={`relative h-9 w-9 rounded-full overflow-hidden transition
+          ${
+            isAdmin
+              ? "p-[2px] bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 shadow-[0_0_12px_rgba(251,191,36,0.5)]"
+              : "bg-white/20"
+          }`}
       >
-        {name.charAt(0)}
+        <div className="h-full w-full rounded-full bg-black flex items-center justify-center">
+          {avatar ? (
+            <img
+              src={avatar}
+              alt="Profile"
+              className="h-full w-full object-cover rounded-full"
+            />
+          ) : (
+            <span className="text-white font-medium">
+              {name.charAt(0)}
+            </span>
+          )}
+        </div>
       </button>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden">
+      {/* DROPDOWN */}
+      <div
+        className={`absolute right-0 mt-2 w-44 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden
+          transition-all duration-200 origin-top-right
+          ${
+            open
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+          }`}
+      >
+        <Link
+          href="/dashboard"
+          className="block px-4 py-2 text-sm text-white hover:bg-white/10"
+          onClick={() => setOpen(false)}
+        >
+          Dashboard
+        </Link>
+
+        {isAdmin && (
           <Link
-            href="/dashboard"
-            className="block px-4 py-2 text-sm text-white hover:bg-white/10"
+            href="/admin"
+            className="block px-4 py-2 text-sm text-amber-400 hover:bg-white/10"
             onClick={() => setOpen(false)}
           >
-            Dashboard
+            Admin Panel
           </Link>
+        )}
 
-          {/* 🔑 ADMIN PANEL (admins only) */}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="block px-4 py-2 text-sm text-emerald-400 hover:bg-white/10"
-              onClick={() => setOpen(false)}
-            >
-              Admin Panel
-            </Link>
-          )}
-
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut()
-              window.location.href = "/"
-            }}
-            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10"
-          >
-            Logout
-          </button>
-        </div>
-      )}
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut()
+            window.location.href = "/"
+          }}
+          className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   )
 }

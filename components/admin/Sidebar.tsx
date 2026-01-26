@@ -10,31 +10,37 @@ const links = [
   { name: 'Inventory', href: '/admin/inventory' },
   { name: 'Inventory Requests', href: '/admin/inventory/requests' },
   { name: 'Events', href: '/admin/events' },
+  { name: 'Users', href: '/admin/users' },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({
+  onNavigate,
+}: {
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
 
   return (
     <aside
       className="
+        h-full
         w-full
-        md:w-64
         lg:w-72
-        border-b md:border-b-0 md:border-r
-        border-border
         bg-background
+        border-border
         px-4 sm:px-6
-        py-6 sm:py-8
-        sticky top-0
-        z-40
+        py-4 sm:py-6
       "
     >
-      <h2 className="text-lg sm:text-xl font-heading tracking-wide mb-6 sm:mb-10">
-        IDEA Lab Admin
-      </h2>
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-heading tracking-wide">
+          IDEA Lab Admin
+        </h2>
+      </div>
 
-      <nav className="space-y-2 sm:space-y-3">
+      {/* Scrollable Nav (important for mobile) */}
+      <nav className="space-y-2 sm:space-y-3 overflow-y-auto max-h-[calc(100vh-5rem)] pr-1">
         {links.map((link) => {
           const active = pathname === link.href
 
@@ -42,6 +48,7 @@ export default function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={onNavigate}
               className={`
                 block rounded-xl px-4 py-2.5 sm:py-3 text-sm sm:text-base transition-all
                 ${

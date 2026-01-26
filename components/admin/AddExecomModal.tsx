@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
+/* --------------------------------
+   FIXED TYPE (matches admin page)
+--------------------------------- */
 export type ExecomMember = {
   id: string
   name: string
-  designation: string
+  designation: string          // ✅ REQUIRED by admin page
   role: string
   image_url: string | null
   display_order: number
@@ -25,23 +28,28 @@ export default function AddExecomModal({
   member = null,
 }: Props) {
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
+  /* --------------------------------
+     Local form state
+     (department is UI-only alias)
+  --------------------------------- */
   const [form, setForm] = useState({
     name: '',
-    designation: '',
+    department: '',
     role: '',
     image_url: '',
     display_order: '',
   })
 
   /* ----------------------------
-     Prefill form when editing
+     Prefill when editing
   ----------------------------- */
   useEffect(() => {
     if (member) {
       setForm({
         name: member.name,
-        designation: member.designation,
+        department: member.designation,   // ✅ map BACK
         role: member.role,
         image_url: member.image_url || '',
         display_order: String(member.display_order),
@@ -49,7 +57,7 @@ export default function AddExecomModal({
     } else {
       setForm({
         name: '',
-        designation: '',
+        department: '',
         role: '',
         image_url: '',
         display_order: '',
@@ -66,8 +74,55 @@ export default function AddExecomModal({
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  /* ----------------------------
+     Cloudinary Upload (Unsigned)
+  ----------------------------- */
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+
+    try {
+      const data = new FormData()
+      data.append('file', file)
+      data.append('upload_preset', 'idea_lab_profiles')
+      data.append('folder', 'idea-lab/profile-photos')
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: data,
+        }
+      )
+
+      const json = await res.json()
+
+      if (!res.ok) {
+        throw new Error(json.error?.message || 'Upload failed')
+      }
+
+      setForm(prev => ({
+        ...prev,
+        image_url: json.secure_url,
+      }))
+    } catch (err) {
+      console.error(err)
+      alert('Image upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  /* ----------------------------
+     Submit
+     (department → designation)
+  ----------------------------- */
   const handleSubmit = async () => {
-    if (!form.name || !form.designation || !form.role) {
+    if (!form.name || !form.department || !form.role) {
       alert('Please fill all required fields')
       return
     }
@@ -76,7 +131,7 @@ export default function AddExecomModal({
 
     const payload = {
       name: form.name,
-      designation: form.designation,
+      designation: form.department,     // ✅ FIX
       role: form.role,
       image_url: form.image_url || null,
       display_order: Number(form.display_order),
@@ -108,54 +163,81 @@ export default function AddExecomModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 sm:px-6">
-      <div className="glass-surface rounded-2xl w-full max-w-md sm:max-w-lg p-5 sm:p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4">
+      <div className="w-full max-w-lg rounded-3xl bg-zinc-900/80 border border-white/10 shadow-2xl p-7 sm:p-8 space-y-8">
+
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-heading">
+          <h2 className="text-xl font-semibold tracking-tight">
             {member ? 'Edit Execom Member' : 'Add Execom Member'}
           </h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition"
+            className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-white/5 transition"
           >
             ✕
           </button>
         </div>
 
-        {/* Form */}
-        <div className="space-y-3 sm:space-y-4">
-          <input
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
-          />
+        {/* Image Upload */}
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full bg-zinc-800 overflow-hidden ring-1 ring-white/10">
+              {form.image_url ? (
+                <img
+                  src={form.image_url}
+                  alt="Execom"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                  No Image
+                </div>
+              )}
+            </div>
 
-          <input
-            name="designation"
-            placeholder="Designation"
-            value={form.designation}
-            onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
-          />
+            <label className="absolute -bottom-1 -right-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <span className="h-8 w-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs cursor-pointer shadow-lg">
+                ✎
+              </span>
+            </label>
+          </div>
 
-          <input
-            name="role"
-            placeholder="Role (eg: Co-ordinator)"
-            value={form.role}
-            onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
-          />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Profile Photo</p>
+            <p className="text-xs text-muted-foreground">
+              Square image · JPG or PNG
+            </p>
+            {uploading && (
+              <p className="text-xs text-muted-foreground">
+                Uploading…
+              </p>
+            )}
+          </div>
+        </div>
 
-          <input
-            name="image_url"
-            placeholder="Image URL (Cloudinary)"
-            value={form.image_url}
-            onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
-          />
+        {/* Inputs */}
+        <div className="space-y-5">
+          {[
+            { name: 'name', placeholder: 'Full Name' },
+            { name: 'department', placeholder: 'Department' },
+            { name: 'role', placeholder: 'Role (e.g. Coordinator)' },
+          ].map(field => (
+            <input
+              key={field.name}
+              name={field.name}
+              placeholder={field.placeholder}
+              value={(form as any)[field.name]}
+              onChange={handleChange}
+              className="w-full h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
+            />
+          ))}
 
           <input
             name="display_order"
@@ -163,33 +245,34 @@ export default function AddExecomModal({
             placeholder="Display Order"
             value={form.display_order}
             onChange={handleChange}
-            className="w-full bg-input rounded-xl px-4 py-2 text-sm sm:text-base outline-none"
+            className="w-full h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-3 sm:pt-4">
+        <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-muted text-muted-foreground text-sm sm:text-base"
+            className="px-4 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white/5 transition"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-accent text-accent-foreground hover:opacity-90 transition text-sm sm:text-base"
+            disabled={loading || uploading}
+            className="px-6 py-2 rounded-xl bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
           >
             {loading
               ? member
-                ? 'Updating...'
-                : 'Adding...'
+                ? 'Updating…'
+                : 'Adding…'
               : member
               ? 'Update Member'
               : 'Add Member'}
           </button>
         </div>
+
       </div>
     </div>
   )

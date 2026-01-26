@@ -30,6 +30,7 @@ export default function AddEditEventModal({
 }) {
   const [form, setForm] = useState<FormState | null>(null)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -47,8 +48,7 @@ export default function AddEditEventModal({
       venue: event?.venue ?? "",
       poster_url: event?.poster_url ?? "",
       registration_link: event?.registration_link ?? "",
-      is_registration_open:
-        event?.is_registration_open ?? true,
+      is_registration_open: event?.is_registration_open ?? true,
       is_active: event?.is_active ?? true,
       is_featured: event?.is_featured ?? false,
       display_order: event?.display_order ?? 0,
@@ -56,6 +56,42 @@ export default function AddEditEventModal({
   }, [open, event])
 
   if (!open || !form) return null
+
+  /* ----------------------------
+     Cloudinary Upload (Unsigned)
+  ----------------------------- */
+  const handlePosterUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+
+    try {
+      const data = new FormData()
+      data.append("file", file)
+      data.append("upload_preset", "idea_lab_profiles")
+      data.append("folder", "idea-lab/event-posters")
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: data }
+      )
+
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json.error?.message || "Upload failed")
+      }
+
+      setForm({ ...form, poster_url: json.secure_url })
+    } catch (err) {
+      console.error(err)
+      alert("Poster upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const validate = () => {
     const missing = Object.entries(form).filter(
@@ -70,7 +106,6 @@ export default function AddEditEventModal({
       alert("All fields are required.")
       return false
     }
-
     return true
   }
 
@@ -81,19 +116,12 @@ export default function AddEditEventModal({
 
     const payload = {
       ...form,
-      start_datetime: new Date(
-        form.start_datetime
-      ).toISOString(),
-      end_datetime: new Date(
-        form.end_datetime
-      ).toISOString(),
+      start_datetime: new Date(form.start_datetime).toISOString(),
+      end_datetime: new Date(form.end_datetime).toISOString(),
     }
 
     if (event) {
-      await supabase
-        .from("events")
-        .update(payload)
-        .eq("id", event.id)
+      await supabase.from("events").update(payload).eq("id", event.id)
     } else {
       await supabase.from("events").insert(payload)
     }
@@ -103,28 +131,59 @@ export default function AddEditEventModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center px-3 sm:px-6">
-      <div
-        className="
-          glass-surface
-          rounded-t-2xl sm:rounded-2xl
-          w-full
-          max-w-lg
-          max-h-[90vh]
-          overflow-y-auto
-          p-4 sm:p-6
-          space-y-4
-        "
-      >
-        <h2 className="text-lg sm:text-xl font-heading">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center px-4">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-zinc-900/80 border border-white/10 shadow-2xl p-6 space-y-6">
+
+        {/* Header */}
+        <h2 className="text-xl font-semibold tracking-tight">
           {event ? "Edit Event" : "Add Event"}
         </h2>
 
+        {/* Poster Upload (RECTANGULAR) */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Event Poster</p>
+
+          <div className="flex gap-4 items-start">
+            <div className="relative w-32 h-44 rounded-xl bg-zinc-800/60 ring-1 ring-white/10 overflow-hidden flex items-center justify-center">
+              {form.poster_url ? (
+                <img
+                  src={form.poster_url}
+                  alt="Poster preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xs text-muted-foreground text-center px-2">
+                  No poster uploaded
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="inline-block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePosterUpload}
+                  className="hidden"
+                />
+                <span className="inline-block px-4 py-2 rounded-xl bg-muted text-sm cursor-pointer">
+                  {uploading ? "Uploading…" : "Upload / Replace"}
+                </span>
+              </label>
+
+              <p className="text-xs text-muted-foreground max-w-[220px]">
+                Recommended: vertical poster, JPG or PNG.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Inputs */}
         {[
           ["title", "Title"],
           ["event_type", "Event Type"],
           ["venue", "Venue"],
-          ["poster_url", "Poster URL"],
+          ["poster_url", "Poster URL (auto-filled)"],
           ["registration_link", "Registration Link"],
         ].map(([key, label]) => (
           <input
@@ -133,65 +192,49 @@ export default function AddEditEventModal({
             placeholder={label}
             value={(form as any)[key]}
             onChange={(e) =>
-              setForm({
-                ...form,
-                [key]: e.target.value,
-              })
+              setForm({ ...form, [key]: e.target.value })
             }
-            className="w-full bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
+            className="w-full h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
           />
         ))}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        {/* Date & Time */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input
             type="datetime-local"
-            required
             value={form.start_datetime}
             onChange={(e) =>
-              setForm({
-                ...form,
-                start_datetime: e.target.value,
-              })
+              setForm({ ...form, start_datetime: e.target.value })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
+            className="h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
           />
-
           <input
             type="datetime-local"
-            required
             value={form.end_datetime}
             onChange={(e) =>
-              setForm({
-                ...form,
-                end_datetime: e.target.value,
-              })
+              setForm({ ...form, end_datetime: e.target.value })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none text-sm sm:text-base"
+            className="h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
           />
         </div>
 
+        {/* Description */}
         <textarea
-          required
           placeholder="Description"
           value={form.description}
           onChange={(e) =>
-            setForm({
-              ...form,
-              description: e.target.value,
-            })
+            setForm({ ...form, description: e.target.value })
           }
-          className="w-full bg-input px-4 py-2 rounded-xl outline-none min-h-[90px] text-sm sm:text-base"
+          className="w-full min-h-[110px] rounded-xl bg-zinc-800/60 px-4 py-3 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Toggles */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <BooleanSelect
             label="Active"
             value={form.is_active}
-            onChange={(v) =>
-              setForm({ ...form, is_active: v })
-            }
+            onChange={(v) => setForm({ ...form, is_active: v })}
           />
-
           <BooleanSelect
             label="Featured"
             value={form.is_featured}
@@ -199,7 +242,6 @@ export default function AddEditEventModal({
               setForm({ ...form, is_featured: v })
             }
           />
-
           <BooleanSelect
             label="Registration Open"
             value={form.is_registration_open}
@@ -212,12 +254,11 @@ export default function AddEditEventModal({
           />
         </div>
 
-        <label className="flex flex-col text-xs sm:text-sm text-muted-foreground gap-1">
+        {/* Display Order */}
+        <label className="flex flex-col gap-1 text-sm text-muted-foreground">
           Display Order
           <input
             type="number"
-            required
-            placeholder="Lower number = higher priority"
             value={form.display_order}
             onChange={(e) =>
               setForm({
@@ -225,24 +266,25 @@ export default function AddEditEventModal({
                 display_order: Number(e.target.value),
               })
             }
-            className="bg-input px-4 py-2 rounded-xl outline-none text-foreground text-sm sm:text-base"
+            className="h-12 rounded-xl bg-zinc-800/60 px-4 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
           />
         </label>
 
-        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 sm:pt-4">
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto text-muted-foreground text-sm sm:text-base"
+            className="px-4 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white/5 transition"
           >
             Cancel
           </button>
 
           <button
             onClick={save}
-            disabled={saving}
-            className="w-full sm:w-auto bg-accent text-accent-foreground px-4 py-2 rounded-xl disabled:opacity-50 text-sm sm:text-base"
+            disabled={saving || uploading}
+            className="px-6 py-2 rounded-xl bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving…" : "Save"}
           </button>
         </div>
       </div>
@@ -260,15 +302,12 @@ function BooleanSelect({
   onChange: (v: boolean) => void
 }) {
   return (
-    <label className="flex flex-col text-xs sm:text-sm text-muted-foreground gap-1">
+    <label className="flex flex-col gap-1 text-sm text-muted-foreground">
       {label}
       <select
-        required
         value={String(value)}
-        onChange={(e) =>
-          onChange(e.target.value === "true")
-        }
-        className="bg-input px-3 py-2 rounded-xl text-foreground text-sm sm:text-base"
+        onChange={(e) => onChange(e.target.value === "true")}
+        className="h-12 rounded-xl bg-zinc-800/60 px-3 text-sm outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-accent transition"
       >
         <option value="true">TRUE</option>
         <option value="false">FALSE</option>
