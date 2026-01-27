@@ -89,7 +89,6 @@ export default function AddExecomModal({
       const data = new FormData()
       data.append('file', file)
       data.append('upload_preset', 'idea_lab_profiles')
-      data.append('folder', 'idea-lab/profile-photos')
 
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,

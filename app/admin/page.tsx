@@ -29,6 +29,9 @@ type Stats = {
 
   usersTotal: number
   usersActive: number
+
+  incubationTotal: number
+  incubationPending: number
 }
 
 type CalendarEvent = {
@@ -58,7 +61,7 @@ export default function AdminDashboard() {
 
     const now = new Date().toISOString()
     const activeSince = new Date(
-      Date.now() - 30 * 60 * 1000 // last 30 minutes
+      Date.now() - 30 * 60 * 1000
     ).toISOString()
 
     const [
@@ -71,6 +74,8 @@ export default function AdminDashboard() {
       eventsUpcoming,
       usersTotal,
       usersActive,
+      incubationTotal,
+      incubationPending,
     ] = await Promise.all([
       supabase.from("execom_members").select("*", { count: "exact", head: true }),
       supabase
@@ -88,15 +93,20 @@ export default function AdminDashboard() {
         .from("events")
         .select("*", { count: "exact", head: true })
         .gt("start_datetime", now),
-
       supabase.from("users").select("*", { count: "exact", head: true }),
       supabase
         .from("users")
         .select("*", { count: "exact", head: true })
         .gte("last_sign_in_at", activeSince),
+      supabase
+        .from("incubation_requests")
+        .select("*", { count: "exact", head: true }),
+      supabase
+        .from("incubation_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
     ])
 
-    /* ------------------ Ideas by Month ------------------ */
     const { data: ideas } = await supabase
       .from("idea_submissions")
       .select("created_at")
@@ -116,7 +126,6 @@ export default function AdminDashboard() {
       }))
     )
 
-    /* ------------------ Execom Split ------------------ */
     setExecomSplit([
       { name: "Active", value: execomActive.count ?? 0 },
       {
@@ -126,7 +135,6 @@ export default function AdminDashboard() {
       },
     ])
 
-    /* ------------------ Inventory Health ------------------ */
     let criticallyLow = 0
     let low = 0
     let available = 0
@@ -143,7 +151,6 @@ export default function AdminDashboard() {
       { name: "Available", value: available },
     ])
 
-    /* ------------------ Users Activity ------------------ */
     setUsersActivity([
       { name: "Active", value: usersActive.count ?? 0 },
       {
@@ -153,7 +160,6 @@ export default function AdminDashboard() {
       },
     ])
 
-    /* ------------------ Upcoming Events ------------------ */
     const { data: events } = await supabase
       .from("events")
       .select("id, title, start_datetime, venue, is_featured, is_active")
@@ -163,7 +169,6 @@ export default function AdminDashboard() {
 
     setUpcomingEvents(events ?? [])
 
-    /* ------------------ Stats ------------------ */
     setStats({
       execomTotal: execomTotal.count ?? 0,
       execomActive: execomActive.count ?? 0,
@@ -172,9 +177,10 @@ export default function AdminDashboard() {
       eventsTotal: eventsTotal.count ?? 0,
       eventsActive: eventsActive.count ?? 0,
       eventsUpcoming: eventsUpcoming.count ?? 0,
-
       usersTotal: usersTotal.count ?? 0,
       usersActive: usersActive.count ?? 0,
+      incubationTotal: incubationTotal.count ?? 0,
+      incubationPending: incubationPending.count ?? 0,
     })
 
     setLoading(false)
@@ -203,6 +209,16 @@ export default function AdminDashboard() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "events" },
+        fetchDashboard
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "incubation_requests" },
+        fetchDashboard
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "users" },
         fetchDashboard
       )
       .subscribe()
@@ -241,9 +257,10 @@ export default function AdminDashboard() {
         <Stat label="Total Events" value={stats.eventsTotal} />
         <Stat label="Active Events" value={stats.eventsActive} />
         <Stat label="Upcoming Events" value={stats.eventsUpcoming} />
+        <Stat label="Incubation Requests" value={stats.incubationTotal} />
+        <Stat label="Pending Incubations" value={stats.incubationPending} accent />
       </div>
 
-      {/* ------------------ Charts ------------------ */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="glass-surface rounded-2xl p-6 soft-shadow xl:col-span-2">
           <h3 className="mb-4 font-medium">
@@ -305,7 +322,6 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* ------------------ Users Activity ------------------ */}
         <div className="glass-surface rounded-2xl p-6 soft-shadow">
           <h3 className="mb-4 font-medium">
             User Activity (Last 30 mins)

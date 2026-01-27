@@ -11,6 +11,7 @@ const links = [
   { name: 'Inventory Requests', href: '/admin/inventory/requests' },
   { name: 'Events', href: '/admin/events' },
   { name: 'Users', href: '/admin/users' },
+  { name: 'Incubation Requests', href: '/admin/incubation-requests' },
 ]
 
 export default function Sidebar({

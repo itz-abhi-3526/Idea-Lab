@@ -136,6 +136,11 @@ export default function DashboardPage() {
           href="/dashboard/my-requests"
         />
         <DashboardCard
+          title="My Incubation Requests"
+          description="Track 3D printing & laser printing requests."
+          href="/dashboard/incubation-requests"
+        />
+        <DashboardCard
           title="Account Settings"
           description="Manage your profile and security."
           href="/dashboard/account"

@@ -3,7 +3,6 @@
 import { motion } from "framer-motion"
 import { Mail, Phone, ExternalLink, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { SlotReservationSection } from "./slot-reservation-section"
 
 function ContactItem({
   icon: Icon,
@@ -82,7 +81,7 @@ export function CoordinatorSection() {
               asChild
             >
               <a
-                href="https://forms.gle/MYEyCnLBowgu4Avr8"
+                href="/incubation/request"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -132,8 +131,6 @@ export function CoordinatorSection() {
             </div>
           </div>
         </motion.div>
-
-        <SlotReservationSection />
       </div>
     </section>
   )
