@@ -115,6 +115,10 @@ export default function AddExecomModal({
       setUploading(false)
     }
   }
+  console.log(
+  "Cloudinary cloud:",
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+)
 
   /* ----------------------------
      Submit
