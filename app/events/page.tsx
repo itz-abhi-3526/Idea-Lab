@@ -1,235 +1,203 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Calendar, MapPin, ArrowRight, Star } from "lucide-react"
+import Link from "next/link"
+import QRCode from "react-qr-code"
+import { Calendar, MapPin, ArrowRight } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 type Event = {
   id: string
   title: string
   description: string | null
-  event_type: string | null
   start_datetime: string
+  registration_deadline: string | null
   venue: string | null
-  poster_url: string | null
-  registration_link: string
-  is_registration_open: boolean
-  is_featured: boolean
-}
 
-const EVENT_TYPE_STYLES: Record<string, string> = {
-  Workshop: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  Hackathon: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  Talk: "bg-green-500/15 text-green-400 border-green-500/30",
-  Bootcamp: "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  Competition: "bg-red-500/15 text-red-400 border-red-500/30",
+  // 🆕 Paid event support
+  is_paid: boolean
+  price: number | null
 }
-
-const normalizeUrl = (url: string) =>
-  url.startsWith("http") ? url : `https://${url}`
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
-
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
   const now = new Date()
 
-  const fetchEvents = async () => {
-    const { data } = await supabase
+  useEffect(() => {
+    supabase
       .from("events")
       .select("*")
       .order("start_datetime", { ascending: true })
-
-    setEvents(data ?? [])
-  }
-
-  useEffect(() => {
-    fetchEvents()
-
-    const channel = supabase
-      .channel("events-page-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "events" },
-        fetchEvents
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+      .then(({ data }) => setEvents(data ?? []))
   }, [])
 
-  const featuredEvent = events.find(
-    (e) => e.is_featured && new Date(e.start_datetime) >= now
-  )
+  const isOpen = (e: Event) =>
+    e.registration_deadline &&
+    new Date(e.registration_deadline) > now
 
-  const upcomingEvents = events.filter(
-    (e) => new Date(e.start_datetime) >= now && !e.is_featured
-  )
-
-  const pastEvents = events.filter(
-    (e) => new Date(e.start_datetime) < now
+  const filtered = events.filter(e =>
+    tab === "upcoming"
+      ? new Date(e.start_datetime) >= now
+      : new Date(e.start_datetime) < now
   )
 
   return (
-    <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* Heading */}
-      <div className="text-center mb-12 sm:mb-16">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
-          Events
+    <section className="min-h-screen max-w-6xl mx-auto px-4 sm:px-8 py-20">
+
+      {/* HEADER */}
+      <div className="text-center mb-16 space-y-4">
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+          Explore the Events
         </h1>
-        <div className="h-1 w-24 sm:w-28 mx-auto mt-4 bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Tickets, passes & experiences at IDEA Lab
+        </p>
       </div>
 
-      {/* FEATURED */}
-      {featuredEvent && (
-        <div className="mb-16 sm:mb-20 bg-accent/10 border border-accent/30 rounded-2xl overflow-hidden">
-          {featuredEvent.poster_url && (
-            <img
-              src={featuredEvent.poster_url}
-              className="h-56 sm:h-72 w-full object-cover"
-              alt={featuredEvent.title}
-            />
-          )}
-
-          <div className="p-5 sm:p-8 space-y-4">
-            <div className="flex items-center gap-2 text-accent text-sm">
-              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
-              Featured Event
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-semibold">
-              {featuredEvent.title}
-            </h2>
-
-            {featuredEvent.description && (
-              <p className="text-sm sm:text-base text-muted-foreground">
-                {featuredEvent.description}
-              </p>
-            )}
-
-            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {new Date(featuredEvent.start_datetime).toLocaleString()}
-              </div>
-
-              {featuredEvent.venue && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  {featuredEvent.venue}
-                </div>
-              )}
-            </div>
-
-            {featuredEvent.is_registration_open ? (
-              <a
-                href={normalizeUrl(featuredEvent.registration_link)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-accent font-medium text-sm hover:underline"
-              >
-                Register Now <ArrowRight className="w-4 h-4" />
-              </a>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Registration Closed
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* TABS */}
-      <div className="flex justify-center gap-4 sm:gap-6 mb-10 sm:mb-12">
-        {(["upcoming", "past"] as const).map((tab) => (
+      <div className="flex justify-center gap-6 mb-12">
+        {(["upcoming", "past"] as const).map(t => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-xs sm:text-sm transition ${
-              activeTab === tab
-                ? "bg-accent/20 text-accent"
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-6 py-2 rounded-full text-sm font-medium transition ${
+              tab === t
+                ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab === "upcoming" ? "Upcoming Events" : "Past Events"}
+            {t === "upcoming" ? "Upcoming" : "Past"}
           </button>
         ))}
       </div>
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {(activeTab === "upcoming" ? upcomingEvents : pastEvents).map(
-          (event) => (
+      {/* TICKETS */}
+      <div className="space-y-8">
+        {filtered.map(event => {
+          const d = new Date(event.start_datetime)
+
+          return (
             <div
               key={event.id}
-              className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col"
+              className="
+                relative overflow-hidden
+                rounded-[28px]
+                bg-gradient-to-br from-white/10 to-white/5
+                backdrop-blur-xl
+                border border-white/10
+                shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]
+              "
             >
-              {event.poster_url && (
-                <img
-                  src={event.poster_url}
-                  className="h-44 sm:h-48 w-full object-cover"
-                  alt={event.title}
-                />
-              )}
+              {/* TOP STRIP */}
+              <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-accent via-orange-400 to-accent" />
 
-              <div className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col">
-                {event.event_type && (
-                  <span
-                    className={`self-start text-xs px-3 py-1 rounded-full border ${
-                      EVENT_TYPE_STYLES[event.event_type] ??
-                      "bg-muted text-muted-foreground border-white/10"
-                    }`}
-                  >
-                    {event.event_type}
-                  </span>
-                )}
+              <div className="flex flex-col sm:flex-row">
 
-                <h3 className="font-semibold text-sm sm:text-base">
-                  {event.title}
-                </h3>
-
-                <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(event.start_datetime).toLocaleString()}
+                {/* DATE / STATUS */}
+                <div className="sm:w-36 flex flex-row sm:flex-col items-center justify-center gap-4 px-6 py-5 bg-black/30 text-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">
+                      {d.getDate()}
+                    </div>
+                    <div className="text-xs uppercase text-muted-foreground">
+                      {d.toLocaleString("default", { month: "short" })}
+                    </div>
                   </div>
 
-                  {event.venue && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      {event.venue}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center gap-2">
+                    <span
+                      className={`text-[11px] px-3 py-1 rounded-full ${
+                        isOpen(event)
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-red-500/20 text-red-400"
+                      }`}
+                    >
+                      {isOpen(event) ? "Registration Open" : "Closed"}
+                    </span>
+
+                    <span
+                      className={`text-[11px] px-3 py-1 rounded-full ${
+                        event.is_paid
+                          ? "bg-orange-500/20 text-orange-400"
+                          : "bg-blue-500/20 text-blue-400"
+                      }`}
+                    >
+                      {event.is_paid ? `₹${event.price}` : "Free"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mt-auto">
-                  {activeTab === "upcoming" ? (
-                    event.is_registration_open ? (
-                      <a
-                        href={normalizeUrl(event.registration_link)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-accent hover:underline"
-                      >
-                        Register Now <ArrowRight className="w-4 h-4" />
-                      </a>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Registration Closed
-                      </p>
-                    )
-                  ) : (
+                {/* MAIN INFO */}
+                <div className="flex-1 px-6 py-6 space-y-3">
+                  <h3 className="text-xl font-semibold">
+                    {event.title}
+                  </h3>
+
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      {d.toLocaleString()}
+                    </span>
+
+                    {event.venue && (
+                      <span className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {event.venue}
+                      </span>
+                    )}
+                  </div>
+
+                  {event.description && (
+                    <p className="text-sm text-muted-foreground max-w-xl">
+                      {event.description}
+                    </p>
+                  )}
+
+                  {isOpen(event) && (
                     <p className="text-xs text-muted-foreground">
-                      Event Ended
+                      Registration closes on{" "}
+                      {new Date(
+                        event.registration_deadline!
+                      ).toLocaleDateString()}
                     </p>
                   )}
                 </div>
+
+                {/* QR / ACTION */}
+                <div
+                  className="
+                    sm:w-56 px-6 py-6
+                    border-t sm:border-t-0 sm:border-l border-white/10
+                    flex sm:flex-col items-center justify-between gap-4
+                  "
+                >
+                  <div className="bg-black/40 rounded-xl p-3">
+                    <QRCode
+                      value={`${location.origin}/events/${event.id}`}
+                      size={80}
+                      bgColor="transparent"
+                      fgColor="#fff"
+                    />
+                  </div>
+
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="
+                      inline-flex items-center gap-2
+                      text-accent font-medium text-sm
+                      hover:underline
+                    "
+                  >
+                    View Details
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
               </div>
             </div>
           )
-        )}
+        })}
       </div>
     </section>
   )

@@ -4,7 +4,11 @@ import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import EventCard from "@/components/admin/events/EventCard"
 import AddEditEventModal from "@/components/admin/events/AddEditEventModal"
+import { Plus } from "lucide-react"
 
+/* -----------------------------
+   TYPES
+----------------------------- */
 export type Event = {
   id: string
   title: string
@@ -22,6 +26,9 @@ export type Event = {
   created_at: string
 }
 
+/* -----------------------------
+   PAGE
+----------------------------- */
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,7 +77,7 @@ export default function AdminEventsPage() {
      Derived
   ----------------------------- */
   const filtered = events.filter(e =>
-    `${e.title} ${e.event_type} ${e.venue}`
+    `${e.title} ${e.event_type ?? ""} ${e.venue ?? ""}`
       .toLowerCase()
       .includes(search.toLowerCase())
   )
@@ -80,9 +87,7 @@ export default function AdminEventsPage() {
   const stats = {
     total: events.length,
     active: events.filter(e => e.is_active).length,
-    upcoming: events.filter(
-      e => new Date(e.start_datetime) > now
-    ).length,
+    upcoming: events.filter(e => new Date(e.start_datetime) > now).length,
     featured: events.filter(e => e.is_featured).length,
   }
 
@@ -90,15 +95,16 @@ export default function AdminEventsPage() {
      UI
   ----------------------------- */
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-12">
+
+      {/* HEADER */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-heading">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
             Events
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-2">
-            Manage IDEA Lab events
+            Manage and monitor all IDEA Lab events
           </p>
         </div>
 
@@ -108,47 +114,54 @@ export default function AdminEventsPage() {
             setOpen(true)
           }}
           className="
+            inline-flex items-center gap-2
             bg-accent text-accent-foreground
-            px-5 py-2.5 rounded-xl
+            px-5 py-3 rounded-xl
             font-medium
             hover:opacity-90 transition
-            w-full sm:w-auto
+            shadow-lg
           "
         >
-          + Add Event
+          <Plus className="w-4 h-4" />
+          Add Event
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Stat label="Total" value={stats.total} />
+      {/* STATS */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+        <Stat label="Total Events" value={stats.total} />
         <Stat label="Active" value={stats.active} />
         <Stat label="Upcoming" value={stats.upcoming} />
         <Stat label="Featured" value={stats.featured} />
       </div>
 
-      {/* Search */}
-      <input
-        placeholder="Search events..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        className="
-          w-full sm:max-w-md
-          bg-input px-4 py-2 rounded-xl
-          outline-none
-          placeholder:text-muted-foreground
-        "
-      />
+      {/* SEARCH */}
+      <div className="flex justify-between items-center">
+        <input
+          placeholder="Search by title, type, or venue..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="
+            w-full sm:max-w-md
+            bg-input/70 backdrop-blur
+            px-4 py-2.5 rounded-xl
+            outline-none
+            ring-1 ring-white/10
+            focus:ring-2 focus:ring-accent
+            placeholder:text-muted-foreground
+          "
+        />
+      </div>
 
-      {/* List */}
+      {/* LIST */}
       {loading ? (
-        <p className="text-muted-foreground">
-          Loading events...
-        </p>
+        <div className="text-muted-foreground">
+          Loading events…
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="glass-surface rounded-2xl p-10 text-center">
+        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-12 text-center">
           <p className="text-muted-foreground">
-            No events found
+            No events match your search
           </p>
         </div>
       ) : (
@@ -166,7 +179,7 @@ export default function AdminEventsPage() {
         </div>
       )}
 
-      {/* Add / Edit Modal */}
+      {/* ADD / EDIT MODAL */}
       <AddEditEventModal
         open={open}
         event={editEvent}
@@ -180,7 +193,7 @@ export default function AdminEventsPage() {
 }
 
 /* -----------------------------
-   Stat Card
+   STAT CARD
 ----------------------------- */
 function Stat({
   label,
@@ -190,11 +203,17 @@ function Stat({
   value: number
 }) {
   return (
-    <div className="glass-surface rounded-2xl p-5 soft-shadow">
-      <p className="text-sm text-muted-foreground">
+    <div className="
+      rounded-3xl
+      bg-white/10 backdrop-blur-xl
+      border border-white/10
+      p-6
+      shadow-lg
+    ">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
-      <p className="text-2xl font-semibold mt-1">
+      <p className="text-3xl font-semibold mt-2">
         {value}
       </p>
     </div>

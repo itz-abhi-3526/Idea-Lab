@@ -141,6 +141,16 @@ export default function DashboardPage() {
           href="/dashboard/incubation-requests"
         />
         <DashboardCard
+          title="My Events"
+          description="View your registered events."
+          href="/dashboard/events"
+        />
+        <DashboardCard
+          title="My Certificates"
+          description="View your Certificates."
+          href="/dashboard/certificates"
+        />
+        <DashboardCard
           title="Account Settings"
           description="Manage your profile and security."
           href="/dashboard/account"
