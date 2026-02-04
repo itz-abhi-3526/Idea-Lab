@@ -13,6 +13,7 @@ const links = [
   { name: 'Users', href: '/admin/users' },
   { name: 'Incubation Requests', href: '/admin/incubation-requests' },
   { name: 'Event Registrations', href: '/admin/events/registrations' },
+  { name: 'Event Feedback', href: '/admin/events/feedback' },
 ]
 
 export default function Sidebar({
