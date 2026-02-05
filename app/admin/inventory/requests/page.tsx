@@ -97,35 +97,26 @@ export default function InventoryRequestsPage() {
     }
   }, [])
 
+  /* ----------------------------------------------------
+     ✅ FIXED: approve now goes through server API
+  ----------------------------------------------------- */
   const approveRequest = async (req: InventoryRequest) => {
-    for (const item of req.inventory_request_items) {
-      if (
-        item.inventory_items.quantity_available <
-        item.quantity
-      ) {
-        alert(
-          `Insufficient stock for ${item.inventory_items.name}`
-        )
-        return
-      }
+  const res = await fetch(
+    "/api/admin/inventory-requests/approve",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId: req.id }),
     }
+  )
 
-    for (const item of req.inventory_request_items) {
-      await supabase
-        .from("inventory_items")
-        .update({
-          quantity_available:
-            item.inventory_items.quantity_available -
-            item.quantity,
-        })
-        .eq("id", item.inventory_items.id)
-    }
+  const json = await res.json()
 
-    await supabase
-      .from("inventory_requests")
-      .update({ status: "approved" })
-      .eq("id", req.id)
+  if (!res.ok) {
+    alert(json.error || "Approval failed")
   }
+}
+
 
   const rejectRequest = async (id: string) => {
     await supabase
@@ -223,7 +214,7 @@ export default function InventoryRequestsPage() {
         ))}
       </div>
 
-      {/* MOBILE / TABLET */}
+      {/* MOBILE */}
       <div className="grid gap-4 lg:hidden">
         {requests.map((req) => (
           <div

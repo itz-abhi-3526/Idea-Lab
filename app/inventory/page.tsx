@@ -9,6 +9,7 @@ import {
   Box,
   Search,
   X,
+  CheckCircle2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
@@ -77,6 +78,12 @@ export default function InventoryPage() {
     purpose: "",
   })
 
+  const [addedItem, setAddedItem] =
+    useState<InventoryItem | null>(null)
+
+  const [requestSubmitted, setRequestSubmitted] =
+    useState(false)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
@@ -108,13 +115,20 @@ export default function InventoryPage() {
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id)
       if (existing) {
-        if (existing.quantity >= item.quantity_available) return prev
+        if (existing.quantity >= item.quantity_available)
+          return prev
+
         return prev.map(i =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         )
       }
       return [...prev, { ...item, quantity: 1 }]
     })
+
+    setAddedItem(item)
+    setTimeout(() => setAddedItem(null), 1800)
   }
 
   const updateQty = (id: string, delta: number) => {
@@ -122,7 +136,8 @@ export default function InventoryPage() {
       prev.map(i => {
         if (i.id !== id) return i
         const next = i.quantity + delta
-        if (next < 1 || next > i.quantity_available) return i
+        if (next < 1 || next > i.quantity_available)
+          return i
         return { ...i, quantity: next }
       })
     )
@@ -135,10 +150,12 @@ export default function InventoryPage() {
   const submitRequest = async () => {
     if (!user) return
     const { name, department, phone, purpose } = form
-    if (!name || !department || !phone || !purpose) return
+    if (!name || !department || !phone || !purpose)
+      return
 
     try {
       setSubmitting(true)
+
       const res = await fetch("/api/inventory-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,9 +170,15 @@ export default function InventoryPage() {
       })
 
       if (!res.ok) return
+
       setCart([])
       setShowCart(false)
       setShowForm(false)
+
+      // ✅ new submitted toast
+      setRequestSubmitted(true)
+      setTimeout(() => setRequestSubmitted(false), 2200)
+
     } finally {
       setSubmitting(false)
     }
@@ -183,6 +206,28 @@ export default function InventoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
+
+      {/* ------------------- Added to cart toast ------------------- */}
+      <AnimatePresence>
+        {addedItem && (
+          <ToastShell
+            title="Added to Cart"
+            subtitle={addedItem.name}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ------------------- Request submitted toast ------------------- */}
+      <AnimatePresence>
+        {requestSubmitted && (
+          <ToastShell
+            title="Request submitted"
+            subtitle="Your inventory request was sent"
+            accent="blue"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="sticky top-0 z-40 border-b bg-card px-4 sm:px-6 py-4 space-y-4">
         <div className="flex justify-between items-center">
@@ -394,5 +439,116 @@ export default function InventoryPage() {
         onClose={() => setShowLogin(false)}
       />
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Reusable Siri-style toast shell                                     */
+/* ------------------------------------------------------------------ */
+
+function ToastShell({
+  title,
+  subtitle,
+  accent = "green",
+}: {
+  title: string
+  subtitle: string
+  accent?: "green" | "blue"
+}) {
+  const glow =
+    accent === "blue"
+      ? "radial-gradient(60% 60% at 50% 50%, rgba(56,189,248,0.35), rgba(167,139,250,0.2), rgba(0,0,0,0))"
+      : "radial-gradient(60% 60% at 50% 50%, rgba(52,211,153,0.35), rgba(56,189,248,0.18), rgba(0,0,0,0))"
+
+  const ring =
+    accent === "blue"
+      ? "linear-gradient(120deg,#38bdf8,#a78bfa,#22d3ee,#38bdf8)"
+      : "linear-gradient(120deg,#34d399,#38bdf8,#a78bfa,#34d399)"
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40, scale: 0.85 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 30, scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 260, damping: 18 }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200]"
+    >
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 rounded-[28px] blur-2xl"
+        style={{ background: glow }}
+        animate={{
+          opacity: [0.6, 1, 0.6],
+          scale: [0.95, 1.05, 0.95],
+        }}
+        transition={{
+          duration: 2.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      <motion.div
+        aria-hidden
+        className="absolute -inset-[2px] rounded-[28px]"
+        style={{
+          background: ring,
+          backgroundSize: "300% 300%",
+          filter: "blur(6px)",
+        }}
+        animate={{
+          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+          opacity: [0.7, 1, 0.7],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      <div className="relative rounded-[26px] px-5 py-4
+                      bg-zinc-950/70 backdrop-blur-xl
+                      border border-white/15
+                      shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
+        <div className="flex items-center gap-4">
+          <motion.div
+            className={`w-11 h-11 rounded-xl flex items-center justify-center
+              ${accent === "blue"
+                ? "bg-sky-500/15 border border-sky-400/30"
+                : "bg-emerald-500/15 border border-emerald-400/30"}`}
+            animate={{
+              boxShadow: [
+                "0 0 0px rgba(255,255,255,0)",
+                "0 0 18px rgba(255,255,255,0.45)",
+                "0 0 0px rgba(255,255,255,0)",
+              ],
+            }}
+            transition={{
+              duration: 1.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <CheckCircle2
+              className={`w-6 h-6 ${
+                accent === "blue"
+                  ? "text-sky-400"
+                  : "text-emerald-400"
+              }`}
+            />
+          </motion.div>
+
+          <div className="flex flex-col leading-tight">
+            <span className="text-sm font-semibold">
+              {title}
+            </span>
+            <span className="text-xs text-muted-foreground max-w-[240px] truncate">
+              {subtitle}
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   )
 }

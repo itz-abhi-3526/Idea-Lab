@@ -26,12 +26,38 @@ export default function AdminRequestsPage() {
   }
 
   const updateStatus = async (id: string, status: string) => {
-    await fetch("/api/admin/requests", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status }),
-    })
-    fetchRequests()
+    try {
+      if (status === "approved") {
+        // ✅ IMPORTANT: use the real approval API (deducts stock)
+        const res = await fetch(
+          "/api/admin/inventory-requests/approve",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ requestId: id }),
+          }
+        )
+
+        const json = await res.json()
+
+        if (!res.ok) {
+          alert(json?.error || "Approval failed")
+          return
+        }
+      } else {
+        // reject -> old API (status only)
+        await fetch("/api/admin/requests", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, status }),
+        })
+      }
+
+      fetchRequests()
+    } catch (err) {
+      console.error(err)
+      alert("Something went wrong")
+    }
   }
 
   useEffect(() => {
@@ -104,26 +130,28 @@ export default function AdminRequestsPage() {
           </ul>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:justify-end">
-            <Button
-              className="w-full sm:w-auto"
-              onClick={() =>
-                updateStatus(req.id, "approved")
-              }
-            >
-              Approve
-            </Button>
+          {req.status === "submitted" && (
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:justify-end">
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  updateStatus(req.id, "approved")
+                }
+              >
+                Approve
+              </Button>
 
-            <Button
-              variant="destructive"
-              className="w-full sm:w-auto"
-              onClick={() =>
-                updateStatus(req.id, "rejected")
-              }
-            >
-              Reject
-            </Button>
-          </div>
+              <Button
+                variant="destructive"
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  updateStatus(req.id, "rejected")
+                }
+              >
+                Reject
+              </Button>
+            </div>
+          )}
         </div>
       ))}
     </div>
