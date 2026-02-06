@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Lightbulb, X } from "lucide-react"
+import { Lightbulb, X, Check } from "lucide-react"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -60,14 +60,13 @@ export function IdeaSubmissionSection() {
       {/* SECTION */}
       <section
         id="idea-submission"
-        className="relative py-16 sm:py-20 lg:py-24 overflow-hidden bg-background"
+        className="relative py-20 overflow-hidden bg-background"
       >
-        {/* ambient glow */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10"
         >
-          <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[120px]" />
         </div>
 
         <motion.div
@@ -75,40 +74,42 @@ export function IdeaSubmissionSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-2xl mx-auto px-4 sm:px-6 text-center space-y-5 sm:space-y-6"
+          className="max-w-2xl mx-auto px-4 sm:px-6 text-center space-y-6"
         >
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Lightbulb className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-accent" />
+            <Lightbulb className="mx-auto h-12 w-12 text-accent" />
           </motion.div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-            Have an Idea?
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
+            Submit your idea
           </h2>
 
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Got an idea worth exploring? Submit it to us and get the support you
-            need to turn it into reality.
+          <p className="text-muted-foreground">
+            Share your concept and get direct access to IDEA Lab support and
+            mentorship.
           </p>
 
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => setOpen(true)}
-            className="relative inline-flex items-center justify-center px-6 py-3 rounded-xl
+            onClick={() => {
+              setSuccess(false)
+              setError(null)
+              setOpen(true)
+            }}
+            className="relative inline-flex items-center justify-center px-8 py-3 rounded-xl
                        bg-accent text-accent-foreground
-                       shadow-[0_12px_30px_rgba(0,0,0,0.35)]
+                       shadow-[0_18px_40px_rgba(0,0,0,0.45)]
                        overflow-hidden"
           >
-            <span className="relative z-10">Submit Your Idea</span>
-            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+            <span className="relative z-10">Submit your idea</span>
           </motion.button>
 
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Ideas are reviewed by IDEA Lab coordinators. Shortlisted teams will be
-            contacted.
+          <p className="text-xs text-muted-foreground">
+            All submissions are reviewed by IDEA Lab coordinators.
           </p>
         </motion.div>
       </section>
@@ -128,135 +129,166 @@ export function IdeaSubmissionSection() {
               onClick={() => setOpen(false)}
             />
 
-            {/* Sheet / dialog */}
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              initial={{ y: 60, opacity: 0, scale: 0.98 }}
+              initial={{ y: 80, opacity: 0, scale: 0.96 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 60, opacity: 0, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+              exit={{ y: 80, opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
               className="
                 relative
                 w-full
-                sm:max-w-xl
+                sm:max-w-3xl
                 h-[92vh] sm:h-auto
                 rounded-t-3xl sm:rounded-2xl
                 bg-background/80 backdrop-blur-xl
                 border border-white/10
                 shadow-[0_30px_80px_rgba(0,0,0,0.45)]
-                p-5 sm:p-8
+                p-6 sm:p-8
                 overflow-y-auto
               "
             >
-              {/* handle */}
-              <div className="sm:hidden mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted" />
-
-              {/* Close */}
               <button
-                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition"
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
                 onClick={() => setOpen(false)}
               >
                 <X />
               </button>
 
-              <h3 className="text-xl sm:text-2xl font-semibold mb-4">
-                Idea Submission
+              <h3 className="text-2xl font-semibold mb-6">
+                Idea submission
               </h3>
 
+              {/* ---------- SUCCESS STATE (SIRI STYLE) ---------- */}
               <AnimatePresence mode="wait">
-                {error && (
-                  <motion.p
-                    key="error"
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="text-red-500 text-sm mb-2"
+                {success && (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex flex-col items-center justify-center py-16 text-center"
                   >
-                    {error}
-                  </motion.p>
+                    <div className="relative mb-10">
+                      <motion.div
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ duration: 2.5, repeat: Infinity }}
+                        className="absolute inset-0 rounded-full bg-accent/30 blur-2xl"
+                      />
+
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                        className="w-24 h-24 rounded-full border border-accent/30 flex items-center justify-center bg-background"
+                      >
+                        <Check className="w-10 h-10 text-accent" />
+                      </motion.div>
+                    </div>
+
+                    <h4 className="text-xl font-semibold mb-2">
+                      Idea submitted successfully
+                    </h4>
+
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      Your idea has been received by the IDEA Lab team. You will
+                      be contacted if your proposal is shortlisted.
+                    </p>
+                  </motion.div>
                 )}
 
-                {success && (
-                  <motion.p
-                    key="success"
-                    initial={{ opacity: 0, y: -6 }}
+                {!success && (
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="text-green-500 text-sm mb-2"
+                    exit={{ opacity: 0, y: -10 }}
                   >
-                    Idea submitted successfully!
-                  </motion.p>
+                    {error && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-red-500 text-sm mb-4"
+                      >
+                        {error}
+                      </motion.p>
+                    )}
+
+                    <form
+                      onSubmit={handleSubmit}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    >
+                      {/* Personal */}
+                      <input
+                        name="student_name"
+                        required
+                        placeholder="Your name"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+                      <input
+                        name="email"
+                        value={email}
+                        readOnly
+                        className="input opacity-70"
+                      />
+
+                      <input
+                        name="phone"
+                        placeholder="Phone number"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+                      <input
+                        name="department"
+                        required
+                        placeholder="Department"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+
+                      <input
+                        name="year"
+                        placeholder="Semester"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+                      <input
+                        name="idea_title"
+                        required
+                        placeholder="Idea title"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+
+                      <textarea
+                        name="idea_description"
+                        required
+                        placeholder="Describe your idea"
+                        className="input min-h-[120px] sm:col-span-2 focus:ring-2 focus:ring-accent/40"
+                      />
+
+                      <input
+                        name="domain"
+                        placeholder="Domain (AI, IoT, etc.)"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+                      <input
+                        name="team_size"
+                        type="number"
+                        min={1}
+                        placeholder="Team size"
+                        className="input focus:ring-2 focus:ring-accent/40"
+                      />
+
+                      <div className="sm:col-span-2 pt-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.97 }}
+                          disabled={loading}
+                          className="w-full rounded-xl bg-accent text-accent-foreground py-3 shadow-lg disabled:opacity-60"
+                        >
+                          {loading ? "Submitting…" : "Submit idea"}
+                        </motion.button>
+                      </div>
+                    </form>
+                  </motion.div>
                 )}
               </AnimatePresence>
-
-              {!success && (
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-3 sm:space-y-4"
-                >
-                  <input
-                    name="student_name"
-                    required
-                    placeholder="Your Name"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="email"
-                    value={email}
-                    readOnly
-                    className="input opacity-70 text-base sm:text-sm"
-                  />
-                  <input
-                    name="phone"
-                    placeholder="Phone Number"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="department"
-                    required
-                    placeholder="Department"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="year"
-                    placeholder="Semester"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="idea_title"
-                    required
-                    placeholder="Idea Title"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <textarea
-                    name="idea_description"
-                    required
-                    placeholder="Describe your idea"
-                    className="input min-h-[120px] text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="domain"
-                    placeholder="Domain (AI, IoT, etc.)"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-                  <input
-                    name="team_size"
-                    type="number"
-                    min={1}
-                    placeholder="Team Size"
-                    className="input text-base sm:text-sm focus:ring-2 focus:ring-accent/40"
-                  />
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
-                    disabled={loading}
-                    className="w-full rounded-xl bg-accent text-accent-foreground py-3 text-base sm:text-sm shadow-lg disabled:opacity-60"
-                  >
-                    {loading ? "Submitting..." : "Submit Idea"}
-                  </motion.button>
-                </form>
-              )}
             </motion.div>
           </motion.div>
         )}
