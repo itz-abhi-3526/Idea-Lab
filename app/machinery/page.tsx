@@ -8,12 +8,12 @@ import { motion, useScroll, useTransform } from "framer-motion"
 /* ================================================= */
 
 const MACHINES = [
+  /* ---- unchanged data (your original array) ---- */
   {
     chapter: "Chapter 1",
     name: "Bambu Lab X1 Carbon",
     headline: "Dual automated bed leveling for doubly guaranteed prints.",
-    image:
-      "https://portal.bblmw.com/x1/ai_dual.png",
+    image: "https://portal.bblmw.com/x1/ai_dual.png",
     description:
       "Bambu Lab X1 utilizes two sets of independent sensors and an algorithm to measure the height of the nozzle relative to the bed. The lidar and analog force sensors crosscheck for an extra layer of redundancy in bed leveling.",
     features: [
@@ -24,7 +24,8 @@ const MACHINES = [
       },
       {
         name: "Multi-Material Support",
-        description: "Engineering-grade polymers and fiber-reinforced composites with closed-loop filament monitoring.",
+        description:
+          "Engineering-grade polymers and fiber-reinforced composites with closed-loop filament monitoring.",
       },
     ],
   },
@@ -32,13 +33,15 @@ const MACHINES = [
     chapter: "Chapter 2",
     name: "Creality K1 Max",
     headline: "Expanded workspace for large-scale production components.",
-    image: "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/k1-chassis_t6epbg.png",
+    image:
+      "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/k1-chassis_t6epbg.png",
     description:
       "The Creality K1 Max extends additive manufacturing with an exceptional 420×420×500mm build volume, enabling single-run production of large structural components and complete assemblies without segmentation.",
     features: [
       {
         name: "Extended Build Volume",
-        description: "420×420×500mm workspace for architectural models and large mechanical prototypes in one piece.",
+        description:
+          "420×420×500mm workspace for architectural models and large mechanical prototypes in one piece.",
       },
       {
         name: "Heated Chamber",
@@ -51,7 +54,8 @@ const MACHINES = [
     chapter: "Chapter 3",
     name: "Elegoo Saturn 4 Ultra 16K",
     headline: "Monochrome 4K resolution printing with unmatched surface quality.",
-    image: "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/404_tm2qvy.jpg",
+    image:
+      "https://res.cloudinary.com/dudp2imxs/image/upload/v1768479850/404_tm2qvy.jpg",
     description:
       "The Elegoo Saturn 4 introduces monochrome 4K resolution with 16K pixel density, delivering unprecedented surface finish quality and micro-detail preservation for optical and mechanical precision.",
     features: [
@@ -92,7 +96,8 @@ const MACHINES = [
     chapter: "Chapter 5",
     name: "Sublimation Printer",
     headline: "Photographic-quality color transfer with permanent results.",
-    image: "https://abhishekid.com/cdn/shop/files/219-Mug-Printing-Machine-Sublimation-Mug-Machine-With-Meter-Coil-11-oz_7c28ab3d-73b3-4bdd-b32e-ae5d17f70520.png?v=1729015248&width=1920",
+    image:
+      "https://abhishekid.com/cdn/shop/files/219-Mug-Printing-Machine-Sublimation-Mug-Machine-With-Meter-Coil-11-oz_7c28ab3d-73b3-4bdd-b32e-ae5d17f70520.png?v=1729015248&width=1920",
     description:
       "The sublimation printing system enables permanent, photographic-quality color transfer onto polyester, ceramic, and coated substrates. Sublimation creates fade-resistant prints integrated into the material structure itself.",
     features: [
@@ -112,7 +117,8 @@ const MACHINES = [
     chapter: "Chapter 6",
     name: "Precision Plotter",
     headline: "Vinyl and flex-material cutting with 0.25mm accuracy.",
-    image: "https://img.directindustry.com/images_di/photo-mg/168629-11072005.jpg",
+    image:
+      "https://img.directindustry.com/images_di/photo-mg/168629-11072005.jpg",
     description:
       "The precision plotter combines cutting accuracy within 0.25mm with real-time contour following. Supports 12-60 inch material widths for everything from precise labels to large-format applications.",
     features: [
@@ -131,8 +137,10 @@ const MACHINES = [
   {
     chapter: "Chapter 7",
     name: "PCB Milling Machine",
-    headline: "Direct mechanical circuit fabrication without chemical processes.",
-    image: "https://www.elepcb.com/wp-content/uploads/2024/06/PCB-Milling-e1718613681541.jpeg",
+    headline:
+      "Direct mechanical circuit fabrication without chemical processes.",
+    image:
+      "https://www.elepcb.com/wp-content/uploads/2024/06/PCB-Milling-e1718613681541.jpeg",
     description:
       "The PCB milling system eliminates chemical etching, enabling direct mechanical drilling and routing. Achieves 0.1mm trace spacing with sub-100-micron positional accuracy for rapid circuit prototyping.",
     features: [
@@ -151,11 +159,12 @@ const MACHINES = [
 ]
 
 /* ================================================= */
-/* HERO SECTION                                      */
+/* HERO                                              */
 /* ================================================= */
 
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -163,93 +172,96 @@ function HeroSection() {
 
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95])
-  const titleY = useTransform(scrollYProgress, [0, 0.5], [0, 100])
+  const titleY = useTransform(scrollYProgress, [0, 0.5], [0, 120])
 
   return (
     <section
       ref={ref}
       className="relative h-screen w-screen overflow-hidden bg-background flex items-center justify-center"
     >
+      {/* floating light field */}
       <motion.div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div
-          animate={{ x: [0, 100, 0], y: [0, 60, 0] }}
-          transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-          className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl"
-          style={{ willChange: "transform" }}
+          animate={{ x: [0, 120, 0], y: [0, 80, 0] }}
+          transition={{
+            duration: 26,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute -top-1/2 -right-1/4 w-[520px] h-[520px] bg-accent/10 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{ x: [0, -80, 0], y: [0, -80, 0] }}
-          transition={{ duration: 25, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-          className="absolute -bottom-1/4 -left-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
-          style={{ willChange: "transform" }}
+          animate={{ x: [0, -120, 0], y: [0, -120, 0] }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute -bottom-1/3 -left-1/4 w-[480px] h-[480px] bg-accent/5 rounded-full blur-3xl"
         />
       </motion.div>
 
-      <motion.div style={{ opacity, scale }} className="relative z-10 text-center max-w-4xl px-6 sm:px-8">
+      <motion.div
+        style={{ opacity, scale }}
+        className="relative z-10 text-center max-w-4xl px-6 sm:px-8"
+      >
         <motion.div
           style={{ y: titleY }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-8"
         >
           <motion.p
-            initial={{ opacity: 0, letterSpacing: "-2px" }}
-            animate={{ opacity: 1, letterSpacing: "2px" }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            initial={{ opacity: 0, letterSpacing: "-4px" }}
+            animate={{ opacity: 1, letterSpacing: "4px" }}
+            transition={{ duration: 0.9 }}
             className="text-accent uppercase text-sm sm:text-base font-semibold tracking-widest"
           >
             Precision Manufacturing Ecosystem
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-tight"
+            className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight"
           >
-            Advanced Fabrication.
+            <span className="relative inline-block">
+              Advanced Fabrication.
+              <span className="absolute inset-0 bg-gradient-to-r from-accent/30 to-transparent blur-2xl -z-10" />
+            </span>
             <br />
             <span className="text-accent">Infinite</span> Possibilities.
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
             className="text-base sm:text-lg text-foreground/70 max-w-3xl mx-auto leading-relaxed font-light"
           >
-            Transform your vision into reality. Harness cutting-edge fabrication technology to prototype, iterate, and
-            scale production with unprecedented precision and speed.
+            Transform your vision into reality. Harness cutting-edge fabrication
+            technology to prototype, iterate, and scale production with
+            unprecedented precision and speed.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex justify-center pt-8"
-          >
+          <motion.div className="flex justify-center pt-8">
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
               className="text-foreground/60 text-sm"
             >
-              Scroll to explore →
+              Scroll to explore
             </motion.p>
           </motion.div>
         </motion.div>
       </motion.div>
 
+      {/* scroll indicator */}
       <motion.div
         animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+        transition={{ duration: 2, repeat: Infinity }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
       >
         <div className="w-6 h-10 border-2 border-foreground/30 rounded-full flex items-center justify-center">
           <motion.div
             animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+            transition={{ duration: 2, repeat: Infinity }}
             className="w-1 h-2 bg-accent rounded-full"
           />
         </div>
@@ -259,7 +271,7 @@ function HeroSection() {
 }
 
 /* ================================================= */
-/* MACHINE SECTION WITH IMAGE AND FEATURES          */
+/* MACHINE SECTION                                   */
 /* ================================================= */
 
 function MachineSection({
@@ -278,113 +290,97 @@ function MachineSection({
     offset: ["start end", "end start"],
   })
 
-  const imageScale = useTransform(scrollYProgress, [0, 1], [0.95, 1.05])
-  const textOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
-  const imageOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
+  const imageScale = useTransform(scrollYProgress, [0, 1], [0.92, 1.06])
+  const imageY = useTransform(scrollYProgress, [0, 1], [40, -40])
+  const textOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0, 1, 1, 0]
+  )
+  const imageOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0, 1, 1, 0]
+  )
 
   useEffect(() => {
-    const unsubscribe = scrollYProgress.onChange((v) => {
-      if (v > 0.3 && v < 0.7) {
-        setActive(index)
-      }
+    const unsub = scrollYProgress.on("change", (v) => {
+      if (v > 0.3 && v < 0.7) setActive(index)
     })
-    return () => unsubscribe()
+    return () => unsub()
   }, [scrollYProgress, index, setActive])
 
   return (
     <section ref={ref} className="relative min-h-screen py-24 lg:py-32">
-      {/* Top Fade */}
-      <motion.div
-        style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [0, 1]) }}
-        className="absolute -top-32 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-background pointer-events-none z-20"
-      />
+      {/* soft divider light */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-accent/5 opacity-20" />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        {/* Chapter Header */}
+        {/* header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="mb-16 lg:mb-24"
         >
-          <p className="text-accent uppercase text-sm font-semibold tracking-wider mb-4">{machine.chapter}</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">{machine.name}</h2>
+          <p className="text-accent uppercase text-sm font-semibold tracking-wider mb-4">
+            {machine.chapter}
+          </p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold">
+            {machine.name}
+          </h2>
         </motion.div>
 
-        {/* Main Content Grid */}
         <motion.div
           style={{ opacity: textOpacity }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"
         >
-          {/* Left: Text Content */}
-          <motion.div style={{ opacity: textOpacity }} className="space-y-8">
-            <motion.h3
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
-            >
+          {/* text */}
+          <motion.div className="space-y-8">
+            <motion.h3 className="text-2xl sm:text-3xl font-semibold leading-tight">
               {machine.headline}
             </motion.h3>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-lg text-foreground/80 leading-relaxed font-light"
-            >
+            <motion.p className="text-base sm:text-lg text-foreground/80 leading-relaxed font-light">
               {machine.description}
             </motion.p>
 
-            {/* Features List */}
-            <motion.div className="space-y-6 pt-8">
-              {machine.features.map((feature, i) => (
+            <motion.div className="space-y-5 pt-8">
+              {machine.features.map((f, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 + i * 0.1 }}
-                  className="group"
+                  whileHover={{ x: 6 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="relative group rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-3 h-3 mt-2 rounded-full bg-accent group-hover:scale-125 transition-transform" />
-                    <div>
-                      <h4 className="text-lg font-semibold text-accent mb-2">{feature.name}</h4>
-                      <p className="text-foreground/70 text-sm leading-relaxed">{feature.description}</p>
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 rounded-2xl bg-accent/10 opacity-0 group-hover:opacity-100 transition" />
+                  <h4 className="relative z-10 text-lg font-semibold text-accent mb-2">
+                    {f.name}
+                  </h4>
+                  <p className="relative z-10 text-foreground/70 text-sm leading-relaxed">
+                    {f.description}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* Right: Image */}
-          <motion.div style={{ scale: imageScale, opacity: imageOpacity }} className="relative h-96 lg:h-full min-h-96">
+          {/* image plate */}
+          <motion.div
+            style={{ scale: imageScale, opacity: imageOpacity, y: imageY }}
+            className="relative h-96 lg:h-full min-h-96"
+          >
+            <div className="absolute -inset-6 rounded-3xl bg-accent/10 blur-2xl" />
             <motion.img
               src={machine.image || "/placeholder.svg"}
               alt={machine.name}
-              className="h-full w-full object-cover rounded-lg"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              className="relative h-full w-full object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
             />
-
-            {/* Image Overlay Fade */}
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-transparent via-transparent to-background/30" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-transparent via-transparent to-background/40" />
           </motion.div>
         </motion.div>
       </div>
-
-      {/* Bottom Fade */}
-      <motion.div
-        style={{ opacity: useTransform(scrollYProgress, [0.9, 1], [1, 0]) }}
-        className="absolute -bottom-32 left-0 right-0 h-32 bg-gradient-to-t from-transparent to-background pointer-events-none z-20"
-      />
     </section>
   )
 }
@@ -398,22 +394,28 @@ export default function MachineryPage() {
 
   return (
     <main className="bg-background text-foreground">
-      {/* Navigation Dots */}
+      {/* navigation dots */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-3 md:gap-4">
         {MACHINES.map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
-          >
+          <motion.div key={i}>
             <motion.div
               animate={{
-                scale: active === i ? 1.2 : 1,
-                backgroundColor: active === i ? "var(--color-accent)" : "rgba(255,107,53,0.2)",
+                scale: active === i ? 1.6 : 1,
+                boxShadow:
+                  active === i
+                    ? "0 0 12px hsl(var(--accent))"
+                    : "0 0 0px transparent",
+                backgroundColor:
+                  active === i
+                    ? "hsl(var(--accent))"
+                    : "hsl(var(--accent) / 0.25)",
               }}
-              transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }}
-              className="w-2 h-2 rounded-full cursor-pointer hover:opacity-80"
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 24,
+              }}
+              className="w-2.5 h-2.5 rounded-full"
             />
           </motion.div>
         ))}
@@ -421,28 +423,34 @@ export default function MachineryPage() {
 
       <HeroSection />
 
-      {MACHINES.map((machine, i) => (
-        <MachineSection key={machine.name} machine={machine} index={i} setActive={setActive} />
+      {MACHINES.map((m, i) => (
+        <MachineSection
+          key={m.name}
+          machine={m}
+          index={i}
+          setActive={setActive}
+        />
       ))}
 
-      {/* Footer */}
+      {/* cinematic footer */}
       <motion.footer
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1 }}
         className="min-h-screen bg-gradient-to-b from-background via-background/95 to-background flex items-center justify-center border-t border-accent/10 py-24"
       >
-        <div className="text-center space-y-8 max-w-3xl px-6">
-          <h3 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+        <div className="text-center space-y-8 max-w-3xl px-6 relative">
+          <div className="absolute -inset-16 bg-accent/10 blur-3xl rounded-full" />
+          <h3 className="relative text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
             The Future of Fabrication
           </h3>
-          <p className="text-lg text-foreground/70 font-light leading-relaxed">
-            Our integrated ecosystem empowers creators, engineers, and manufacturers to bring complex ideas to life with
-            precision, speed, and scale. Every machine in our collection is engineered to work seamlessly together,
-            creating a unified fabrication experience that transforms how products are made—from initial concept to
-            final production.
+          <p className="relative text-lg text-foreground/70 font-light leading-relaxed">
+            Our integrated ecosystem empowers creators, engineers, and
+            manufacturers to bring complex ideas to life with precision, speed,
+            and scale. Every machine in our collection is engineered to work
+            seamlessly together, creating a unified fabrication experience.
           </p>
-          <p className="text-base text-foreground/60 font-light">
+          <p className="relative text-base text-foreground/60 font-light">
             Welcome to the intersection of innovation and infinite possibility.
           </p>
         </div>

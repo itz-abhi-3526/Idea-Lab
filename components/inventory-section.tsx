@@ -29,7 +29,7 @@ const availabilityStyles: Record<Availability, string> = {
 }
 
 function getAvailability(qty: number): Availability {
-  if (qty ===0) return "Unavailable"
+  if (qty === 0) return "Unavailable"
   if (qty < 10) return "Limited"
   return "Available"
 }
@@ -61,7 +61,7 @@ export function InventorySection() {
 
   return (
     <section className="relative w-full py-16 sm:py-20 bg-background overflow-hidden">
-      {/* ambient wash */}
+      {/* Ambient wash */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -71,7 +71,6 @@ export function InventorySection() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
-
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -98,21 +97,7 @@ export function InventorySection() {
           </p>
         </motion.div>
 
-        {/* Loading */}
-        {loading && (
-          <p className="text-center text-sm sm:text-base text-muted-foreground">
-            Loading inventory…
-          </p>
-        )}
-
-        {/* Empty */}
-        {!loading && items.length === 0 && (
-          <p className="text-center text-sm sm:text-base text-muted-foreground">
-            No inventory available
-          </p>
-        )}
-
-        {/* Inventory Cards */}
+        {/* Inventory cards / skeletons */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -123,6 +108,7 @@ export function InventorySection() {
           }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
         >
+          {/* Real items */}
           {items.map((item) => {
             const availability = getAvailability(item.quantity_available)
 
@@ -134,14 +120,18 @@ export function InventorySection() {
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                    transition: {
+                      duration: 0.45,
+                      ease: [0.16, 1, 0.3, 1],
+                    },
                   },
                 }}
                 whileHover={{ y: -6 }}
                 className="
                   relative
                   rounded-2xl
-                  bg-background/60 backdrop-blur-xl
+                  bg-background/60
+                  backdrop-blur-xl
                   border border-white/10
                   p-4 sm:p-6
                   shadow-[0_12px_30px_rgba(0,0,0,0.25)]
@@ -149,12 +139,6 @@ export function InventorySection() {
                   justify-between
                 "
               >
-                {/* soft glow */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 rounded-2xl bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                />
-
                 {/* Top */}
                 <div className="space-y-3 sm:space-y-4 relative z-10">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center">
@@ -185,6 +169,42 @@ export function InventorySection() {
               </motion.div>
             )
           })}
+
+          {/* Skeleton preview when loading or empty */}
+          {(loading || items.length === 0) &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <motion.div
+                key={`skeleton-${i}`}
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.4 },
+                  },
+                }}
+                className="
+                  relative
+                  rounded-2xl
+                  bg-background/40
+                  border border-white/10
+                  p-4 sm:p-6
+                  backdrop-blur-xl
+                  overflow-hidden
+                "
+              >
+                <div className="space-y-4 animate-pulse">
+                  <div className="w-10 h-10 rounded-lg bg-white/10" />
+                  <div className="h-4 w-3/4 rounded bg-white/10" />
+                  <div className="h-3 w-1/2 rounded bg-white/10" />
+
+                  <div className="pt-6 flex justify-between">
+                    <div className="h-4 w-20 rounded bg-white/10" />
+                    <div className="h-4 w-12 rounded bg-white/10" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
         </motion.div>
 
         {/* CTA */}
