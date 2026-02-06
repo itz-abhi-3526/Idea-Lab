@@ -53,21 +53,41 @@ export default function ExecomPage() {
   if (loading) return null
 
   return (
-    <section className="relative w-full min-h-screen py-20 sm:py-24 bg-background">
+    <section className="relative w-full min-h-screen py-20 sm:py-24 bg-background overflow-hidden">
+      {/* soft ambient wash (purely visual) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
+      </div>
+
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12 sm:mb-16 text-center"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
             Executive Committee
           </h1>
+
           <p className="mt-3 text-sm sm:text-base text-muted-foreground">
             Organised. Driven. Committed.
           </p>
+
+          <div className="relative h-[2px] w-24 mx-auto mt-4 overflow-hidden rounded-full bg-gradient-to-r from-accent/0 via-accent to-accent/0">
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
         </motion.div>
 
         {/* Grid */}
@@ -75,24 +95,33 @@ export default function ExecomPage() {
           {members.map((member, index) => (
             <motion.div
               key={member.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.04 }}
+              transition={{
+                duration: 0.35,
+                delay: index * 0.035,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="
+                group
                 flex items-center gap-4
-                rounded-xl
+                rounded-2xl
                 border border-white/10
                 bg-white/5
                 p-4
-                backdrop-blur-md
+                backdrop-blur-xl
+                shadow-[0_8px_24px_rgba(0,0,0,0.18)]
+                transition-all
+                hover:-translate-y-0.5
+                hover:shadow-[0_12px_32px_rgba(0,0,0,0.28)]
               "
             >
               {/* Photo */}
-              <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-full bg-accent/10">
+              <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-full bg-accent/10 ring-2 ring-white/10">
                 <img
                   src={member.image_url ?? "/placeholder-avatar.png"}
                   alt={member.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
 
@@ -115,6 +144,7 @@ export default function ExecomPage() {
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   )

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Calendar, MapPin, ArrowRight, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { motion } from "framer-motion"
 
 type Event = {
   id: string
@@ -16,7 +17,6 @@ type Event = {
   is_featured: boolean
   capacity: number | null
 
-  // 🆕 Paid support
   is_paid: boolean
   price: number | null
 }
@@ -51,7 +51,6 @@ export function EventSection() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // ✅ Registered events
     if (user) {
       const { data: regs } = await supabase
         .from("event_registrations")
@@ -61,7 +60,6 @@ export function EventSection() {
       setRegistered(new Set(regs?.map((r) => r.event_id)))
     }
 
-    // ✅ Registration counts
     if (eventsData?.length) {
       const { data: regCounts } = await supabase
         .from("event_registrations")
@@ -109,37 +107,76 @@ export function EventSection() {
     e.capacity !== null && (counts[e.id] ?? 0) >= e.capacity
 
   return (
-    <section className="relative w-full py-20 bg-background/50">
+    <section className="relative w-full py-20 overflow-hidden bg-background/50">
+      {/* ambient wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute left-1/4 top-0 h-[32rem] w-[32rem] rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute right-0 bottom-0 h-[28rem] w-[28rem] rounded-full bg-accent/5 blur-3xl" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
 
         {/* HEADER */}
-        <div className="mb-16 text-center space-y-4">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 text-center space-y-4"
+        >
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
             Events
           </h2>
-          <div className="h-1 w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+
+          <div className="relative h-[2px] w-28 mx-auto overflow-hidden rounded-full bg-gradient-to-r from-accent/0 via-accent to-accent/0">
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+
           <p className="text-muted-foreground">
             Moments where ideas meet action
           </p>
-        </div>
+        </motion.div>
 
         {/* FEATURED */}
         {featuredEvent && (
-          <div className="mb-20 rounded-3xl overflow-hidden border border-accent/30 bg-accent/10 backdrop-blur-xl shadow-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20 relative rounded-3xl overflow-hidden
+                       border border-accent/30
+                       bg-accent/10 backdrop-blur-xl
+                       shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+          >
             {featuredEvent.poster_url && (
-              <img
-                src={featuredEvent.poster_url}
-                alt={featuredEvent.title}
-                className="h-72 w-full object-cover"
-              />
+              <div className="relative h-72 w-full overflow-hidden">
+                <motion.img
+                  src={featuredEvent.poster_url}
+                  alt={featuredEvent.title}
+                  className="h-full w-full object-cover"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              </div>
             )}
 
             <div className="p-8 space-y-5">
-              <span className="text-xs uppercase tracking-wide text-accent">
+
+              <span className="inline-flex text-xs uppercase tracking-wide text-accent">
                 Featured Event
               </span>
 
-              <h3 className="text-2xl font-semibold">
+              <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">
                 {featuredEvent.title}
               </h3>
 
@@ -159,12 +196,11 @@ export function EventSection() {
                 )}
               </div>
 
-              {/* PRICE BADGE */}
               <span
-                className={`inline-flex px-3 py-1 rounded-full text-xs ${
+                className={`inline-flex px-3 py-1 rounded-full text-xs border ${
                   featuredEvent.is_paid
-                    ? "bg-orange-500/20 text-orange-400"
-                    : "bg-blue-500/20 text-blue-400"
+                    ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
+                    : "bg-blue-500/15 text-blue-400 border-blue-500/30"
                 }`}
               >
                 {featuredEvent.is_paid
@@ -174,39 +210,70 @@ export function EventSection() {
 
               <Link
                 href={`/events/${featuredEvent.id}`}
-                className="inline-flex items-center gap-2 text-accent font-medium hover:underline"
+                className="inline-flex items-center gap-2 text-accent font-medium group"
               >
-                View Details <ArrowRight className="w-4 h-4" />
+                <span className="relative">
+                  View Details
+                  <span className="absolute left-0 right-0 -bottom-0.5 h-px bg-accent scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                </span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* GRID */}
+        {/* EMPTY */}
         {!loading && upcomingEvents.length === 0 && (
           <p className="text-center text-muted-foreground">
             No events right now. Stay tuned!
           </p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* GRID */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08 } },
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {upcomingEvents.map((event) => {
             const alreadyRegistered = registered.has(event.id)
 
             return (
-              <div
+              <motion.div
                 key={event.id}
-                className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md overflow-hidden hover:shadow-xl transition"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                  },
+                }}
+                whileHover={{ y: -6 }}
+                className="relative rounded-2xl overflow-hidden
+                           bg-white/5 backdrop-blur-xl
+                           border border-white/10
+                           shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
               >
                 {event.poster_url && (
-                  <img
-                    src={event.poster_url}
-                    alt={event.title}
-                    className="h-48 w-full object-cover"
-                  />
+                  <div className="relative h-48 overflow-hidden">
+                    <motion.img
+                      src={event.poster_url}
+                      alt={event.title}
+                      className="h-full w-full object-cover"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                    />
+                  </div>
                 )}
 
                 <div className="p-5 space-y-4">
+
                   <div className="flex flex-wrap items-center gap-2">
                     {event.event_type && (
                       <span
@@ -220,10 +287,10 @@ export function EventSection() {
                     )}
 
                     <span
-                      className={`text-xs px-3 py-1 rounded-full ${
+                      className={`text-xs px-3 py-1 rounded-full border ${
                         event.is_paid
-                          ? "bg-orange-500/20 text-orange-400"
-                          : "bg-blue-500/20 text-blue-400"
+                          ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
+                          : "bg-blue-500/15 text-blue-400 border-blue-500/30"
                       }`}
                     >
                       {event.is_paid ? `₹${event.price}` : "Free"}
@@ -237,7 +304,9 @@ export function EventSection() {
                     )}
                   </div>
 
-                  <h4 className="font-semibold">{event.title}</h4>
+                  <h4 className="font-semibold leading-snug">
+                    {event.title}
+                  </h4>
 
                   <div className="text-sm text-muted-foreground space-y-1">
                     <div className="flex items-center gap-2">
@@ -266,27 +335,46 @@ export function EventSection() {
                   ) : (
                     <Link
                       href={`/events/${event.id}`}
-                      className="inline-flex items-center gap-2 text-sm text-accent hover:underline"
+                      className="inline-flex items-center gap-2 text-sm text-accent group"
                     >
-                      View Details <ArrowRight className="w-4 h-4" />
+                      <span className="relative">
+                        View Details
+                        <span className="absolute left-0 right-0 -bottom-0.5 h-px bg-accent scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                      </span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
         {/* VIEW ALL */}
-        <div className="mt-16 flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-16 flex justify-center"
+        >
           <Link
             href="/events"
-            className="group flex items-center gap-2 px-6 py-3 rounded-lg border border-accent/30 bg-accent/20 hover:bg-accent/30 transition"
+            className="group relative overflow-hidden flex items-center gap-2 px-6 py-3 rounded-xl
+                       border border-accent/30
+                       bg-accent/15 backdrop-blur
+                       hover:bg-accent/25 transition"
           >
-            View All Events
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span className="relative z-10">
+              View All Events
+            </span>
+            <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+
+            {/* liquid sweep */}
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-700" />
           </Link>
-        </div>
+        </motion.div>
+
       </div>
     </section>
   )

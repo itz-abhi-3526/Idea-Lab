@@ -75,9 +75,18 @@ export function AboutSection() {
 
   return (
     <section
-      className="relative w-full py-16 sm:py-24 md:py-32"
+      className="relative w-full py-16 sm:py-24 md:py-32 overflow-hidden"
       id="about"
     >
+      {/* ambient background wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute left-1/2 top-0 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute right-0 bottom-0 h-[28rem] w-[28rem] rounded-full bg-accent/5 blur-3xl" />
+      </div>
+
       <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-24">
 
         {/* Heading */}
@@ -89,23 +98,45 @@ export function AboutSection() {
           className="mb-12 sm:mb-20"
         >
           <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)]">
+
+            <motion.h2
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: easeOut }}
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight"
+            >
               About IDEA Lab
-            </h2>
+            </motion.h2>
 
             <motion.div
               initial={{ width: 0 }}
-              whileInView={{ width: 100 }}
+              whileInView={{ width: 120 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2, ease: easeOut }}
-              className="h-1 bg-gradient-to-r from-accent/0 via-accent to-accent/0"
-            />
+              transition={{ duration: 0.9, delay: 0.2, ease: easeOut }}
+              className="relative h-[2px] rounded-full bg-gradient-to-r from-accent/0 via-accent to-accent/0"
+            >
+              {/* shimmer */}
+              <motion.span
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+              />
+            </motion.div>
 
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: easeOut }}
+              className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl"
+            >
               The FISAT AICTE IDEA Lab is a dedicated innovation space where students
               transform ideas into impactful solutions through hands-on
               experimentation, mentorship, and collaboration.
-            </p>
+            </motion.p>
+
           </div>
         </motion.div>
 
@@ -117,8 +148,16 @@ export function AboutSection() {
           viewport={{ once: true, amount: 0.25 }}
           className="max-w-6xl mx-auto"
         >
-          {/* Desktop */}
+
+          {/* Desktop timeline */}
           <div className="hidden md:flex items-start justify-center relative">
+
+            {/* connecting rail */}
+            <div
+              aria-hidden
+              className="absolute left-0 right-0 top-10 lg:top-12 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"
+            />
+
             {journeySteps.map((step, index) => {
               const Icon = step.icon
               const isHovered = hoveredIndex === index
@@ -127,29 +166,45 @@ export function AboutSection() {
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="flex-1 flex flex-col items-center relative"
+                  className="flex-1 flex flex-col items-center relative group"
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
                   <div className="relative z-10 flex flex-col items-center text-center px-3 lg:px-4">
+
+                    {/* glass icon pod */}
                     <motion.div
-                      className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center mb-4"
+                      className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-2xl
+                                 bg-background/60 backdrop-blur-xl
+                                 border border-accent/25
+                                 shadow-[0_10px_30px_rgba(0,0,0,0.25)]
+                                 flex items-center justify-center mb-4"
                       animate={{
-                        backgroundColor: isHovered
-                          ? "hsl(var(--accent) / 0.2)"
-                          : "hsl(var(--accent) / 0.1)",
+                        scale: isHovered ? 1.08 : 1,
                         borderColor: isHovered
                           ? "hsl(var(--accent))"
-                          : "hsl(var(--accent) / 0.3)",
+                          : "hsl(var(--accent) / 0.25)",
                       }}
-                      transition={{ duration: 0.3, ease: easeOut }}
+                      transition={{ duration: 0.35, ease: easeOut }}
                     >
-                      <Icon className="w-7 h-7 lg:w-9 lg:h-9 text-accent" />
+                      {/* breathing glow */}
+                      <motion.div
+                        aria-hidden
+                        className="absolute inset-0 rounded-2xl bg-accent/10 blur-xl"
+                        animate={{ opacity: isHovered ? 0.6 : 0.25 }}
+                        transition={{ duration: 0.35, ease: easeOut }}
+                      />
+
+                      <Icon className="relative z-10 w-7 h-7 lg:w-9 lg:h-9 text-accent" />
                     </motion.div>
 
-                    <h3 className="text-lg lg:text-xl font-semibold mb-2">
+                    <motion.h3
+                      animate={{ y: isHovered ? -2 : 0 }}
+                      transition={{ duration: 0.3, ease: easeOut }}
+                      className="text-lg lg:text-xl font-semibold mb-2"
+                    >
                       {step.title}
-                    </h3>
+                    </motion.h3>
 
                     <motion.div
                       initial={{ opacity: 0, y: -10, height: 0 }}
@@ -161,23 +216,38 @@ export function AboutSection() {
                       transition={{ duration: 0.3, ease: easeOut }}
                       className="overflow-hidden"
                     >
-                      <p className="text-sm text-muted-foreground max-w-[200px]">
+                      <p className="text-sm text-muted-foreground max-w-[220px]">
                         {step.description}
                       </p>
                     </motion.div>
                   </div>
 
+                  {/* connector arrow */}
                   {index < journeySteps.length - 1 && (
-                    <div className="absolute top-8 lg:top-10 left-[60%] w-[calc(100%-60px)] h-[2px] bg-accent/20 flex items-center justify-center">
-                      <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 text-accent/40 bg-background" />
-                    </div>
+                    <motion.div
+                      aria-hidden
+                      animate={{ opacity: isHovered ? 1 : 0.5 }}
+                      transition={{ duration: 0.3 }}
+                      className="absolute top-8 lg:top-10 left-[60%] w-[calc(100%-60px)] h-[2px] bg-accent/20 flex items-center justify-center"
+                    >
+                      <motion.div
+                        animate={{ x: [0, 6, 0] }}
+                        transition={{
+                          duration: 1.6,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 text-accent/50 bg-background rounded-full" />
+                      </motion.div>
+                    </motion.div>
                   )}
                 </motion.div>
               )
             })}
           </div>
 
-          {/* Mobile */}
+          {/* Mobile stacked cards */}
           <div className="flex md:hidden flex-col gap-6 sm:gap-8">
             {journeySteps.map((step, index) => {
               const Icon = step.icon
@@ -185,9 +255,14 @@ export function AboutSection() {
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="flex gap-4 items-start"
+                  className="relative rounded-2xl border border-accent/15
+                             bg-background/60 backdrop-blur-xl
+                             shadow-[0_10px_30px_rgba(0,0,0,0.25)]
+                             p-4 flex gap-4 items-start"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3, ease: easeOut }}
                 >
-                  <div className="w-14 h-14 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center">
+                  <div className="relative w-14 h-14 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center shrink-0">
                     <Icon className="w-6 h-6 text-accent" />
                   </div>
                   <div>
@@ -202,6 +277,7 @@ export function AboutSection() {
               )
             })}
           </div>
+
         </motion.div>
       </div>
     </section>

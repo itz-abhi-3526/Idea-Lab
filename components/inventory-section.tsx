@@ -29,7 +29,7 @@ const availabilityStyles: Record<Availability, string> = {
 }
 
 function getAvailability(qty: number): Availability {
-  if (qty === 0) return "Unavailable"
+  if (qty ===0) return "Unavailable"
   if (qty < 10) return "Limited"
   return "Available"
 }
@@ -60,21 +60,43 @@ export function InventorySection() {
   }, [])
 
   return (
-    <section className="w-full py-16 sm:py-20 bg-background">
+    <section className="relative w-full py-16 sm:py-20 bg-background overflow-hidden">
+      {/* ambient wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute left-1/3 top-0 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
+        <div className="absolute right-0 bottom-0 h-64 w-64 rounded-full bg-accent/5 blur-3xl" />
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
 
         {/* Header */}
-        <div className="text-center space-y-3 sm:space-y-4">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-heading">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center space-y-3 sm:space-y-4"
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
             IDEA Lab Inventory
           </h2>
 
-          <div className="h-1 w-20 sm:w-28 mx-auto bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+          <div className="relative h-[2px] w-20 sm:w-28 mx-auto overflow-hidden rounded-full bg-gradient-to-r from-accent/0 via-accent to-accent/0">
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
 
           <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
             Tools, components, and equipment available for your ideas.
           </p>
-        </div>
+        </motion.div>
 
         {/* Loading */}
         {loading && (
@@ -91,43 +113,65 @@ export function InventorySection() {
         )}
 
         {/* Inventory Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08 } },
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+        >
           {items.map((item) => {
             const availability = getAvailability(item.quantity_available)
 
             return (
               <motion.div
                 key={item.id}
-                whileHover={{ y: -4 }}
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                  },
+                }}
+                whileHover={{ y: -6 }}
                 className="
-                  glass-surface
-                  rounded-xl
+                  relative
+                  rounded-2xl
+                  bg-background/60 backdrop-blur-xl
+                  border border-white/10
                   p-4 sm:p-6
-                  soft-shadow
+                  shadow-[0_12px_30px_rgba(0,0,0,0.25)]
                   flex flex-col
                   justify-between
                 "
               >
+                {/* soft glow */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-2xl bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+
                 {/* Top */}
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Icon */}
+                <div className="space-y-3 sm:space-y-4 relative z-10">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center">
                     <Box className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                   </div>
 
-                  {/* Name */}
                   <h3 className="font-semibold text-base sm:text-lg leading-snug line-clamp-2">
                     {item.name}
                   </h3>
 
-                  {/* Category */}
                   <span className="inline-block w-fit text-xs px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/30">
                     {item.category}
                   </span>
                 </div>
 
                 {/* Bottom */}
-                <div className="pt-4 sm:pt-6 flex items-center justify-between text-xs sm:text-sm">
+                <div className="pt-4 sm:pt-6 flex items-center justify-between text-xs sm:text-sm relative z-10">
                   <span
                     className={`px-3 py-1 rounded-full border ${availabilityStyles[availability]}`}
                   >
@@ -141,27 +185,38 @@ export function InventorySection() {
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
         {/* CTA */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 sm:pt-0">
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row gap-3 justify-center pt-2 sm:pt-0"
+        >
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => router.push("/inventory")}
             className="
               w-full sm:w-auto
               inline-flex items-center justify-center gap-2
               px-6 py-3
               bg-accent text-accent-foreground
-              rounded-lg
+              rounded-xl
+              shadow-[0_14px_30px_rgba(0,0,0,0.35)]
               hover:opacity-90 transition
               text-sm sm:text-base
             "
           >
             View Full Inventory
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => router.push("/machinery")}
             className="
               w-full sm:w-auto
@@ -169,15 +224,15 @@ export function InventorySection() {
               px-6 py-3
               border border-accent/40
               text-accent
-              rounded-lg
+              rounded-xl
               hover:bg-accent/10 transition
               text-sm sm:text-base
             "
           >
             Explore Lab Machinery
             <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   )
