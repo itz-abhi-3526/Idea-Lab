@@ -277,7 +277,7 @@ export function EventSection() {
             <Link href="/events" className="group relative px-10 py-5 bg-transparent overflow-hidden transition-all">
               <div className="absolute inset-0 border border-white/10 group-hover:border-orange-500/50 rounded-2xl transition-all" />
               <div className="relative flex items-center gap-4 text-neutral-300 font-['Syne'] uppercase text-xs tracking-[0.3em] font-bold">
-                Access All Lab Events <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                Access All Events <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </div>
             </Link>
           </m.div>
