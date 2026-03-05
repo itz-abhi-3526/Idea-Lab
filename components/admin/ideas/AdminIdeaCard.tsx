@@ -28,7 +28,7 @@ const STATUS_CFG: Record<string, { label: string; color: string; bg: string; bor
 const STATUS_FALLBACK = { label: "UNKNOWN", color: DIMWHITE(0.3), bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.08)" }
 
 /* ─────────────────────────────────────────
-   TYPES — unchanged
+   TYPES
 ───────────────────────────────────────── */
 type IdeaStatus = "submitted" | "approved" | "rejected" | "completed" | "cancelled"
 
@@ -73,9 +73,9 @@ function ActionBtn({
         overflow:      "hidden",
         transition:    "background 0.18s, color 0.18s",
         opacity:       disabled ? 0.5 : 1,
+        flex: "1 1 auto", /* Allow buttons to grow and fill row on mobile */
       }}
     >
-      {/* left stripe */}
       <div style={{
         position: "absolute", left: 0, top: 0, bottom: 0, width: 1,
         background: `linear-gradient(to bottom, transparent, ${color}, transparent)`,
@@ -88,7 +88,7 @@ function ActionBtn({
 }
 
 /* ─────────────────────────────────────────
-   CARD — all supabase logic untouched
+   CARD
 ───────────────────────────────────────── */
 export default function AdminIdeaCard({
   idea,
@@ -100,7 +100,6 @@ export default function AdminIdeaCard({
   const [loading, setLoading] = useState(false)
   const [hov,     setHov]     = useState(false)
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
   const updateStatus = async (status: IdeaStatus) => {
     setLoading(true)
     await supabase.from("idea_submissions").update({ status }).eq("id", idea.id)
@@ -143,14 +142,14 @@ export default function AdminIdeaCard({
       <div style={{ padding: "16px 18px 14px 20px" }}>
 
         {/* ── TOP ROW ── */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 10 }}>
-          <div style={{ minWidth: 0 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+          <div style={{ minWidth: 200, flex: "1 1 0" }}>
             {/* id eyebrow */}
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: AMBER(0.28), marginBottom: 5 }}>
               IDEA·{shortId}
             </div>
             {/* title */}
-            <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 2.5vw, 1.2rem)", letterSpacing: "0.01em", color: DIMWHITE(0.92), lineHeight: 1.15, margin: 0 }}>
+            <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1rem, 4vw, 1.2rem)", letterSpacing: "0.01em", color: DIMWHITE(0.92), lineHeight: 1.15, margin: 0 }}>
               {idea.idea_title}
             </h3>
           </div>
@@ -197,14 +196,17 @@ export default function AdminIdeaCard({
         <div style={{ height: 1, background: `linear-gradient(to right, ${AMBER(0.1)}, transparent)`, margin: "12px 0" }} />
 
         {/* ── FOOTER ROW ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-          {/* date */}
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.1em", color: AMBER(0.28) }}>
-            SUBMITTED · {new Date(idea.created_at).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-          </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+            {/* date */}
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.1em", color: AMBER(0.28) }}>
+              SUBMITTED · {new Date(idea.created_at).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
 
-          {/* action buttons */}
-          <div style={{ display: "flex", gap: 6 }}>
+          {/* action buttons container */}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {idea.status === "submitted" && (
               <>
                 <ActionBtn

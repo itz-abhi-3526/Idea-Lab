@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase"
 function useFonts() {
   useEffect(() => {
     const id = "auth-header-fonts"
-    if (document.getElementById(id)) return
+    // SSR Check: Ensure document exists before accessing
+    if (typeof document === 'undefined' || document.getElementById(id)) return
     const l = document.createElement("link")
     l.id = id; l.rel = "stylesheet"
     l.href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;700&display=swap"
@@ -25,7 +26,7 @@ export default function AuthHeader() {
   const [avatar, setAvatar] = useState<string | null>(null)
   const [open,   setOpen]   = useState(false)
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
+  /* ── AUTH LOGIC ── */
   useEffect(() => {
     const loadUser = async () => {
       const { data } = await supabase.auth.getUser()
@@ -50,28 +51,37 @@ export default function AuthHeader() {
     return () => subscription.unsubscribe()
   }, [])
 
-  /* ── LOGGED OUT ── */
+  /* ── LOGGED OUT STATE ── */
   if (!user) {
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <style>{`@keyframes ahblink{0%,100%{opacity:1}50%{opacity:0.2}}`}</style>
+        <style>{`
+          @keyframes ahblink{0%,100%{opacity:1}50%{opacity:0.2}}
+          .auth-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.18em;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: all 0.18s;
+            position: relative;
+            white-space: nowrap;
+          }
+          @media (min-width: 640px) {
+            .auth-btn { padding: 7px 16px; }
+          }
+        `}</style>
 
         <Link href="/login" style={{ textDecoration: "none" }}>
           <button
+            className="auth-btn"
             style={{
-              fontFamily:    "'IBM Plex Mono', monospace",
-              fontSize:      "0.6rem",
-              letterSpacing: "0.18em",
-              padding:       "7px 16px",
-              background:    "transparent",
-              borderTop:     "1px solid rgba(255,255,255,0.15)",
-              borderRight:   "1px solid rgba(255,255,255,0.15)",
-              borderBottom:  "1px solid rgba(255,255,255,0.15)",
-              borderLeft:    "none",
-              color:         DIMWHITE(0.65),
-              cursor:        "pointer",
-              transition:    "border-color 0.18s, color 0.18s",
-              position:      "relative",
+              background: "transparent",
+              borderTop: "1px solid rgba(255,255,255,0.15)",
+              borderRight: "1px solid rgba(255,255,255,0.15)",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              borderLeft: "none",
+              color: DIMWHITE(0.65),
             }}
             onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = "rgba(255,255,255,0.35)"; b.style.color = DIMWHITE(0.9) }}
             onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = "rgba(255,255,255,0.15)"; b.style.color = DIMWHITE(0.65) }}
@@ -83,18 +93,13 @@ export default function AuthHeader() {
 
         <Link href="/signup" style={{ textDecoration: "none" }}>
           <button
+            className="auth-btn"
             style={{
-              fontFamily:    "'IBM Plex Mono', monospace",
-              fontSize:      "0.6rem",
-              letterSpacing: "0.18em",
-              padding:       "7px 16px",
-              background:    AMBER(0.9),
-              border:        "none",
-              color:         "#0a0900",
-              fontWeight:    600,
-              cursor:        "pointer",
-              boxShadow:     `0 0 12px ${AMBER(0.25)}`,
-              transition:    "box-shadow 0.18s",
+              background: AMBER(0.9),
+              border: "none",
+              color: "#0a0900",
+              fontWeight: 600,
+              boxShadow: `0 0 12px ${AMBER(0.25)}`,
             }}
             onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${AMBER(0.45)}`}
             onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 12px ${AMBER(0.25)}`}
@@ -106,15 +111,32 @@ export default function AuthHeader() {
     )
   }
 
-  /* ── LOGGED IN ── */
-  const name    = user.user_metadata?.display_name || user.email?.charAt(0).toUpperCase() || "U"
+  /* ── LOGGED IN STATE ── */
+  const name    = user.user_metadata?.display_name || user.email?.split('@')[0] || "USER"
   const isAdmin = user.user_metadata?.role === "admin" || user.user_metadata?.is_admin === true
 
   return (
     <div style={{ position: "relative" }}>
       <style>{`
-        @keyframes ahblink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-        @keyframes ahpulse  { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        @keyframes ahpulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        .dropdown-panel {
+          position: absolute;
+          right: 0;
+          top: calc(100% + 8px);
+          width: 180px;
+          background: rgba(10,9,0,0.98);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(255,176,0,0.18);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+          z-index: 100;
+          transform-origin: top right;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media (max-width: 480px) {
+          .dropdown-panel {
+             right: -10px; /* Slight offset for small screens */
+          }
+        }
       `}</style>
 
       {/* ── AVATAR BUTTON ── */}
@@ -130,7 +152,7 @@ export default function AuthHeader() {
           cursor:     "pointer",
           padding:    0,
           overflow:   "hidden",
-          transition: "border-color 0.2s, box-shadow 0.2s",
+          transition: "all 0.2s",
           flexShrink: 0,
         }}
         onMouseEnter={e => {
@@ -154,80 +176,66 @@ export default function AuthHeader() {
           </div>
         )}
 
-        {/* admin glow corner */}
         {isAdmin && (
           <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "0 8px 8px 0", borderColor: `transparent ${AMBER(0.7)} transparent transparent` }} />
         )}
       </button>
 
       {/* ── DROPDOWN ── */}
-      <div style={{
-        position:       "absolute",
-        right:          0,
-        top:            "calc(100% + 6px)",
-        width:          180,
-        background:     "rgba(10,9,0,0.96)",
-        backdropFilter: "blur(16px)",
-        border:         `1px solid rgba(255,176,0,0.18)`,
-        boxShadow:      `0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px ${AMBER(0.04)}`,
-        overflow:       "hidden",
-        zIndex:         50,
-        transformOrigin:"top right",
-        transform:      open ? "scale(1) translateY(0)"  : "scale(0.95) translateY(-6px)",
-        opacity:        open ? 1 : 0,
-        pointerEvents:  open ? "auto" : "none",
-        transition:     "transform 0.18s ease, opacity 0.18s ease",
-      }}>
-        {/* top shimmer */}
+      <div 
+        className="dropdown-panel"
+        style={{
+          transform: open ? "scale(1) translateY(0)" : "scale(0.95) translateY(-8px)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+        }}
+      >
         <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${AMBER(0.45)}, transparent)` }} />
 
-        {/* user info row */}
-        <div style={{ padding: "10px 12px 8px", borderBottom: `1px solid rgba(255,176,0,0.08)` }}>
+        <div style={{ padding: "12px", borderBottom: `1px solid rgba(255,176,0,0.08)` }}>
           <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 600, fontSize: "0.82rem", color: DIMWHITE(0.8), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {name}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
-            {isAdmin && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+            {isAdmin ? (
               <>
-                <div style={{ width: 4, height: 4, borderRadius: "50%", background: AMBER(0.85), boxShadow: `0 0 4px ${AMBER(0.6)}`, animation: "ahpulse 2s ease-in-out infinite" }} />
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.22em", color: AMBER(0.6) }}>ADMIN</span>
+                <div style={{ width: 4, height: 4, borderRadius: "50%", background: AMBER(0.85), animation: "ahpulse 2s infinite" }} />
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.22em", color: AMBER(0.6) }}>ROOT_ADMIN</span>
               </>
-            )}
-            {!isAdmin && (
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.22em", color: DIMWHITE(0.25) }}>GUEST</span>
+            ) : (
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.22em", color: DIMWHITE(0.25) }}>VERIFIED_USER</span>
             )}
           </div>
         </div>
 
-        {/* menu items */}
-        <DropItem label="Dashboard"  href="/dashboard" onClick={() => setOpen(false)} />
+        <DropItem label="Control Dashboard" href="/dashboard" onClick={() => setOpen(false)} />
 
         {isAdmin && (
-          <DropItem label="Admin Panel" href="/admin" onClick={() => setOpen(false)} accent />
+          <DropItem label="Admin Terminal" href="/admin" onClick={() => setOpen(false)} accent />
         )}
 
-        <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(255,60,60,0.15), transparent)`, margin: "2px 0" }} />
+        <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(255,60,60,0.15), transparent)`, margin: "4px 0" }} />
 
         <button
           onClick={async () => { await supabase.auth.signOut(); window.location.href = "/" }}
           style={{
-            display:       "block",
-            width:         "100%",
-            textAlign:     "left",
-            padding:       "9px 12px",
-            background:    "transparent",
-            border:        "none",
-            fontFamily:    "'IBM Plex Mono', monospace",
-            fontSize:      "0.62rem",
+            display: "block",
+            width: "100%",
+            textAlign: "left",
+            padding: "10px 12px",
+            background: "transparent",
+            border: "none",
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: "0.62rem",
             letterSpacing: "0.14em",
-            color:         "rgba(255,60,60,0.65)",
-            cursor:        "pointer",
-            transition:    "background 0.15s, color 0.15s",
+            color: "rgba(255,60,60,0.65)",
+            cursor: "pointer",
+            transition: "all 0.15s",
           }}
           onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(255,60,60,0.07)"; b.style.color = "rgba(255,60,60,0.9)" }}
           onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "transparent"; b.style.color = "rgba(255,60,60,0.65)" }}
         >
-          LOGOUT
+          TERMINATE_SESSION
         </button>
       </div>
     </div>
@@ -242,20 +250,20 @@ function DropItem({ label, href, onClick, accent = false }: { label: string; hre
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
-          padding:       "9px 12px",
-          background:    hov ? (accent ? `rgba(255,176,0,0.07)` : "rgba(255,255,255,0.04)") : "transparent",
-          fontFamily:    "'IBM Plex Mono', monospace",
-          fontSize:      "0.62rem",
+          padding: "10px 12px",
+          background: hov ? (accent ? `rgba(255,176,0,0.07)` : "rgba(255,255,255,0.04)") : "transparent",
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: "0.62rem",
           letterSpacing: "0.14em",
-          color:         accent ? AMBER(hov ? 0.9 : 0.6) : DIMWHITE(hov ? 0.8 : 0.45),
-          transition:    "background 0.15s, color 0.15s",
-          position:      "relative",
+          color: accent ? AMBER(hov ? 0.9 : 0.6) : DIMWHITE(hov ? 0.8 : 0.45),
+          transition: "all 0.15s",
+          position: "relative",
         }}
       >
         {hov && accent && (
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${AMBER(0.7)}, transparent)` }} />
         )}
-        {label}
+        {label.toUpperCase()}
       </div>
     </Link>
   )

@@ -21,34 +21,35 @@ export default function LogoutButton() {
         position:      "relative",
         display:       "flex",
         alignItems:    "center",
-        gap:           7,
-        paddingLeft:   12,
+        gap:           8,
+        paddingLeft:   14,
         paddingRight:  12,
-        paddingTop:    7,
-        paddingBottom: 7,
-        background:    hov ? RED(0.07) : "transparent",
+        paddingTop:    10,
+        paddingBottom: 10,
+        background:    hov ? RED(0.08) : "transparent",
         borderTop:     `1px solid ${hov ? RED(0.28) : AMBER(0.1)}`,
         borderRight:   `1px solid ${hov ? RED(0.28) : AMBER(0.1)}`,
         borderBottom:  `1px solid ${hov ? RED(0.28) : AMBER(0.1)}`,
         borderLeft:    "none",
         cursor:        "pointer",
-        transition:    "background 0.18s, border-color 0.18s",
+        transition:    "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
         width:         "100%",
+        boxSizing:     "border-box", // Prevents overflow on mobile
       }}
     >
-      {/* left stripe */}
+      {/* Left indicator stripe */}
       <div style={{
         position:   "absolute", left: 0, top: 0, bottom: 0, width: hov ? 2 : 1,
         background: hov
-          ? `linear-gradient(to bottom, transparent, ${RED(0.7)}, transparent)`
+          ? `linear-gradient(to bottom, transparent, ${RED(0.75)}, transparent)`
           : `linear-gradient(to bottom, transparent, ${AMBER(0.15)}, transparent)`,
-        transition: "background 0.18s, width 0.15s",
+        transition: "all 0.18s",
       }} />
 
-      {/* icon */}
+      {/* Logout Icon */}
       <svg
-        width="11" height="11" viewBox="0 0 24 24" fill="none"
-        stroke={hov ? RED(0.75) : AMBER(0.3)} strokeWidth="2"
+        width="12" height="12" viewBox="0 0 24 24" fill="none"
+        stroke={hov ? RED(0.85) : AMBER(0.3)} strokeWidth="2.5"
         strokeLinecap="square" strokeLinejoin="miter"
         style={{ flexShrink: 0, transition: "stroke 0.18s" }}
       >
@@ -59,13 +60,15 @@ export default function LogoutButton() {
 
       <span style={{
         fontFamily:    "'IBM Plex Mono', monospace",
-        fontSize:      "0.58rem",
-        letterSpacing: "0.2em",
-        color:         hov ? RED(0.75) : AMBER(0.3),
+        fontSize:      "0.6rem",
+        letterSpacing: "0.22em",
+        color:         hov ? RED(0.85) : AMBER(0.35),
         transition:    "color 0.18s",
-        position:      "relative", zIndex: 1,
+        position:      "relative", 
+        zIndex: 1,
+        whiteSpace: "nowrap",
       }}>
-        LOGOUT
+        TERMINATE_SESSION
       </span>
     </button>
   )

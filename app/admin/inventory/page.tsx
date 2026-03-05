@@ -48,7 +48,7 @@ function MCInput({
 }) {
   const [foc, setFoc] = useState(false)
   return (
-    <div style={{ position: "relative", width: 320 }}>
+    <div className="mc-input-container" style={{ position: "relative" }}>
       <div
         style={{
           position: "absolute",
@@ -99,7 +99,6 @@ export default function InventoryPage() {
   const [editItem, setEditItem] =
     useState<InventoryItem | null>(null)
 
-  /* ── LOGIC UNCHANGED ── */
   const fetchItems = async () => {
     setLoading(true)
     const { data } = await supabase
@@ -111,27 +110,13 @@ export default function InventoryPage() {
   }
 
   useEffect(() => {
-  fetchItems()
-
-  const channel = supabase
-    .channel("inventory-realtime")
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "inventory_items",
-      },
-      () => {
-        fetchItems()
-      }
-    )
-    .subscribe()
-
-  return () => {
-    supabase.removeChannel(channel)
-  }
-}, [])
+    fetchItems()
+    const channel = supabase
+      .channel("inventory-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "inventory_items" }, fetchItems)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   const toggleActive = async (item: InventoryItem) => {
     await supabase
@@ -155,20 +140,44 @@ export default function InventoryPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: DIMWHITE(0.85) }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <style>{`
+        .mc-input-container { width: 100%; max-width: 320px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid ${AMBER(0.12)}; margin-bottom: 18px; }
+        .stats-item { padding: 12px 18px; border-bottom: 1px solid ${AMBER(0.12)}; }
+        .stats-item:nth-child(even) { border-left: 1px solid ${AMBER(0.12)}; }
+        .stats-item:nth-last-child(-n+2) { border-bottom: none; }
+        
+        .desktop-table { display: none; }
+        .mobile-cards { display: flex; flex-direction: column; gap: 10px; }
+
+        @media (min-width: 768px) {
+          .stats-grid { display: flex; }
+          .stats-item { border-bottom: none !important; border-left: 1px solid ${AMBER(0.12)}; flex: 1; }
+          .stats-item:first-child { border-left: none; }
+          .desktop-table { display: block; overflow-x: auto; border: 1px solid ${BORDER}; }
+          .mobile-cards { display: none; }
+        }
+
+        @media (max-width: 480px) {
+          .mc-input-container { max-width: none; }
+          .header-flex { flex-direction: column; align-items: stretch !important; }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
         {/* ── RULE ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-          <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.58rem", letterSpacing: "0.32em", color: AMBER(0.45) }}>
+          <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.58rem", letterSpacing: "0.32em", color: AMBER(0.45), whiteSpace: 'nowrap' }}>
             SYS · INVENTORY REGISTRY
           </span>
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.25)}, transparent)` }} />
         </div>
 
         {/* ── HEADER ── */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, marginBottom: 22 }}>
+        <div className="header-flex" style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 22 }}>
           <div>
-            <h1 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "clamp(1.6rem,4vw,2.4rem)", color: AMBER(0.9), lineHeight: 1 }}>
+            <h1 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "clamp(1.6rem,4vw,2.4rem)", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
               Inventory
             </h1>
             <p style={{ fontFamily: "'IBM Plex Sans'", fontSize: "0.85rem", color: DIMWHITE(0.3), marginTop: 6 }}>
@@ -179,13 +188,14 @@ export default function InventoryPage() {
           <button
             onClick={() => setShowAdd(true)}
             style={{
-              padding: "9px 18px",
+              padding: "10px 20px",
               background: AMBER(0.9),
               color: BG,
               border: "none",
               fontFamily: "'IBM Plex Mono'",
               fontSize: "0.6rem",
               letterSpacing: "0.22em",
+              fontWeight: 700,
               cursor: "pointer",
             }}
           >
@@ -194,14 +204,14 @@ export default function InventoryPage() {
         </div>
 
         {/* ── STATS STRIP ── */}
-        <div style={{ display: "flex", border: `1px solid ${AMBER(0.12)}`, marginBottom: 18 }}>
+        <div className="stats-grid">
           {[
             ["TOTAL", stats.total],
             ["ACTIVE", stats.active],
             ["LOW", stats.low],
             ["CRITICAL", stats.critical],
-          ].map(([l, v], i) => (
-            <div key={l} style={{ padding: "8px 18px", borderLeft: i ? `1px solid ${AMBER(0.1)}` : "none" }}>
+          ].map(([l, v]) => (
+            <div key={l as string} className="stats-item">
               <div style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.47rem", letterSpacing: "0.22em", color: AMBER(0.35) }}>{l}</div>
               <div style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "1.25rem", color: AMBER(0.85) }}>{v}</div>
             </div>
@@ -213,7 +223,7 @@ export default function InventoryPage() {
           <MCInput value={search} onChange={setSearch} placeholder="SEARCH ITEMS OR CATEGORY..." />
         </div>
 
-        {/* ── TABLE ── */}
+        {/* ── CONTENT ── */}
         {loading ? (
           <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.65rem", letterSpacing: "0.25em", color: AMBER(0.35) }}>
             LOADING INVENTORY...
@@ -225,40 +235,75 @@ export default function InventoryPage() {
             </span>
           </div>
         ) : (
-          <div style={{ overflowX: "auto", border: `1px solid ${BORDER}` }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'IBM Plex Mono'" }}>
-              <thead>
-                <tr style={{ background: "rgba(255,176,0,0.05)" }}>
-                  {["ITEM","CATEGORY","TOTAL","AVAILABLE","HEALTH","STATUS","ACTION"].map(h => (
-                    <th key={h} style={{ padding: "10px 14px", fontSize: "0.55rem", letterSpacing: "0.22em", color: AMBER(0.4), textAlign: "left", borderBottom: `1px solid ${AMBER(0.15)}` }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map(item => (
-                  <tr key={item.id} style={{ borderBottom: `1px solid ${AMBER(0.06)}` }}>
-                    <td style={{ padding: "10px 14px" }}>
-                      <div style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700 }}>{item.name}</div>
-                      <div style={{ fontSize: "0.55rem", color: AMBER(0.35) }}>{item.description}</div>
-                    </td>
-                    <td style={{ padding: "10px 14px" }}>{item.category}</td>
-                    <td style={{ padding: "10px 14px" }}>{item.quantity_total}</td>
-                    <td style={{ padding: "10px 14px" }}>{item.quantity_available}</td>
-                    <td style={{ padding: "10px 14px" }}>{health(item.quantity_available)}</td>
-                    <td style={{ padding: "10px 14px" }}>{item.is_active ? "ACTIVE" : "INACTIVE"}</td>
-                    <td style={{ padding: "10px 14px", display: "flex", gap: 10 }}>
-                      <button onClick={() => setEditItem(item)} style={actionBtn()}>EDIT</button>
-                      <button onClick={() => toggleActive(item)} style={actionBtn(item.is_active ? RED(0.7) : GREEN(0.7))}>
-                        {item.is_active ? "DISABLE" : "ENABLE"}
-                      </button>
-                    </td>
+          <>
+            {/* Desktop Table */}
+            <div className="desktop-table">
+              <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'IBM Plex Mono'" }}>
+                <thead>
+                  <tr style={{ background: "rgba(255,176,0,0.05)" }}>
+                    {["ITEM","CATEGORY","TOTAL","AVAILABLE","HEALTH","STATUS","ACTION"].map(h => (
+                      <th key={h} style={{ padding: "10px 14px", fontSize: "0.55rem", letterSpacing: "0.22em", color: AMBER(0.4), textAlign: "left", borderBottom: `1px solid ${AMBER(0.15)}` }}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredItems.map(item => (
+                    <tr key={item.id} style={{ borderBottom: `1px solid ${AMBER(0.06)}` }}>
+                      <td style={{ padding: "10px 14px" }}>
+                        <div style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700 }}>{item.name}</div>
+                        <div style={{ fontSize: "0.55rem", color: AMBER(0.35) }}>{item.description}</div>
+                      </td>
+                      <td style={{ padding: "10px 14px" }}>{item.category}</td>
+                      <td style={{ padding: "10px 14px" }}>{item.quantity_total}</td>
+                      <td style={{ padding: "10px 14px" }}>{item.quantity_available}</td>
+                      <td style={{ padding: "10px 14px" }}>{health(item.quantity_available)}</td>
+                      <td style={{ padding: "10px 14px" }}>{item.is_active ? "ACTIVE" : "INACTIVE"}</td>
+                      <td style={{ padding: "10px 14px", display: "flex", gap: 10 }}>
+                        <button onClick={() => setEditItem(item)} style={actionBtn()}>EDIT</button>
+                        <button onClick={() => toggleActive(item)} style={actionBtn(item.is_active ? RED(0.7) : GREEN(0.7))}>
+                          {item.is_active ? "DISABLE" : "ENABLE"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="mobile-cards">
+              {filteredItems.map(item => (
+                <div key={item.id} style={{ background: PANEL, border: `1px solid ${BORDER}`, padding: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: '0.5rem', color: AMBER(0.4) }}>{item.category?.toUpperCase()}</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: '0.5rem' }}>{health(item.quantity_available)}</span>
+                  </div>
+                  <div style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: '1.1rem', marginBottom: '4px' }}>{item.name}</div>
+                  <div style={{ fontSize: "0.65rem", color: DIMWHITE(0.4), marginBottom: '12px' }}>{item.description}</div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '10px 0', borderTop: `1px solid ${AMBER(0.06)}`, borderBottom: `1px solid ${AMBER(0.06)}`, marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.5rem', color: AMBER(0.3) }}>TOTAL</div>
+                      <div style={{ fontSize: '0.9rem' }}>{item.quantity_total}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.5rem', color: AMBER(0.3) }}>AVAILABLE</div>
+                      <div style={{ fontSize: '0.9rem' }}>{item.quantity_available}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => setEditItem(item)} style={{ ...actionBtn(), flex: 1, padding: '8px' }}>EDIT</button>
+                    <button onClick={() => toggleActive(item)} style={{ ...actionBtn(item.is_active ? RED(0.7) : GREEN(0.7)), flex: 1, padding: '8px' }}>
+                      {item.is_active ? "DISABLE" : "ENABLE"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         <AddInventoryModal

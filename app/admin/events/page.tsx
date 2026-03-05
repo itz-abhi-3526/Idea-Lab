@@ -6,7 +6,7 @@ import EventCard from "@/components/admin/events/EventCard"
 import AddEditEventModal from "@/components/admin/events/AddEditEventModal"
 
 /* ─────────────────────────────────────────
-   SYSTEM PALETTE (MATCH INCUBATION PAGE)
+   SYSTEM PALETTE
 ───────────────────────────────────────── */
 const AMBER    = (a = 1) => `rgba(255,176,0,${a})`
 const GREEN    = (a = 1) => `rgba(0,255,120,${a})`
@@ -105,9 +105,39 @@ export default function AdminEventsPage() {
           font-size:0.7rem;
           letter-spacing:0.06em
         }
+        
+        .events-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+          margin-bottom: 22px;
+        }
+
+        .events-control-row {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 18px;
+        }
+
+        @media (min-width: 768px) {
+          .events-stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+          .events-control-row {
+            flex-direction: row;
+            align-items: stretch;
+          }
+          .search-input-wrapper {
+            flex: 1;
+          }
+          .add-event-btn {
+            width: auto;
+          }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
         {/* SYSTEM RULE */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
@@ -152,12 +182,7 @@ export default function AdminEventsPage() {
         </div>
 
         {/* STATS STRIP */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: 8,
-          marginBottom: 22
-        }}>
+        <div className="events-stats-grid">
           {Object.entries(stats).map(([k, v]) => (
             <div key={k} style={{
               background: PANEL,
@@ -195,8 +220,8 @@ export default function AdminEventsPage() {
         </div>
 
         {/* SEARCH + ADD ROW */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-          <div style={{ flex: 1, position: "relative" }}>
+        <div className="events-control-row">
+          <div className="search-input-wrapper" style={{ position: "relative" }}>
             <div style={{
               position: "absolute",
               left: 0,
@@ -205,7 +230,8 @@ export default function AdminEventsPage() {
               width: searchFoc ? 2 : 1,
               background: searchFoc
                 ? `linear-gradient(to bottom, transparent, ${AMBER(0.85)}, transparent)`
-                : `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`
+                : `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`,
+              transition: "all 0.2s"
             }} />
             <input
               placeholder="SEARCH TITLE / TYPE / VENUE..."
@@ -215,7 +241,7 @@ export default function AdminEventsPage() {
               onBlur={() => setSearchFoc(false)}
               style={{
                 width: "100%",
-                padding: "10px 12px",
+                padding: "11px 14px",
                 background: PANEL,
                 borderTop: `1px solid ${BORDER}`,
                 borderRight: `1px solid ${BORDER}`,
@@ -230,18 +256,20 @@ export default function AdminEventsPage() {
           </div>
 
           <button
+            className="add-event-btn"
             onClick={() => { setEditEvent(null); setOpen(true) }}
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: "0.65rem",
               letterSpacing: "0.18em",
-              padding: "10px 18px",
+              padding: "11px 22px",
               background: AMBER(0.9),
               border: "none",
               color: BG,
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: "pointer",
-              boxShadow: `0 0 14px ${AMBER(0.2)}`
+              boxShadow: `0 0 14px ${AMBER(0.2)}`,
+              whiteSpace: "nowrap"
             }}
           >
             + ADD EVENT
@@ -261,7 +289,7 @@ export default function AdminEventsPage() {
             letterSpacing: "0.22em",
             color: AMBER(0.25)
           }}>
-            {filtered.length} EVENT{filtered.length !== 1 ? "S" : ""}
+            {filtered.length} EVENT{filtered.length !== 1 ? "S" : ""} FOUND
           </span>
           <div style={{
             flex: 1,
@@ -307,7 +335,7 @@ export default function AdminEventsPage() {
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filtered.map(event => (
               <div key={event.id}>
                 <EventCard

@@ -16,14 +16,14 @@ function MCInput({ label, value, onChange, type = "text", placeholder = "" }: {
   const border = foc ? AMBER(0.28) : AMBER(0.09)
   const bg     = foc ? "rgba(255,176,0,0.04)" : "rgba(0,0,0,0.35)"
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.28em", color: AMBER(0.3), marginBottom: 3, paddingLeft: 10 }}>{label}</div>
       <div style={{ position: "relative" }}>
         <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: foc ? 2 : 1, background: foc ? `linear-gradient(to bottom,transparent,${AMBER(0.85)},transparent)` : `linear-gradient(to bottom,transparent,${AMBER(0.18)},transparent)`, transition: "all 0.18s" }} />
         <input type={type} placeholder={placeholder} value={value}
           onChange={e => onChange(e.target.value)}
           onFocus={() => setFoc(true)} onBlur={() => setFoc(false)}
-          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, background:bg, borderTop:`1px solid ${border}`, borderRight:`1px solid ${border}`, borderBottom:`1px solid ${border}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.85), fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.75rem", letterSpacing:"0.04em", transition:"background 0.18s" }}
+          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, background:bg, borderTop:`1px solid ${border}`, borderRight:`1px solid ${border}`, borderBottom:`1px solid ${border}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.85), fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.75rem", letterSpacing:"0.04em", transition:"background 0.18s", boxSizing: "border-box" }}
         />
       </div>
     </div>
@@ -45,7 +45,7 @@ function MCTextarea({ label, value, onChange, rows = 4 }: {
         <textarea value={value} rows={rows} placeholder="Event description..."
           onChange={e => onChange(e.target.value)}
           onFocus={() => setFoc(true)} onBlur={() => setFoc(false)}
-          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, resize:"none", background:bg, borderTop:`1px solid ${border}`, borderRight:`1px solid ${border}`, borderBottom:`1px solid ${border}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.85), fontFamily:"'IBM Plex Sans',sans-serif", fontWeight:300, fontSize:"0.82rem", lineHeight:1.65, transition:"background 0.18s" }}
+          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, resize:"none", background:bg, borderTop:`1px solid ${border}`, borderRight:`1px solid ${border}`, borderBottom:`1px solid ${border}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.85), fontFamily:"'IBM Plex Sans',sans-serif", fontWeight:300, fontSize:"0.82rem", lineHeight:1.65, transition:"background 0.18s", boxSizing: "border-box" }}
         />
       </div>
     </div>
@@ -57,12 +57,12 @@ function MCBoolSelect({ label, value, onChange }: {
   label: string; value: boolean; onChange: (v: boolean) => void
 }) {
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.46rem", letterSpacing:"0.28em", color:AMBER(0.3), marginBottom:3, paddingLeft:10 }}>{label}</div>
       <div style={{ position:"relative" }}>
         <div style={{ position:"absolute", left:0, top:0, bottom:0, width:1, background:`linear-gradient(to bottom,transparent,${AMBER(0.18)},transparent)` }} />
         <select value={String(value)} onChange={e => onChange(e.target.value === "true")}
-          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, background:"rgba(0,0,0,0.35)", borderTop:`1px solid ${AMBER(0.09)}`, borderRight:`1px solid ${AMBER(0.09)}`, borderBottom:`1px solid ${AMBER(0.09)}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.75), fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.72rem", letterSpacing:"0.06em", cursor:"pointer", appearance:"none" as any }}
+          style={{ width:"100%", paddingLeft:10, paddingRight:10, paddingTop:8, paddingBottom:8, background:"rgba(0,0,0,0.35)", borderTop:`1px solid ${AMBER(0.09)}`, borderRight:`1px solid ${AMBER(0.09)}`, borderBottom:`1px solid ${AMBER(0.09)}`, borderLeft:"none", outline:"none", color:DIMWHITE(0.75), fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.72rem", letterSpacing:"0.06em", cursor:"pointer", appearance:"none", boxSizing: "border-box" }}
         >
           <option value="true"  style={{ background:BG }}>TRUE</option>
           <option value="false" style={{ background:BG }}>FALSE</option>
@@ -75,14 +75,14 @@ function MCBoolSelect({ label, value, onChange }: {
 /* ─── Section Rule ─── */
 function SRule({ label }: { label: string }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:8, margin:"6px 0 2px" }}>
+    <div style={{ display:"flex", alignItems:"center", gap:8, margin:"12px 0 6px" }}>
       <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.46rem", letterSpacing:"0.28em", color:AMBER(0.35), whiteSpace:"nowrap" }}>{label}</span>
       <div style={{ flex:1, height:1, background:`linear-gradient(to right,${AMBER(0.18)},transparent)` }} />
     </div>
   )
 }
 
-/* ─── TYPES — unchanged ─── */
+/* ─── TYPES ─── */
 type Event = {
   id: string; title: string; description: string; event_type: string | null
   start_datetime: string; end_datetime: string
@@ -100,7 +100,6 @@ type FormState = {
   is_paid: boolean; price: number; upi_qr_url: string
 }
 
-/* ─── MODAL — all supabase / cloudinary / validation logic unchanged ─── */
 export default function AddEditEventModal({ open, onClose, event }: {
   open: boolean; onClose: () => void; event: Event | null
 }) {
@@ -117,21 +116,20 @@ export default function AddEditEventModal({ open, onClose, event }: {
       start_datetime:        event?.start_datetime        ? event.start_datetime.slice(0, 16)        : "",
       end_datetime:          event?.end_datetime          ? event.end_datetime.slice(0, 16)          : "",
       registration_deadline: event?.registration_deadline ? event.registration_deadline.slice(0, 16) : "",
-      venue:        event?.venue       ?? "",
-      poster_url:   event?.poster_url  ?? "",
-      capacity:     event?.capacity    ?? 0,
-      is_active:    event?.is_active   ?? true,
-      is_featured:  event?.is_featured ?? false,
-      display_order:event?.display_order ?? 0,
-      is_paid:    event?.is_paid  ?? false,
-      price:      event?.price    ?? 0,
-      upi_qr_url: event?.upi_qr_url ?? "",
+      venue:         event?.venue       ?? "",
+      poster_url:    event?.poster_url  ?? "",
+      capacity:      event?.capacity    ?? 0,
+      is_active:     event?.is_active   ?? true,
+      is_featured:   event?.is_featured ?? false,
+      display_order: event?.display_order ?? 0,
+      is_paid:     event?.is_paid  ?? false,
+      price:       event?.price    ?? 0,
+      upi_qr_url:  event?.upi_qr_url ?? "",
     })
   }, [open, event])
 
   if (!open || !form) return null
 
-  /* cloudinary uploads */
   const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     try {
@@ -156,7 +154,7 @@ export default function AddEditEventModal({ open, onClose, event }: {
 
   const validate = () => {
     if (!form.title || !form.description || !form.event_type || !form.start_datetime || !form.end_datetime || !form.registration_deadline || !form.venue) { alert("Please fill all required fields."); return false }
-    if (form.capacity <= 0) { alert("Capacity must be greater than zero."); return false }
+    if (form.capacity < 0) { alert("Capacity cannot be negative."); return false }
     if (form.is_paid) {
       if (form.price <= 0) { alert("Enter valid amount for paid event."); return false }
       if (!form.upi_qr_url) { alert("Upload UPI QR for paid event."); return false }
@@ -168,7 +166,7 @@ export default function AddEditEventModal({ open, onClose, event }: {
     if (!validate()) return; setSaving(true)
     const payload = { ...form, start_datetime: new Date(form.start_datetime).toISOString(), end_datetime: new Date(form.end_datetime).toISOString(), registration_deadline: new Date(form.registration_deadline).toISOString() }
     if (event) { await supabase.from("events").update(payload).eq("id", event.id) }
-    else        { await supabase.from("events").insert(payload) }
+    else         { await supabase.from("events").insert(payload) }
     setSaving(false); onClose()
   }
 
@@ -176,8 +174,8 @@ export default function AddEditEventModal({ open, onClose, event }: {
   const busy   = saving || uploading
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4"
-      style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)" }}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}
     >
       <style>{`
         @keyframes evtshimmer { from{left:-40%} to{left:140%} }
@@ -187,118 +185,93 @@ export default function AddEditEventModal({ open, onClose, event }: {
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0 }
         input[type=datetime-local]::-webkit-calendar-picker-indicator { filter:invert(0.6) sepia(1) saturate(3) hue-rotate(5deg); cursor:pointer; opacity:0.5 }
-        .evtscroll textarea::placeholder, .evtscroll input::placeholder { color:rgba(255,176,0,0.2); font-family:"IBM Plex Mono",monospace; font-size:0.72rem }
-        .evtscroll option { background:#0a0900 }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-grid-tri { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        @media (max-width: 500px) {
+          .form-grid, .form-grid-tri { grid-template-columns: 1fr; }
+        }
       `}</style>
 
-      <div className="evtscroll w-full sm:max-w-xl" style={{ background: BG, border: `1px solid ${AMBER(0.18)}`, borderBottom: "none", maxHeight: "92vh", overflowY: "auto", position: "relative", boxShadow: "0 -20px 60px rgba(0,0,0,0.7)" }}>
+      <div className="evtscroll w-full sm:max-w-xl" style={{ background: BG, border: `1px solid ${AMBER(0.18)}`, maxHeight: "90vh", overflowY: "auto", position: "relative", boxShadow: "0 20px 80px rgba(0,0,0,0.8)", borderRadius: "12px 12px 0 0" }}>
 
-        {/* shimmer bar */}
+        {/* top shimmer */}
         <div style={{ height:1, overflow:"hidden", background:AMBER(0.1), position:"relative" }}>
           <div style={{ position:"absolute", top:0, bottom:0, width:"40%", background:`linear-gradient(to right,transparent,${AMBER(0.65)},transparent)`, animation:"evtshimmer 2.5s linear infinite" }} />
         </div>
 
-        {/* HUD corners */}
-        <div style={{ position:"absolute", top:8, left:8,  width:10, height:10, borderTop:`1px solid ${AMBER(0.4)}`, borderLeft:`1px solid ${AMBER(0.4)}`  }} />
-        <div style={{ position:"absolute", top:8, right:8, width:10, height:10, borderTop:`1px solid ${AMBER(0.4)}`, borderRight:`1px solid ${AMBER(0.4)}` }} />
-
-        <div style={{ padding: "22px 22px 28px", display:"flex", flexDirection:"column", gap:12 }}>
+        <div style={{ padding: "20px 20px 32px", display:"flex", flexDirection:"column", gap:12 }}>
 
           {/* header */}
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:8 }}>
             <div>
               <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.5rem", letterSpacing:"0.3em", color:AMBER(0.4), marginBottom:4 }}>
-                {isEdit ? "SYS \u00b7 EDIT EVENT" : "SYS \u00b7 CREATE EVENT"}
+                {isEdit ? "SYS · EDIT_LOG" : "SYS · NEW_ENTRY"}
               </div>
-              <h2 style={{ fontFamily:"'IBM Plex Sans Condensed',sans-serif", fontWeight:700, fontSize:"1.3rem", letterSpacing:"-0.01em", color:AMBER(0.9), lineHeight:1, margin:0 }}>
-                {isEdit ? "Edit Event" : "Create Event"}
+              <h2 style={{ fontFamily:"'IBM Plex Sans Condensed',sans-serif", fontWeight: 700, fontSize:"clamp(1.1rem, 4vw, 1.4rem)", color: AMBER(0.9), margin:0 }}>
+                {isEdit ? "Edit Event Protocol" : "Initialize Event"}
               </h2>
             </div>
-            <button onClick={onClose}
-              style={{ width:26, height:26, display:"flex", alignItems:"center", justifyContent:"center", background:"transparent", border:`1px solid ${AMBER(0.18)}`, color:AMBER(0.45), cursor:"pointer", fontSize:"0.65rem", fontFamily:"'IBM Plex Mono',monospace", flexShrink:0 }}
-            >X</button>
+            <button onClick={onClose} style={{ width:28, height:28, flexShrink:0, background:"transparent", border:`1px solid ${AMBER(0.15)}`, color:AMBER(0.4), cursor:"pointer" }}>✕</button>
           </div>
 
-          {/* poster */}
-          <SRule label="EVT \u00b7 POSTER" />
-          <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
-            <div style={{ width:100, height:136, flexShrink:0, border:`1px solid ${AMBER(0.2)}`, background:AMBER(0.04), overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", position:"relative" }}>
-              {form.poster_url
-                ? <img src={form.poster_url} alt="Poster" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover" }} />
-                : <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.48rem", letterSpacing:"0.15em", color:AMBER(0.25), textAlign:"center", padding:"0 6px" }}>NO POSTER</span>
-              }
+          <SRule label="EVT · POSTER" />
+          <div style={{ display:"flex", flexWrap: "wrap", gap:14, alignItems:"center" }}>
+            <div style={{ width:100, height:130, flexShrink:0, border:`1px solid ${AMBER(0.2)}`, background:AMBER(0.04), overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", position:"relative" }}>
+              {form.poster_url ? <img src={form.poster_url} alt="Poster" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontSize: "0.5rem", color: AMBER(0.2) }}>VOID</span>}
             </div>
             <label style={{ cursor:"pointer" }}>
               <input type="file" accept="image/*" onChange={handlePosterUpload} />
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.55rem", letterSpacing:"0.18em", padding:"8px 14px", background:"transparent", border:`1px solid ${AMBER(0.2)}`, color:AMBER(0.55) }}>
-                {uploading ? "UPLOADING..." : "UPLOAD / REPLACE"}
+              <div style={{ fontFamily:"'IBM Plex Mono'", fontSize:"0.55rem", padding:"10px 16px", border:`1px solid ${AMBER(0.2)}`, color:AMBER(0.5) }}>
+                {uploading ? "SYNCING..." : "UPLOAD_MEDIA"}
               </div>
             </label>
           </div>
 
-          {/* core info */}
-          <SRule label="EVT \u00b7 CORE INFO" />
-          <MCInput label="TITLE"       value={form.title}      onChange={v => setForm({ ...form, title: v })}      placeholder="Event title" />
-          <MCInput label="EVENT TYPE"  value={form.event_type} onChange={v => setForm({ ...form, event_type: v })} placeholder="Workshop, Hackathon..." />
-          <MCInput label="VENUE"       value={form.venue}      onChange={v => setForm({ ...form, venue: v })}      placeholder="Location" />
-          <MCTextarea label="DESCRIPTION" value={form.description} onChange={v => setForm({ ...form, description: v })} rows={4} />
-
-          {/* schedule */}
-          <SRule label="EVT \u00b7 SCHEDULE" />
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-            <MCInput label="START DATE + TIME" type="datetime-local" value={form.start_datetime}         onChange={v => setForm({ ...form, start_datetime: v })} />
-            <MCInput label="END DATE + TIME"   type="datetime-local" value={form.end_datetime}           onChange={v => setForm({ ...form, end_datetime: v })} />
+          <SRule label="EVT · METADATA" />
+          <MCInput label="TITLE" value={form.title} onChange={v => setForm({ ...form, title: v })} placeholder="Entry point" />
+          <div className="form-grid">
+            <MCInput label="EVENT TYPE" value={form.event_type} onChange={v => setForm({ ...form, event_type: v })} placeholder="Classification" />
+            <MCInput label="VENUE" value={form.venue} onChange={v => setForm({ ...form, venue: v })} placeholder="Coordinates" />
           </div>
-          <MCInput label="REGISTRATION DEADLINE" type="datetime-local" value={form.registration_deadline} onChange={v => setForm({ ...form, registration_deadline: v })} />
+          <MCTextarea label="DESCRIPTION" value={form.description} onChange={v => setForm({ ...form, description: v })} />
 
-          {/* settings */}
-          <SRule label="EVT \u00b7 SETTINGS" />
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-            <MCInput label="CAPACITY"      type="number" value={form.capacity}      onChange={v => setForm({ ...form, capacity: Number(v) })} />
-            <MCInput label="DISPLAY ORDER" type="number" value={form.display_order} onChange={v => setForm({ ...form, display_order: Number(v) })} />
+          <SRule label="EVT · CHRONO" />
+          <div className="form-grid">
+            <MCInput label="START_UTC" type="datetime-local" value={form.start_datetime} onChange={v => setForm({ ...form, start_datetime: v })} />
+            <MCInput label="END_UTC" type="datetime-local" value={form.end_datetime} onChange={v => setForm({ ...form, end_datetime: v })} />
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
-            <MCBoolSelect label="ACTIVE"     value={form.is_active}   onChange={v => setForm({ ...form, is_active: v })} />
-            <MCBoolSelect label="FEATURED"   value={form.is_featured} onChange={v => setForm({ ...form, is_featured: v })} />
-            <MCBoolSelect label="PAID EVENT" value={form.is_paid}     onChange={v => setForm({ ...form, is_paid: v, ...(v === false && { price: 0, upi_qr_url: "" }) })} />
+          <MCInput label="REG_DEADLINE" type="datetime-local" value={form.registration_deadline} onChange={v => setForm({ ...form, registration_deadline: v })} />
+
+          <SRule label="EVT · PARAMETERS" />
+          <div className="form-grid">
+            <MCInput label="MAX_CAPACITY" type="number" value={form.capacity} onChange={v => setForm({ ...form, capacity: Number(v) })} />
+            <MCInput label="PRIORITY_VAL" type="number" value={form.display_order} onChange={v => setForm({ ...form, display_order: Number(v) })} />
+          </div>
+          <div className="form-grid-tri">
+            <MCBoolSelect label="ACTIVE" value={form.is_active} onChange={v => setForm({ ...form, is_active: v })} />
+            <MCBoolSelect label="FEATURED" value={form.is_featured} onChange={v => setForm({ ...form, is_featured: v })} />
+            <MCBoolSelect label="PAID" value={form.is_paid} onChange={v => setForm({ ...form, is_paid: v, ...(v === false && { price: 0, upi_qr_url: "" }) })} />
           </div>
 
-          {/* payment section — conditional */}
           {form.is_paid && (
-            <>
-              <SRule label="EVT \u00b7 PAYMENT" />
-              <div style={{ padding:"14px", background:AMBER(0.04), border:`1px solid ${AMBER(0.14)}`, position:"relative" }}>
-                <div style={{ position:"absolute", left:0, top:0, bottom:0, width:2, background:`linear-gradient(to bottom,transparent,${AMBER(0.6)},transparent)` }} />
-                <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                  <MCInput label="AMOUNT (Rs)" type="number" value={form.price} onChange={v => setForm({ ...form, price: Number(v) })} placeholder="0" />
-                  <div>
-                    <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.46rem", letterSpacing:"0.28em", color:AMBER(0.3), marginBottom:8, paddingLeft:10 }}>UPI QR CODE</div>
-                    {form.upi_qr_url && <img src={form.upi_qr_url} style={{ width:120, border:`1px solid ${AMBER(0.2)}`, marginBottom:10, display:"block" }} />}
-                    <label style={{ cursor:"pointer" }}>
-                      <input type="file" accept="image/*" onChange={handleUpiQrUpload} />
-                      <div style={{ display:"inline-block", fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.55rem", letterSpacing:"0.18em", padding:"7px 14px", border:`1px solid ${AMBER(0.2)}`, color:AMBER(0.55), background:"transparent" }}>
-                        {uploading ? "UPLOADING..." : "UPLOAD QR"}
-                      </div>
-                    </label>
-                  </div>
-                </div>
+            <div style={{ marginTop: 8, padding:"16px", background:AMBER(0.03), border:`1px solid ${AMBER(0.12)}` }}>
+              <MCInput label="CURRENCY_VAL (INR)" type="number" value={form.price} onChange={v => setForm({ ...form, price: Number(v) })} />
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize:"0.46rem", color:AMBER(0.3), marginBottom:8 }}>UPI_UPLINK (QR)</div>
+                {form.upi_qr_url && <img src={form.upi_qr_url} style={{ width:100, marginBottom:10 }} />}
+                <label style={{ cursor:"pointer" }}>
+                  <input type="file" accept="image/*" onChange={handleUpiQrUpload} />
+                  <div style={{ display:"inline-block", fontSize:"0.55rem", padding:"8px 14px", border:`1px solid ${AMBER(0.2)}`, color:AMBER(0.5) }}>UPLOAD_QR</div>
+                </label>
               </div>
-            </>
+            </div>
           )}
 
-          {/* actions */}
-          <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:8, paddingTop:16, borderTop:`1px solid ${AMBER(0.08)}` }}>
-            <button onClick={onClose}
-              style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"9px 18px", background:"transparent", border:`1px solid ${AMBER(0.15)}`, color:AMBER(0.4), cursor:"pointer" }}
-            >CANCEL</button>
-
-            <button onClick={save} disabled={busy}
-              style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"9px 22px", background:busy ? AMBER(0.5) : AMBER(0.9), border:"none", color:BG, fontWeight:600, cursor:busy?"not-allowed":"pointer", position:"relative", overflow:"hidden", boxShadow:busy?"none":`0 0 16px ${AMBER(0.25)}` }}
-            >
-              {busy && <span style={{ position:"absolute", top:0, bottom:0, width:"30%", background:"linear-gradient(to right,transparent,rgba(0,0,0,0.2),transparent)", animation:"evtshimmer 0.85s linear infinite" }} />}
-              <span style={{ position:"relative", zIndex:1 }}>
-                {saving ? "SAVING..." : uploading ? "UPLOADING..." : isEdit ? "SAVE EVENT" : "CREATE EVENT"}
-              </span>
+          <div style={{ display:"flex", flexWrap: "wrap", justifyContent:"flex-end", gap:8, marginTop:12, paddingTop:16, borderTop:`1px solid ${AMBER(0.08)}` }}>
+            <button onClick={onClose} style={{ flex: "1 1 auto", fontFamily:"'IBM Plex Mono'", fontSize:"0.6rem", padding:"12px 20px", background:"transparent", border:`1px solid ${AMBER(0.15)}`, color:AMBER(0.4) }}>ABORT</button>
+            <button onClick={save} disabled={busy} style={{ flex: "2 1 auto", fontFamily:"'IBM Plex Mono'", fontSize:"0.6rem", padding:"12px 24px", background:busy ? AMBER(0.4) : AMBER(0.9), border:"none", color:BG, fontWeight:700, position: "relative", overflow: "hidden" }}>
+              {busy && <span style={{ position:"absolute", inset: 0, background:"rgba(0,0,0,0.1)", animation:"evtshimmer 0.85s infinite" }} />}
+              <span style={{ position:"relative" }}>{saving ? "SAVING_DATA..." : uploading ? "SYNCING_MEDIA..." : isEdit ? "UPDATE_PROTOCOL" : "INITIALIZE_EVENT"}</span>
             </button>
           </div>
 

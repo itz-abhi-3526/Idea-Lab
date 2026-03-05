@@ -30,7 +30,7 @@ function MagneticButton({ children, onClick, className = "" }: { children: React
       className={`relative group ${className}`}
     >
       <m.div
-        className="absolute -inset-4 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
+        className="absolute -inset-4 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0 hidden md:block"
         style={{
           background: useTransform(
             [smoothX, smoothY],
@@ -45,7 +45,7 @@ function MagneticButton({ children, onClick, className = "" }: { children: React
           x: useTransform(smoothX, [-100, 100], [-10, 10]), 
           y: useTransform(smoothY, [-100, 100], [-10, 10]) 
         }}
-        className="relative z-10 px-10 py-5 bg-white text-black rounded-2xl font-bold font-['Syne'] text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-orange-500 hover:text-white transition-colors duration-300"
+        className="relative z-10 w-full sm:w-auto px-10 py-5 bg-white text-black rounded-2xl font-bold font-['Syne'] text-[10px] sm:text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-orange-500 hover:text-white transition-colors duration-300"
       >
         {children}
       </m.button>
@@ -74,7 +74,6 @@ export function IdeaSubmissionSection() {
     const form = e.currentTarget
     const formData = new FormData(form)
     const payload = Object.fromEntries(formData.entries())
-
     const { data: sessionData } = await supabase.auth.getSession()
 
     try {
@@ -103,63 +102,63 @@ export function IdeaSubmissionSection() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="bg-black relative" id="idea">
+      <div className="bg-black relative overflow-hidden" id="idea">
         
-        {/* DESIGN: AMBIENT BACKGROUND */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* AMBIENT BACKGROUND */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
           <m.div 
-            animate={{ x: [0, 50, 0], y: [0, 30, 0], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 -left-20 w-96 h-96 bg-orange-500/20 blur-[120px] rounded-full" 
+            animate={{ x: [0, 30, 0], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 8, repeat: Infinity }}
+            className="absolute top-1/4 -left-20 w-72 h-72 sm:w-96 sm:h-96 bg-orange-500/10 blur-[100px] rounded-full" 
           />
         </div>
 
-        <section id="idea-submission" className="relative py-32 overflow-hidden border-t border-white/[0.05]">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+        <section id="idea-submission" className="relative py-20 sm:py-32 border-t border-white/[0.05]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
               
-              {/* LEFT: TEXT CONTENT */}
-              <m.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-px bg-orange-500" />
-                  <span className="text-[10px] tracking-[0.4em] uppercase text-orange-500 font-bold font-['Outfit']">Innovation Portal</span>
+              {/* LEFT CONTENT */}
+              <m.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="space-y-6 sm:space-y-8 text-center lg:text-left">
+                <div className="flex items-center justify-center lg:justify-start gap-4">
+                  <div className="w-8 h-px bg-orange-500 hidden sm:block" />
+                  <span className="text-[8px] sm:text-[10px] tracking-[0.4em] uppercase text-orange-500 font-black font-['Outfit']">Innovation Portal</span>
                 </div>
 
-                <h2 className="text-white font-[800] tracking-tighter leading-[1] uppercase" style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}>
-                  Have a <br/>
-                  <m.span animate={{ opacity: [1, 0.7, 1] }} transition={{ duration: 3, repeat: Infinity }} className="text-orange-500">Solid</m.span> <br/>
+                <h2 className="text-white font-black tracking-tighter leading-[1] uppercase" style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(2rem, 8vw, 4.5rem)" }}>
+                  Have a <br className="hidden sm:block"/>
+                  <m.span animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 4, repeat: Infinity }} className="text-orange-500">Solid</m.span> <br className="hidden sm:block"/>
                   Idea?
                 </h2>
 
-                <p className="text-neutral-500 font-['Outfit'] font-light text-lg max-w-md leading-relaxed">
+                <p className="text-neutral-500 font-['Outfit'] font-light text-sm sm:text-lg max-w-md mx-auto lg:mx-0 leading-relaxed">
                   The IDEA Lab provides the infrastructure to turn concepts into reality. Access mentorship and high-end hardware.
                 </p>
 
-                <div className="flex items-center gap-4 pt-4">
+                <div className="flex items-center justify-center lg:justify-start gap-4 pt-4">
                   <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                    <Zap className="text-orange-500" size={20} />
+                    <Zap className="text-orange-500" size={18} />
                   </div>
-                  <p className="text-xs text-neutral-400 font-['Outfit'] tracking-wide">
+                  <p className="text-[10px] sm:text-xs text-neutral-400 font-['Outfit'] tracking-wide text-left">
                     Submissions are currently <span className="text-white font-bold tracking-widest uppercase ml-1">Open</span> <br/>
-                    <span className="text-[10px] text-neutral-600 uppercase">for the next Cohort</span>
+                    <span className="text-[9px] text-neutral-600 uppercase">for the next cohort</span>
                   </p>
                 </div>
               </m.div>
 
-              {/* RIGHT: INTERACTIVE CARD */}
-              <m.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-                <div className="relative bg-neutral-900/40 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-8 sm:p-16 flex flex-col items-center text-center space-y-10 overflow-hidden group shadow-2xl">
-                  <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-500/20 blur-[100px] rounded-full" />
-                  <div className="relative p-6 rounded-2xl bg-black border border-orange-500/20 shadow-inner">
-                    <Rocket className="w-12 h-12 text-orange-500" />
+              {/* RIGHT CARD */}
+              <m.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+                <div className="relative bg-neutral-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-16 flex flex-col items-center text-center space-y-8 sm:space-y-10 overflow-hidden shadow-2xl">
+                  <div className="absolute -top-24 -right-24 w-48 h-48 sm:w-64 sm:h-64 bg-orange-500/10 blur-[80px] rounded-full" />
+                  <div className="relative p-5 sm:p-6 rounded-2xl bg-black border border-orange-500/20">
+                    <Rocket className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500" />
                   </div>
                   <div className="space-y-4">
-                    <h3 className="text-3xl font-bold text-white font-['Syne'] tracking-tight">Ready to Launch?</h3>
-                    <p className="text-neutral-500 text-sm font-['Outfit'] max-w-xs leading-relaxed">Submit your proposal for technical review by our lab coordinators.</p>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white font-['Syne'] tracking-tight">Ready to Launch?</h3>
+                    <p className="text-neutral-500 text-xs sm:text-sm font-['Outfit'] max-w-xs leading-relaxed mx-auto">Submit your proposal for technical review by our lab coordinators.</p>
                   </div>
-                  <MagneticButton onClick={() => { setSuccess(false); setError(null); setOpen(true); }}>
-                    Submit Proposal <ArrowRight size={18} />
+                  <MagneticButton className="w-full sm:w-auto" onClick={() => { setSuccess(false); setError(null); setOpen(true); }}>
+                    Submit Proposal <ArrowRight size={16} />
                   </MagneticButton>
                 </div>
               </m.div>
@@ -167,82 +166,84 @@ export function IdeaSubmissionSection() {
           </div>
         </section>
 
-        {/* MODAL SYSTEM: INCORPORATING YOUR FORM FIELDS */}
+        {/* MODAL SYSTEM */}
         <AnimatePresence>
           {open && (
-            <m.div className="fixed inset-0 z-[100] flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <m.div className="fixed inset-0 z-[200] flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <m.div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setOpen(false)} />
-              <m.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }} className="relative w-full max-w-3xl bg-[#050505] border border-white/10 rounded-[2.5rem] overflow-hidden">
-                <div className="p-8 sm:p-12 max-h-[85vh] overflow-y-auto scrollbar-hide">
+              <m.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="relative w-full max-w-3xl bg-[#080808] border border-white/10 rounded-3xl sm:rounded-[2.5rem] overflow-hidden">
+                <div className="p-6 sm:p-12 max-h-[90vh] overflow-y-auto scrollbar-hide">
                   
-                  <div className="flex justify-between items-center mb-10">
+                  <div className="flex justify-between items-start mb-8 sm:mb-10">
                     <div className="space-y-1">
-                      <h3 className="text-3xl font-bold text-white font-['Syne'] uppercase tracking-tight">Idea Proposal</h3>
-                      <p className="text-[10px] text-orange-500 font-bold uppercase tracking-[0.3em]">Technical Submission Form</p>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white font-['Syne'] uppercase tracking-tight">Idea Proposal</h3>
+                      <p className="text-[8px] sm:text-[10px] text-orange-500 font-black uppercase tracking-[0.3em]">Technical Submission Form</p>
                     </div>
-                    <button onClick={() => setOpen(false)} className="p-3 rounded-full bg-white/5 text-neutral-500 hover:text-white transition-all"><X size={24} /></button>
+                    <button onClick={() => setOpen(false)} className="p-2 sm:p-3 rounded-full bg-white/5 text-neutral-500 hover:text-white transition-all"><X size={20} /></button>
                   </div>
 
                   <AnimatePresence mode="wait">
                     {success ? (
-                      <m.div key="success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center space-y-8">
-                        <Check className="w-16 h-16 text-green-500 mx-auto" />
-                        <h4 className="text-2xl font-bold text-white font-['Syne'] uppercase">Proposal Submitted!</h4>
-                        <button onClick={() => setOpen(false)} className="text-xs text-orange-500 font-bold uppercase tracking-widest border-b border-orange-500/30 pb-1">Return to Lab</button>
+                      <m.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-16 sm:py-24 text-center space-y-6">
+                        <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
+                          <Check className="w-8 h-8 text-green-500" />
+                        </div>
+                        <h4 className="text-xl sm:text-2xl font-bold text-white font-['Syne'] uppercase">Proposal Transmitted</h4>
+                        <button onClick={() => setOpen(false)} className="text-[10px] text-orange-500 font-black uppercase tracking-widest border-b border-orange-500/30 pb-1">Return to Lab</button>
                       </m.div>
                     ) : (
-                      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {error && <div className="sm:col-span-2 text-red-500 text-xs bg-red-500/5 border border-red-500/20 p-5 rounded-2xl">{error}</div>}
+                      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                        {error && <div className="sm:col-span-2 text-red-500 text-[10px] bg-red-500/5 border border-red-500/10 p-4 rounded-xl font-mono">{error}</div>}
                         
-                        {/* THE FIELDS FROM YOUR CODE */}
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Student Name</label>
-                          <input name="student_name" required className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" placeholder="Your name" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Student Name</label>
+                          <input name="student_name" required className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" placeholder="Enter Full Name" />
+                        </div>
+
+                        <div className="space-y-2 opacity-60">
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Auth Email</label>
+                          <input name="email" value={email} readOnly className="w-full bg-transparent border border-white/5 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-neutral-500 text-xs sm:text-sm cursor-not-allowed" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Email (Read Only)</label>
-                          <input name="email" value={email} readOnly className="w-full bg-white/[0.01] border border-white/5 rounded-xl px-5 py-4 text-neutral-600 text-sm cursor-not-allowed" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Phone Link</label>
+                          <input name="phone" required placeholder="+91 00000 00000" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Phone Number</label>
-                          <input name="phone" placeholder="Phone number" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Department</label>
+                          <input name="department" required placeholder="Major / Stream" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Department</label>
-                          <input name="department" required placeholder="Department" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Semester Cycle</label>
+                          <input name="year" required placeholder="Current Semester" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Semester</label>
-                          <input name="year" placeholder="Semester" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Idea Title</label>
-                          <input name="idea_title" required placeholder="Idea title" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Project Code Name</label>
+                          <input name="idea_title" required placeholder="Idea Title" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="sm:col-span-2 space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Description</label>
-                          <textarea name="idea_description" required placeholder="Describe your idea" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-5 text-white focus:border-orange-500/50 outline-none text-sm min-h-[120px] resize-none transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Concept Brief</label>
+                          <textarea name="idea_description" required placeholder="Explain the project scope and hardware requirements..." className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-4 sm:px-5 sm:py-5 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm min-h-[140px] resize-none transition-all" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Domain</label>
-                          <input name="domain" placeholder="AI, IoT, etc." className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Technical Domain</label>
+                          <input name="domain" placeholder="AI / Robotics / IoT" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold ml-1">Team Size</label>
-                          <input name="team_size" type="number" min={1} placeholder="Team size" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white focus:border-orange-500/50 outline-none text-sm transition-all" />
+                          <label className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-500 font-black ml-1">Core Team Size</label>
+                          <input name="team_size" type="number" min={1} required placeholder="Member Count" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 sm:px-5 sm:py-4 text-white focus:border-orange-500/40 outline-none text-xs sm:text-sm transition-all" />
                         </div>
 
                         <div className="sm:col-span-2 pt-6">
-                          <button type="submit" disabled={loading} className="w-full py-5 bg-orange-500 hover:bg-orange-600 text-black font-bold font-['Syne'] uppercase tracking-[0.3em] text-[11px] rounded-2xl transition-all disabled:opacity-50">
-                            {loading ? "Initializing..." : "Finalize Submission"}
+                          <button type="submit" disabled={loading} className="group relative w-full py-5 bg-orange-500 hover:bg-orange-600 text-black font-black font-['Syne'] uppercase tracking-[0.3em] text-[10px] sm:text-[11px] rounded-2xl transition-all disabled:opacity-50 overflow-hidden">
+                            <span className="relative z-10">{loading ? "Synchronizing..." : "Submit to Lab"}</span>
+                            {loading && <m.div className="absolute inset-0 bg-white/20" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }} />}
                           </button>
                         </div>
                       </form>

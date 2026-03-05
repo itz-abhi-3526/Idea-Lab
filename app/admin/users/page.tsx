@@ -172,7 +172,7 @@ function MCInput({ value, onChange, placeholder }: {
 }) {
   const [foc, setFoc] = useState(false)
   return (
-    <div style={{ position: "relative", flex: 1 }}>
+    <div className="mc-input-wrapper">
       <div style={{
         position: "absolute", left: 0, top: 0, bottom: 0, width: foc ? 2 : 1,
         background: foc
@@ -189,17 +189,17 @@ function MCInput({ value, onChange, placeholder }: {
         placeholder={placeholder}
         style={{
           width: "100%", paddingLeft: 32, paddingRight: 12, paddingTop: 9, paddingBottom: 9,
-          background:   foc ? `rgba(255,176,0,0.04)` : PANEL,
-          borderTop:    `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
-          borderRight:  `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
-          borderBottom: `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
-          borderLeft:   "none",
-          outline:      "none",
-          color:        DIMWHITE(0.8),
-          fontFamily:   "'IBM Plex Mono', monospace",
-          fontSize:     "0.7rem",
+          background:    foc ? `rgba(255,176,0,0.04)` : PANEL,
+          borderTop:     `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
+          borderRight:   `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
+          borderBottom:  `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
+          borderLeft:    "none",
+          outline:       "none",
+          color:         DIMWHITE(0.8),
+          fontFamily:    "'IBM Plex Mono', monospace",
+          fontSize:      "0.7rem",
           letterSpacing:"0.06em",
-          transition:   "background 0.2s",
+          transition:    "background 0.2s",
         }}
       />
     </div>
@@ -207,7 +207,7 @@ function MCInput({ value, onChange, placeholder }: {
 }
 
 /* ─────────────────────────────────────────
-   PAGE — all supabase/filter/CSV logic untouched
+   PAGE
 ───────────────────────────────────────── */
 export default function AdminUsersPage() {
   useFonts()
@@ -217,7 +217,6 @@ export default function AdminUsersPage() {
   const [search,     setSearch]     = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'guest'>('all')
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
   useEffect(() => {
     const fetchUsers = async () => {
       const { data, error } = await supabase
@@ -262,28 +261,14 @@ export default function AdminUsersPage() {
     document.body.removeChild(link)
   }
 
-  /* ── LOADING ── */
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "40px 0" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "40px 24px" }}>
         <div style={{ width: 5, height: 5, borderRadius: "50%", background: AMBER(0.8), animation: "mcblink 0.9s ease-in-out infinite" }} />
         <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.68rem", letterSpacing: "0.25em", color: AMBER(0.35) }}>
           LOADING USERS...
         </span>
         <style>{`@keyframes mcblink{0%,100%{opacity:1}50%{opacity:0.15}}`}</style>
-      </div>
-    )
-  }
-
-  if (!users.length) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "60px 0", border: `1px solid ${AMBER(0.08)}`, background: PANEL }}>
-        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.25em", color: AMBER(0.25) }}>
-          NO USERS VISIBLE
-        </span>
-        <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.78rem", color: DIMWHITE(0.2) }}>
-          Check RLS policy / admin role
-        </span>
       </div>
     )
   }
@@ -294,13 +279,29 @@ export default function AdminUsersPage() {
   return (
     <div style={{ minHeight: "100vh", background: BG, color: DIMWHITE(0.85) }}>
       <style>{`
-        @keyframes mcblink  { 0%,100%{opacity:1} 50%{opacity:0.15} }
-        @keyframes mcpulse  { 0%,100%{opacity:1} 50%{opacity:0.25} }
-        input::placeholder  { color: ${AMBER(0.2)}; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; }
+        @keyframes mcblink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+        @keyframes mcpulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        input::placeholder { color: ${AMBER(0.2)}; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; }
         option { background: #0a0900; color: rgba(220,215,200,0.8); }
+
+        .mc-header-flex { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; }
+        .mc-stats-container { display: flex; border: 1px solid ${AMBER(0.12)}; width: fit-content; }
+        .mc-controls-flex { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .mc-input-wrapper { position: relative; width: 100%; }
+        .mc-filter-row { display: flex; gap: 10px; }
+        .mc-select-wrapper { position: relative; flex: 1; }
+        .mc-export-btn { flex: 1; }
+
+        @media (min-width: 768px) {
+          .mc-header-flex { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+          .mc-controls-flex { flex-direction: row; align-items: stretch; gap: 8px; }
+          .mc-input-wrapper { flex: 1; }
+          .mc-select-wrapper { flex: none; }
+          .mc-export-btn { flex: none; }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
         {/* ── RULE ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
@@ -311,7 +312,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* ── HEADER ── */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 24 }}>
+        <div className="mc-header-flex">
           <div>
             <h1 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", letterSpacing: "-0.01em", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
               Registered Users
@@ -322,7 +323,7 @@ export default function AdminUsersPage() {
           </div>
 
           {/* stats strip */}
-          <div style={{ display: "flex", gap: 0, border: `1px solid ${AMBER(0.12)}` }}>
+          <div className="mc-stats-container">
             {[
               { label: "TOTAL", val: filteredUsers.length },
               { label: "ADMIN", val: adminCount           },
@@ -337,77 +338,54 @@ export default function AdminUsersPage() {
         </div>
 
         {/* ── CONTROLS ── */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "stretch" }}>
+        <div className="mc-controls-flex">
           {/* search */}
-          <MCInput value={search} onChange={setSearch} placeholder="SEARCH BY NAME OR EMAIL..." />
+          <MCInput value={search} onChange={setSearch} placeholder="SEARCH NAME OR EMAIL..." />
 
-          {/* role filter */}
-          <div style={{ position: "relative" }}>
-            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)` }} />
-            <select
-              value={roleFilter}
-              onChange={e => setRoleFilter(e.target.value as 'all' | 'admin' | 'guest')}
+          <div className="mc-filter-row">
+            {/* role filter */}
+            <div className="mc-select-wrapper">
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)` }} />
+              <select
+                value={roleFilter}
+                onChange={e => setRoleFilter(e.target.value as 'all' | 'admin' | 'guest')}
+                style={{
+                  width: "100%", paddingLeft: 14, paddingRight: 28, paddingTop: 9, paddingBottom: 9,
+                  background: PANEL, borderTop: `1px solid ${AMBER(0.1)}`, borderRight: `1px solid ${AMBER(0.1)}`,
+                  borderBottom: `1px solid ${AMBER(0.1)}`, borderLeft: "none", outline: "none",
+                  color: DIMWHITE(0.7), fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.68rem",
+                  letterSpacing: "0.1em", cursor: "pointer", appearance: "none"
+                }}
+              >
+                <option value="all">ALL ROLES</option>
+                <option value="admin">ADMIN</option>
+                <option value="guest">GUEST</option>
+              </select>
+            </div>
+
+            {/* export */}
+            <button
+              onClick={exportCSV}
+              className="mc-export-btn"
               style={{
-                paddingLeft:   14,
-                paddingRight:  28,
-                paddingTop:    9,
-                paddingBottom: 9,
-                background:    PANEL,
-                borderTop:     `1px solid ${AMBER(0.1)}`,
-                borderRight:   `1px solid ${AMBER(0.1)}`,
-                borderBottom:  `1px solid ${AMBER(0.1)}`,
-                borderLeft:    "none",
-                outline:       "none",
-                color:         DIMWHITE(0.7),
-                fontFamily:    "'IBM Plex Mono', monospace",
-                fontSize:      "0.68rem",
-                letterSpacing: "0.1em",
-                cursor:        "pointer",
-                appearance:    "none" as any,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "9px 16px",
+                background: "transparent", border: `1px solid ${AMBER(0.22)}`, color: AMBER(0.6),
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.62rem", letterSpacing: "0.2em",
+                cursor: "pointer", transition: "all 0.18s"
+              }}
+              onMouseEnter={e => {
+                const b = e.currentTarget as HTMLButtonElement
+                b.style.background = AMBER(0.07); b.style.borderColor = AMBER(0.4); b.style.color = AMBER(0.85)
+              }}
+              onMouseLeave={e => {
+                const b = e.currentTarget as HTMLButtonElement
+                b.style.background = "transparent"; b.style.borderColor = AMBER(0.22); b.style.color = AMBER(0.6)
               }}
             >
-              <option value="all">ALL ROLES</option>
-              <option value="admin">ADMIN</option>
-              <option value="guest">GUEST</option>
-            </select>
+              <Download style={{ width: 13, height: 13 }} />
+              EXPORT CSV
+            </button>
           </div>
-
-          {/* export */}
-          <button
-            onClick={exportCSV}
-            style={{
-              display:       "flex",
-              alignItems:    "center",
-              gap:           7,
-              paddingLeft:   16,
-              paddingRight:  16,
-              paddingTop:    9,
-              paddingBottom: 9,
-              background:    "transparent",
-              border:        `1px solid ${AMBER(0.22)}`,
-              color:         AMBER(0.6),
-              fontFamily:    "'IBM Plex Mono', monospace",
-              fontSize:      "0.62rem",
-              letterSpacing: "0.2em",
-              cursor:        "pointer",
-              transition:    "background 0.18s, border-color 0.18s, color 0.18s",
-            }}
-            onMouseEnter={e => {
-              const b = e.currentTarget as HTMLButtonElement
-              b.style.background   = AMBER(0.07)
-              b.style.borderColor  = AMBER(0.4)
-              b.style.color        = AMBER(0.85)
-            }}
-            onMouseLeave={e => {
-              const b = e.currentTarget as HTMLButtonElement
-              b.style.background   = "transparent"
-              b.style.borderColor  = AMBER(0.22)
-              b.style.color        = AMBER(0.6)
-            }}
-          >
-            <Download style={{ width: 13, height: 13 }} />
-            EXPORT CSV
-          </button>
         </div>
 
         {/* ── RESULT COUNT ── */}
@@ -423,11 +401,11 @@ export default function AdminUsersPage() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "60px 0", border: `1px solid ${AMBER(0.08)}`, background: PANEL }}>
             <div style={{ width: 5, height: 5, borderRadius: "50%", background: AMBER(0.3), animation: "mcblink 2s ease-in-out infinite" }} />
             <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.25em", color: AMBER(0.25) }}>
-              NO USERS MATCH FILTER
+              NO RECORDS MATCH FILTER
             </span>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 10 }}>
             {filteredUsers.map(user => (
               <UserCard key={user.id} user={user} />
             ))}

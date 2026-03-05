@@ -75,11 +75,11 @@ function ActionBtn({ label, onClick, color, bg, border }: {
       onMouseLeave={() => setHov(false)}
       style={{
         fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.18em",
-        padding: "6px 14px", background: hov ? bg : "transparent",
+        padding: "8px 14px", background: hov ? bg : "transparent",
         borderTop: `1px solid ${border}`, borderRight: `1px solid ${border}`,
         borderBottom: `1px solid ${border}`, borderLeft: "none",
         color, cursor: "pointer", position: "relative", overflow: "hidden",
-        transition: "background 0.18s", whiteSpace: "nowrap" as const,
+        transition: "background 0.18s", whiteSpace: "nowrap" as const, flex: 1
       }}
     >
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${color}, transparent)`, opacity: hov ? 1 : 0.4, transition: "opacity 0.18s" }} />
@@ -101,9 +101,9 @@ function TabBtn({ label, active, onClick, count }: {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: "flex", alignItems: "center", gap: 7,
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
         fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.18em",
-        padding: "9px 16px",
+        padding: "10px 16px", flex: 1,
         background: active ? `rgba(255,176,0,0.09)` : hov ? `rgba(255,176,0,0.04)` : "transparent",
         borderTop:    `1px solid ${active ? AMBER(0.32) : AMBER(0.1)}`,
         borderRight:  `1px solid ${active ? AMBER(0.32) : AMBER(0.1)}`,
@@ -150,21 +150,20 @@ function RequestCard({ req, onApprove, onReject, onComplete, onDownload, onRemar
     >
       {hov && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(to right, transparent, ${AMBER(0.5)}, transparent)` }} />}
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: hov ? 2 : 1, background: `linear-gradient(to bottom, transparent, ${cfg.color}, transparent)`, opacity: hov ? 0.85 : 0.35, transition: "opacity 0.22s, width 0.15s" }} />
-      <div style={{ position: "absolute", top: 8, right: 8, width: 9, height: 9, borderTop: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, borderRight: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, transition: "border-color 0.22s" }} />
-
+      
       <div style={{ padding: "16px 18px 14px 20px" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16 }}>
+        <div className="card-inner-flex">
 
           {/* ── LEFT ── */}
-          <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             {/* eyebrow */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
               <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: AMBER(0.28) }}>INC·{shortId}</span>
               <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.18em", padding: "1px 7px", color: AMBER(0.6), border: `1px solid ${AMBER(0.2)}`, background: AMBER(0.05) }}>{typeLabel}</span>
             </div>
 
             {/* name */}
-            <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.05rem", color: DIMWHITE(0.9), lineHeight: 1.1, marginBottom: 6 }}>
+            <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.1rem", color: DIMWHITE(0.9), lineHeight: 1.1, marginBottom: 8 }}>
               {req.name}
             </div>
 
@@ -174,30 +173,30 @@ function RequestCard({ req, onApprove, onReject, onComplete, onDownload, onRemar
               { k: "SLOT",    v: `${req.preferred_date} · ${req.preferred_time}` },
               { k: "CREATED", v: new Date(req.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
             ].map(d => (
-              <div key={d.k} style={{ display: "flex", gap: 8, marginBottom: 3 }}>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.14em", color: AMBER(0.3), minWidth: 55 }}>{d.k}</span>
-                <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.8rem", color: DIMWHITE(0.55) }}>{d.v}</span>
+              <div key={d.k} style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.14em", color: AMBER(0.3), minWidth: 60 }}>{d.k}</span>
+                <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.8rem", color: DIMWHITE(0.55), overflow: "hidden", textOverflow: "ellipsis" }}>{d.v}</span>
               </div>
             ))}
 
             {/* admin remark */}
             {req.admin_remarks && (
-              <div style={{ marginTop: 10, padding: "8px 12px", background: AMBER(0.05), border: `1px solid ${AMBER(0.2)}`, borderLeft: "none", position: "relative" }}>
+              <div style={{ marginTop: 12, padding: "10px 12px", background: AMBER(0.05), border: `1px solid ${AMBER(0.15)}`, borderLeft: "none", position: "relative" }}>
                 <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 2, background: `linear-gradient(to bottom, transparent, ${AMBER(0.7)}, transparent)` }} />
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: AMBER(0.45), marginBottom: 3 }}>ADMIN REMARK</div>
-                <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.8rem", color: AMBER(0.7), lineHeight: 1.55 }}>{req.admin_remarks}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: AMBER(0.45), marginBottom: 4 }}>ADMIN REMARK</div>
+                <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.8rem", color: AMBER(0.7), lineHeight: 1.5 }}>{req.admin_remarks}</div>
               </div>
             )}
 
             {/* download + remark buttons */}
-            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" as const }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
               <button
                 onClick={onDownload}
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.18em",
-                  padding: "7px 14px", background: AMBER(0.9), border: "none",
-                  color: BG, fontWeight: 600, cursor: "pointer",
-                  boxShadow: `0 0 12px ${AMBER(0.2)}`,
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.15em",
+                  padding: "9px 16px", background: AMBER(0.9), border: "none",
+                  color: BG, fontWeight: 700, cursor: "pointer",
+                  boxShadow: `0 0 12px ${AMBER(0.2)}`, flex: 1, minWidth: '140px'
                 }}
               >
                 ↓ DOWNLOAD ZIP
@@ -206,11 +205,11 @@ function RequestCard({ req, onApprove, onReject, onComplete, onDownload, onRemar
               <button
                 onClick={onRemark}
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.18em",
-                  padding: "7px 14px", background: "transparent",
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.15em",
+                  padding: "9px 16px", background: "transparent",
                   borderTop: `1px solid ${AMBER(0.18)}`, borderRight: `1px solid ${AMBER(0.18)}`,
                   borderBottom: `1px solid ${AMBER(0.18)}`, borderLeft: "none",
-                  color: AMBER(0.5), cursor: "pointer",
+                  color: AMBER(0.5), cursor: "pointer", flex: 1, minWidth: '140px'
                 }}
               >
                 {req.admin_remarks ? 'EDIT REMARK' : 'ADD REMARK'}
@@ -219,20 +218,17 @@ function RequestCard({ req, onApprove, onReject, onComplete, onDownload, onRemar
           </div>
 
           {/* ── RIGHT ── */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, minWidth: 160 }}>
-            {/* status badge */}
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.2em", padding: "3px 10px", color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, whiteSpace: "nowrap" as const }}>
+          <div className="card-right-section">
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.15em", padding: "4px 12px", color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, whiteSpace: "nowrap" }}>
               {cfg.label}
             </span>
 
-            {/* cost */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4, padding: "5px 10px", background: "rgba(0,0,0,0.2)", border: `1px solid ${AMBER(0.1)}` }}>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.48rem", letterSpacing: "0.15em", color: AMBER(0.3) }}>COST</span>
-              <span style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.1rem", color: AMBER(0.85) }}>₹{req.estimated_cost}</span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6, padding: "8px 14px", background: "rgba(0,0,0,0.25)", border: `1px solid ${AMBER(0.08)}`, width: '100%', justifyContent: 'center' }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.48rem", letterSpacing: "0.15em", color: AMBER(0.3) }}>EST COST</span>
+              <span style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.2rem", color: AMBER(0.85) }}>₹{req.estimated_cost}</span>
             </div>
 
-            {/* action buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
+            <div style={{ display: "flex", flexDirection: "row", gap: 6, width: '100%' }}>
               {req.status !== 'approved'  && <ActionBtn label="APPROVE"  onClick={onApprove}  color={SKY(0.8)}   bg={SKY(0.08)}   border={SKY(0.28)}   />}
               {req.status !== 'rejected'  && <ActionBtn label="REJECT"   onClick={onReject}   color={RED(0.8)}   bg={RED(0.08)}   border={RED(0.28)}   />}
               {req.status !== 'completed' && <ActionBtn label="COMPLETE" onClick={onComplete} color={GREEN(0.8)} bg={GREEN(0.08)} border={GREEN(0.28)} />}
@@ -240,97 +236,22 @@ function RequestCard({ req, onApprove, onReject, onComplete, onDownload, onRemar
           </div>
         </div>
       </div>
+      <style>{`
+        .card-inner-flex { display: flex; flex-direction: column; gap: 20px; }
+        .card-right-section { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+        
+        @media (min-width: 768px) {
+          .card-inner-flex { flex-direction: row; justify-content: space-between; }
+          .card-right-section { align-items: flex-end; min-width: 180px; width: auto; }
+          .card-right-section > div:last-child { flex-direction: column; align-items: flex-end; }
+        }
+      `}</style>
     </div>
   )
 }
 
 /* ─────────────────────────────────────────
-   REJECT CONFIRM MODAL
-───────────────────────────────────────── */
-function RejectModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)", padding: 16 }}>
-      <div style={{ width: "100%", maxWidth: 360, background: BG, border: `1px solid ${RED(0.3)}`, boxShadow: `0 32px 64px rgba(0,0,0,0.7)`, position: "relative", overflow: "hidden" }}>
-        <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${RED(0.5)}, transparent)` }} />
-        <div style={{ position: "absolute", top: 8, left: 8,  width: 9, height: 9, borderTop: `1px solid ${RED(0.4)}`, borderLeft:  `1px solid ${RED(0.4)}`  }} />
-        <div style={{ position: "absolute", top: 8, right: 8, width: 9, height: 9, borderTop: `1px solid ${RED(0.4)}`, borderRight: `1px solid ${RED(0.4)}`  }} />
-        <div style={{ padding: "22px 22px 18px" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.3em", color: RED(0.5), marginBottom: 6 }}>SYS · CONFIRM ACTION</div>
-          <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.2rem", color: RED(0.85), margin: "0 0 8px" }}>Confirm Rejection</h3>
-          <p style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.84rem", color: DIMWHITE(0.4), marginBottom: 20 }}>Are you sure you want to reject this request?</p>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <button onClick={onCancel} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "8px 16px", background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), cursor: "pointer" }}>CANCEL</button>
-            <button onClick={onConfirm} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "8px 18px", background: RED(0.85), border: "none", color: BG, fontWeight: 600, cursor: "pointer" }}>REJECT</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────
-   REMARKS MODAL
-───────────────────────────────────────── */
-function RemarksModal({ remarksFor, remarksText, onChange, onSave, onDelete, onCancel }: {
-  remarksFor: IncubationRequest; remarksText: string
-  onChange: (v: string) => void; onSave: () => void
-  onDelete: () => void; onCancel: () => void
-}) {
-  const [foc, setFoc] = useState(false)
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)", padding: 16 }}>
-      <style>{`@keyframes rmkshimmer{from{left:-40%}to{left:140%}} textarea::placeholder{color:${AMBER(0.2)};font-family:'IBM Plex Mono',monospace;font-size:0.72rem}`}</style>
-      <div style={{ width: "100%", maxWidth: 440, background: BG, border: `1px solid ${BORDER}`, boxShadow: `0 32px 64px rgba(0,0,0,0.7)`, position: "relative", overflow: "hidden" }}>
-        <div style={{ height: 1, overflow: "hidden", background: AMBER(0.1), position: "relative" }}>
-          <div style={{ position: "absolute", top: 0, bottom: 0, width: "40%", background: `linear-gradient(to right, transparent, ${AMBER(0.65)}, transparent)`, animation: "rmkshimmer 2.5s linear infinite" }} />
-        </div>
-        <div style={{ position: "absolute", top: 8, left: 8,   width: 9, height: 9, borderTop: `1px solid ${AMBER(0.4)}`, borderLeft:  `1px solid ${AMBER(0.4)}`  }} />
-        <div style={{ position: "absolute", top: 8, right: 8,  width: 9, height: 9, borderTop: `1px solid ${AMBER(0.4)}`, borderRight: `1px solid ${AMBER(0.4)}`  }} />
-        <div style={{ padding: "22px 22px 18px" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.3em", color: AMBER(0.4), marginBottom: 4 }}>SYS · ADMIN REMARKS</div>
-          <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.2rem", color: AMBER(0.9), margin: "0 0 16px" }}>
-            {remarksFor.admin_remarks ? 'Edit Remark' : 'Add Remark'}
-          </h3>
-
-          {/* textarea */}
-          <div style={{ position: "relative", marginBottom: 18 }}>
-            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: foc ? 2 : 1, background: foc ? `linear-gradient(to bottom, transparent, ${AMBER(0.85)}, transparent)` : `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`, transition: "background 0.2s, width 0.15s" }} />
-            <textarea
-              value={remarksText}
-              onChange={e => onChange(e.target.value)}
-              onFocus={() => setFoc(true)}
-              onBlur={() => setFoc(false)}
-              rows={4}
-              placeholder="Enter remarks…"
-              style={{
-                width: "100%", paddingLeft: 12, paddingRight: 12, paddingTop: 9, paddingBottom: 9,
-                background: foc ? `rgba(255,176,0,0.04)` : "rgba(0,0,0,0.35)",
-                borderTop: `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`, borderRight: `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`,
-                borderBottom: `1px solid ${foc ? AMBER(0.28) : AMBER(0.1)}`, borderLeft: "none",
-                outline: "none", resize: "none",
-                color: DIMWHITE(0.85), fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65,
-                transition: "background 0.2s",
-              }}
-            />
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {remarksFor.admin_remarks && (
-              <button onClick={onDelete} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.15em", background: "transparent", border: "none", color: RED(0.65), cursor: "pointer", borderBottom: `1px solid ${RED(0.3)}`, paddingBottom: 1 }}>DELETE REMARK</button>
-            )}
-            <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
-              <button onClick={onCancel} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "8px 16px", background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), cursor: "pointer" }}>CANCEL</button>
-              <button onClick={onSave}   style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "8px 20px", background: AMBER(0.9), border: "none", color: BG, fontWeight: 600, cursor: "pointer" }}>SAVE</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────
-   PAGE — all supabase/filter/remarks logic untouched
+   PAGE
 ───────────────────────────────────────── */
 export default function AdminIncubationRequestsPage() {
   const [requests,    setRequests]    = useState<IncubationRequest[]>([])
@@ -342,7 +263,6 @@ export default function AdminIncubationRequestsPage() {
   const [rejectFor,   setRejectFor]   = useState<IncubationRequest | null>(null)
   const [searchFoc,   setSearchFoc]   = useState(false)
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
   const fetchRequests = async () => {
     const { data } = await supabase.from('incubation_requests').select('*').order('created_at', { ascending: false })
     setRequests(data || [])
@@ -392,33 +312,42 @@ export default function AdminIncubationRequestsPage() {
         @keyframes mcblink { 0%,100%{opacity:1} 50%{opacity:0.15} }
         @keyframes mcpulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
         input::placeholder { color:${AMBER(0.22)};font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.06em }
+        
+        .tab-search-flex { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .tabs-row { display: flex; gap: 4px; }
+        .search-container { position: relative; width: 100%; }
+
+        @media (min-width: 768px) {
+          .tab-search-flex { flex-direction: row; align-items: stretch; gap: 12px; }
+          .tabs-row { flex: none; width: auto; }
+          .search-container { flex: 1; }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
-        {/* rule */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.32em", color: AMBER(0.45), whiteSpace: "nowrap" }}>SYS · INCUBATION REQUESTS</span>
+          <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.58rem", letterSpacing: "0.32em", color: AMBER(0.45), whiteSpace: 'nowrap' }}>SYS · INCUBATION REQUESTS</span>
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.25)}, transparent)` }} />
         </div>
 
-        {/* header */}
         <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", letterSpacing: "-0.01em", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
             Incubation Requests
           </h1>
-          <p style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.85rem", color: DIMWHITE(0.3), marginTop: 5 }}>
-            Review, approve, and manage incubation requests
+          <p style={{ fontFamily: "'IBM Plex Sans'", fontSize: "0.85rem", color: DIMWHITE(0.3), marginTop: 6 }}>
+            Review, approve, and manage project incubation
           </p>
         </div>
 
-        {/* tabs + search row */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: 8, marginBottom: 20 }}>
-          <TabBtn label="PENDING" active={tab === 'pending'} onClick={() => setTab('pending')} count={pendingCount} />
-          <TabBtn label="PAST"    active={tab === 'past'}    onClick={() => setTab('past')}    count={pastCount}    />
+        <div className="tab-search-flex">
+          <div className="tabs-row">
+            <TabBtn label="PENDING" active={tab === 'pending'} onClick={() => setTab('pending')} count={pendingCount} />
+            <TabBtn label="PAST"    active={tab === 'past'}    onClick={() => setTab('past')}    count={pastCount}    />
+          </div>
 
-          <div style={{ flex: 1, minWidth: 200, position: "relative" }}>
-            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: searchFoc ? 2 : 1, background: searchFoc ? `linear-gradient(to bottom, transparent, ${AMBER(0.85)}, transparent)` : `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`, transition: "background 0.2s, width 0.15s" }} />
+          <div className="search-container">
+            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: searchFoc ? 2 : 1, background: searchFoc ? AMBER(0.85) : AMBER(0.18), transition: "all 0.2s" }} />
             <input
               placeholder="SEARCH NAME OR CONTACT..."
               value={search}
@@ -426,41 +355,34 @@ export default function AdminIncubationRequestsPage() {
               onFocus={() => setSearchFoc(true)}
               onBlur={() => setSearchFoc(false)}
               style={{
-                width: "100%", paddingLeft: 12, paddingRight: 12, paddingTop: 9, paddingBottom: 9,
+                width: "100%", padding: "10px 14px",
                 background: searchFoc ? `rgba(255,176,0,0.04)` : PANEL,
-                borderTop: `1px solid ${searchFoc ? AMBER(0.28) : AMBER(0.1)}`, borderRight: `1px solid ${searchFoc ? AMBER(0.28) : AMBER(0.1)}`,
-                borderBottom: `1px solid ${searchFoc ? AMBER(0.28) : AMBER(0.1)}`, borderLeft: "none",
-                outline: "none", color: DIMWHITE(0.8), fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.7rem", letterSpacing: "0.06em", transition: "background 0.2s",
+                borderTop: `1px solid ${AMBER(0.1)}`, borderRight: `1px solid ${AMBER(0.1)}`,
+                borderBottom: `1px solid ${AMBER(0.1)}`, borderLeft: "none",
+                outline: "none", color: DIMWHITE(0.85), fontFamily: "'IBM Plex Mono'", fontSize: "0.7rem", letterSpacing: "0.05em"
               }}
             />
           </div>
         </div>
 
-        {/* result row */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.22em", color: AMBER(0.25) }}>
-            {filteredRequests.length} REQUEST{filteredRequests.length !== 1 ? "S" : ""}
+          <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.5rem", letterSpacing: "0.22em", color: AMBER(0.25) }}>
+            {filteredRequests.length} RECORD{filteredRequests.length !== 1 ? "S" : ""} FOUND
           </span>
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.08)}, transparent)` }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 4, height: 4, borderRadius: "50%", background: `rgba(0,255,120,0.85)`, boxShadow: `0 0 4px rgba(0,255,120,0.5)`, animation: "mcpulse 2s ease-in-out infinite" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: `rgba(0,255,120,0.45)` }}>LIVE</span>
-          </div>
         </div>
 
-        {/* content */}
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "40px 0" }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: AMBER(0.8), animation: "mcblink 0.9s ease-in-out infinite" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.68rem", letterSpacing: "0.25em", color: AMBER(0.35) }}>LOADING REQUESTS...</span>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: AMBER(0.8), animation: "mcblink 0.9s infinite" }} />
+            <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.68rem", color: AMBER(0.35) }}>LOADING...</span>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "60px 0", border: `1px solid ${AMBER(0.08)}`, background: PANEL }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: AMBER(0.3), animation: "mcblink 2s ease-in-out infinite" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.25em", color: AMBER(0.25) }}>NO REQUESTS FOUND</span>
+          <div style={{ padding: "60px 0", border: `1px solid ${AMBER(0.08)}`, background: PANEL, textAlign: "center" }}>
+            <span style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.65rem", color: AMBER(0.25) }}>NO REQUESTS FOUND</span>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {filteredRequests.map(req => (
               <RequestCard
                 key={req.id} req={req}
@@ -475,7 +397,6 @@ export default function AdminIncubationRequestsPage() {
         )}
       </div>
 
-      {/* reject confirm */}
       {rejectFor && (
         <RejectModal
           onConfirm={() => { updateStatus(rejectFor, 'rejected'); setRejectFor(null) }}
@@ -483,7 +404,6 @@ export default function AdminIncubationRequestsPage() {
         />
       )}
 
-      {/* remarks modal */}
       {remarksFor && (
         <RemarksModal
           remarksFor={remarksFor} remarksText={remarksText}
@@ -491,6 +411,61 @@ export default function AdminIncubationRequestsPage() {
           onDelete={deleteRemarks} onCancel={() => setRemarksFor(null)}
         />
       )}
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────
+   MODALS (Corrected for Responsive)
+───────────────────────────────────────── */
+function RejectModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", padding: 16 }}>
+      <div style={{ width: "100%", maxWidth: 360, background: BG, border: `1px solid ${RED(0.3)}`, padding: "24px", position: "relative" }}>
+        <h3 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "1.2rem", color: RED(0.85), margin: "0 0 10px" }}>Confirm Rejection</h3>
+        <p style={{ fontSize: "0.85rem", color: DIMWHITE(0.4), marginBottom: 20 }}>Are you sure you want to reject this request? This action is permanent.</p>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onCancel} style={{ background: "transparent", border: `1px solid ${AMBER(0.2)}`, color: AMBER(0.4), padding: "8px 16px", cursor: "pointer", fontSize: '0.6rem' }}>CANCEL</button>
+          <button onClick={onConfirm} style={{ background: RED(0.85), border: "none", color: "#000", padding: "8px 20px", fontWeight: 700, cursor: "pointer", fontSize: '0.6rem' }}>REJECT</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RemarksModal({ remarksFor, remarksText, onChange, onSave, onDelete, onCancel }: {
+  remarksFor: IncubationRequest; remarksText: string
+  onChange: (v: string) => void; onSave: () => void
+  onDelete: () => void; onCancel: () => void
+}) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", padding: 12 }}>
+      <div style={{ width: "100%", maxWidth: 480, background: BG, border: `1px solid ${AMBER(0.2)}`, padding: "24px", position: "relative", maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ fontFamily: "'IBM Plex Mono'", fontSize: "0.5rem", color: AMBER(0.4), marginBottom: 4 }}>SYS · ADMIN REMARKS</div>
+        <h3 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "1.3rem", color: AMBER(0.9), marginBottom: 16 }}>{remarksFor.admin_remarks ? 'Edit Remark' : 'Add Remark'}</h3>
+        
+        <textarea
+          value={remarksText}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Enter remarks…"
+          rows={5}
+          style={{
+            width: "100%", background: "rgba(0,0,0,0.3)", border: `1px solid ${AMBER(0.1)}`,
+            color: DIMWHITE(0.85), padding: "12px", outline: "none", fontFamily: "inherit",
+            fontSize: "0.9rem", resize: "none", marginBottom: 20
+          }}
+        />
+
+        <div style={{ display: "flex", flexWrap: 'wrap', gap: 12, justifyContent: "space-between", alignItems: 'center' }}>
+          {remarksFor.admin_remarks ? (
+            <button onClick={onDelete} style={{ background: "transparent", border: "none", color: RED(0.6), cursor: "pointer", fontSize: '0.6rem', textDecoration: 'underline' }}>DELETE REMARK</button>
+          ) : <div />}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={onCancel} style={{ background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), padding: "10px 18px", fontSize: '0.6rem' }}>CANCEL</button>
+            <button onClick={onSave} style={{ background: AMBER(0.9), border: "none", color: "#000", padding: "10px 22px", fontWeight: 700, fontSize: '0.6rem' }}>SAVE</button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

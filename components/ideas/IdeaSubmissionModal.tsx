@@ -54,76 +54,98 @@ export default function IdeaSubmissionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-0 sm:px-4">
+      {/* Container - Stacks to bottom on mobile, centers on desktop */}
       <div
         className="
           w-full
-          max-w-xl
-          max-h-[90vh]
-          overflow-y-auto
-          rounded-2xl
+          sm:max-w-xl
+          max-h-[95vh]
+          sm:max-h-[90vh]
+          overflow-hidden
+          rounded-t-[2rem] sm:rounded-2xl
           bg-card
-          p-5 sm:p-6
-          space-y-4
+          flex flex-col
+          shadow-2xl
         "
       >
-        <h2 className="text-lg sm:text-xl font-semibold">
-          Submit Your Idea
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {Object.entries(form).map(([key, value]) => (
-            <input
-              key={key}
-              placeholder={key.replace("_", " ")}
-              value={value}
-              onChange={(e) =>
-                setForm({ ...form, [key]: e.target.value })
-              }
-              className="
-                w-full
-                rounded-md
-                border
-                bg-background
-                px-3 py-2
-                text-sm
-                outline-none
-              "
-            />
-          ))}
+        {/* Fixed Header */}
+        <div className="p-6 pb-2 border-b border-white/5">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            Idea Proposal
+          </h2>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">
+            Technical Submission Protocol
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        {/* Scrollable Form Area */}
+        <div className="p-6 overflow-y-auto space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {Object.entries(form).map(([key, value]) => (
+              <div key={key} className={key === 'idea_description' ? 'sm:col-span-2' : ''}>
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold ml-1 mb-1 block">
+                  {key.replace("_", " ")}
+                </label>
+                {key === 'idea_description' ? (
+                  <textarea
+                    rows={4}
+                    placeholder={`Enter ${key.replace("_", " ")}`}
+                    value={value}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    className="w-full rounded-xl border border-white/10 bg-background/50 px-4 py-3 text-sm outline-none focus:border-accent transition-all resize-none"
+                  />
+                ) : (
+                  <input
+                    type={key === 'team_size' ? 'number' : 'text'}
+                    placeholder={`Enter ${key.replace("_", " ")}`}
+                    value={value}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    className="w-full rounded-xl border border-white/10 bg-background/50 px-4 py-3 text-sm outline-none focus:border-accent transition-all"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fixed Action Footer */}
+        <div className="p-6 bg-muted/20 border-t border-white/5 flex flex-col sm:flex-row gap-3">
           <button
             onClick={onClose}
             className="
-              w-full sm:w-auto
-              rounded-md
-              border
-              px-4 py-2
-              text-sm
+              order-2 sm:order-1
+              w-full sm:w-1/3
+              rounded-xl
+              border border-white/10
+              px-4 py-3
+              text-xs font-bold uppercase tracking-widest
               text-muted-foreground
-              hover:bg-muted/50
-              transition
+              hover:bg-white/5
+              transition-all
             "
           >
-            Cancel
+            Abort
           </button>
 
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="
-              w-full sm:w-auto
-              rounded-md
-              bg-accent
-              px-4 py-2
-              text-sm font-medium
-              text-white
+              order-1 sm:order-2
+              w-full sm:flex-1
+              rounded-xl
+              bg-white
+              text-black
+              px-4 py-3
+              text-xs font-bold uppercase tracking-[0.2em]
+              hover:bg-accent hover:text-white
               disabled:opacity-60
+              transition-all
+              shadow-lg
             "
           >
-            {loading ? "Submitting..." : "Submit Idea"}
+            {loading ? "Transmitting..." : "Initialize Submission"}
           </button>
         </div>
       </div>

@@ -81,7 +81,7 @@ function SRule({ label }: { label: string }) {
   )
 }
 
-/* ── TYPES — unchanged ── */
+/* ── TYPES ── */
 type Product = {
   id: string; title: string; short_description: string | null; full_description: string | null
   category: string | null; status: string | null; price: number | null; is_paid: boolean
@@ -106,28 +106,13 @@ export default function AdminProductsPage() {
   }
 
   async function deleteProduct(id: string) {
-
-  setDeleting(true)
-
-  const { data, error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", id)
-    .select()
-
-  setDeleting(false)
-
-  if (error) {
-    console.error(error)
-    alert(error.message)
-    return
+    setDeleting(true)
+    const { error } = await supabase.from("products").delete().eq("id", id)
+    setDeleting(false)
+    if (error) { console.error(error); alert(error.message); return }
+    setDeleteFor(null)
+    loadProducts()
   }
-
-  console.log("Deleted:", data)
-
-  setDeleteFor(null)
-  loadProducts()
-}
 
   function closeModal() { setOpen(false); setEditing(null); loadProducts() }
 
@@ -145,9 +130,22 @@ export default function AdminProductsPage() {
         select { appearance:none }
         .prdscroll::-webkit-scrollbar { width:3px;background:#0a0900 }
         .prdscroll::-webkit-scrollbar-thumb { background:rgba(255,176,0,0.2) }
+
+        .prd-header-flex { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; }
+        .prd-stats-bar { display: flex; align-items: center; gap: 10px; }
+        .prd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+
+        @media (min-width: 768px) {
+          .prd-header-flex { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+        }
+
+        @media (max-width: 480px) {
+          .prd-stats-bar { width: 100%; justify-content: space-between; }
+          .prd-grid { grid-template-columns: 1fr; }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
         {/* rule */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
@@ -156,7 +154,7 @@ export default function AdminProductsPage() {
         </div>
 
         {/* header row */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 24 }}>
+        <div className="prd-header-flex">
           <div>
             <h1 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.6rem,4vw,2.4rem)", letterSpacing: "-0.01em", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
               Products
@@ -165,7 +163,7 @@ export default function AdminProductsPage() {
               Manage IDEA Lab products and projects
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="prd-stats-bar">
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.22em", color: AMBER(0.3), padding: "7px 12px", border: `1px solid ${AMBER(0.12)}` }}>
               {products.length} PRODUCT{products.length !== 1 ? "S" : ""}
             </div>
@@ -180,7 +178,7 @@ export default function AdminProductsPage() {
             <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.25em", color: AMBER(0.25) }}>NO PRODUCTS FOUND</span>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 6 }}>
+          <div className="prd-grid">
             {products.map(p => (
               <ProductCard
                 key={p.id} product={p}
@@ -221,65 +219,41 @@ function ProductCard({ product: p, onEdit, onDelete }: {
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: hov ? 2 : 1, background: `linear-gradient(to bottom,transparent,${p.is_active ? AMBER(hov ? 0.8 : 0.3) : "rgba(255,255,255,0.1)"},transparent)`, transition: "all 0.22s" }} />
       <div style={{ position: "absolute", top: 8, right: 8, width: 9, height: 9, borderTop: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, borderRight: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, transition: "border-color 0.22s" }} />
 
-      {/* image */}
       {p.image_url && (
-        <div style={{ height: 130, overflow: "hidden", position: "relative", borderBottom: `1px solid ${AMBER(0.08)}` }}>
+        <div style={{ height: 140, overflow: "hidden", position: "relative", borderBottom: `1px solid ${AMBER(0.08)}` }}>
           <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,9,0,0.7), transparent)" }} />
         </div>
       )}
 
       <div style={{ padding: "12px 14px 12px 16px" }}>
-        {/* eyebrow */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
           <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.2em", color: AMBER(0.28) }}>PRD·{shortId}</span>
-          {p.is_featured && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: AMBER(0.8), background: AMBER(0.08), border: `1px solid ${AMBER(0.22)}` }}>FEAT</span>
-          )}
-          {p.is_paid && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: SKY(0.8), background: SKY(0.06), border: `1px solid ${SKY(0.2)}` }}>PAID</span>
-          )}
-          {!p.is_active && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>INACTIVE</span>
-          )}
+          {p.is_featured && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: AMBER(0.8), background: AMBER(0.08), border: `1px solid ${AMBER(0.22)}` }}>FEAT</span>}
+          {p.is_paid && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: SKY(0.8), background: SKY(0.06), border: `1px solid ${SKY(0.2)}` }}>PAID</span>}
+          {!p.is_active && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.44rem", letterSpacing: "0.16em", padding: "1px 6px", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>INACTIVE</span>}
         </div>
 
-        {/* title */}
         <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1rem", color: DIMWHITE(0.9), lineHeight: 1.1, marginBottom: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {p.title}
         </div>
 
-        {/* short desc */}
         {p.short_description && (
           <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.78rem", color: DIMWHITE(0.38), lineHeight: 1.5, marginBottom: 8, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
             {p.short_description}
           </div>
         )}
 
-        {/* meta row */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-          {p.category && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: AMBER(0.55), border: `1px solid ${AMBER(0.18)}` }}>
-              {p.category.toUpperCase()}
-            </span>
-          )}
-          {p.status && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: GREEN(0.6), border: `1px solid ${GREEN(0.2)}` }}>
-              {p.status.toUpperCase()}
-            </span>
-          )}
-          {p.price != null && p.is_paid && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: SKY(0.7), border: `1px solid ${SKY(0.2)}` }}>
-              Rs{p.price}
-            </span>
-          )}
+          {p.category && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: AMBER(0.55), border: `1px solid ${AMBER(0.18)}` }}>{p.category.toUpperCase()}</span>}
+          {p.status && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: GREEN(0.6), border: `1px solid ${GREEN(0.2)}` }}>{p.status.toUpperCase()}</span>}
+          {p.price != null && p.is_paid && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", padding: "2px 7px", color: SKY(0.7), border: `1px solid ${SKY(0.2)}` }}>Rs{p.price}</span>}
         </div>
 
-        {/* divider + actions */}
         <div style={{ height: 1, background: `linear-gradient(to right,${AMBER(0.08)},transparent)`, marginBottom: 10 }} />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-          <CardActionBtn label="EDIT"   onClick={onEdit}   color={AMBER(0.7)} hoverBg={AMBER(0.07)} hoverBorder={AMBER(0.3)} />
-          <CardActionBtn label="DELETE" onClick={onDelete} color={RED(0.7)}   hoverBg={RED(0.07)}   hoverBorder={RED(0.3)}   />
+          <CardActionBtn label="EDIT" onClick={onEdit} color={AMBER(0.7)} hoverBg={AMBER(0.07)} hoverBorder={AMBER(0.3)} />
+          <CardActionBtn label="DELETE" onClick={onDelete} color={RED(0.7)} hoverBg={RED(0.07)} hoverBorder={RED(0.3)} />
         </div>
       </div>
     </div>
@@ -306,7 +280,7 @@ function AddBtn({ onClick }: { onClick: () => void }) {
   const [hov, setHov] = useState(false)
   return (
     <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "9px 18px", background: hov ? AMBER(1) : AMBER(0.9), border: "none", color: BG, fontWeight: 600, cursor: "pointer", boxShadow: `0 0 ${hov ? 22 : 12}px ${AMBER(hov ? 0.4 : 0.22)}`, transition: "background 0.18s, box-shadow 0.18s" }}
+      style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "9px 18px", background: hov ? AMBER(1) : AMBER(0.9), border: "none", color: BG, fontWeight: 600, cursor: "pointer", boxShadow: `0 0 ${hov ? 22 : 12}px ${AMBER(hov ? 0.4 : 0.22)}`, transition: "background 0.18s, box-shadow 0.18s", whiteSpace: "nowrap" }}
     >
       + ADD PRODUCT
     </button>
@@ -317,31 +291,16 @@ function AddBtn({ onClick }: { onClick: () => void }) {
 function DeleteConfirmModal({ onConfirm, onCancel, deleting }: {
   onConfirm: () => void; onCancel: () => void; deleting: boolean
 }) {
-  const A = (a = 1) => `rgba(255,176,0,${a})`
-  const R = (a = 1) => `rgba(255,60,60,${a})`
-  const D = (a = 1) => `rgba(220,215,200,${a})`
-  const [hovC, setHovC] = useState(false)
   return (
-    <div style={{ position:"fixed", inset:0, zIndex:60, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.85)", backdropFilter:"blur(8px)", padding:16 }}>
-      <div style={{ width:"100%", maxWidth:360, background:"#0a0900", border:`1px solid ${R(0.35)}`, boxShadow:`0 32px 64px rgba(0,0,0,0.7)`, position:"relative", overflow:"hidden" }}>
-        <div style={{ height:1, background:`linear-gradient(to right,transparent,${R(0.55)},transparent)` }} />
-        <div style={{ position:"absolute", top:8, left:8,  width:9, height:9, borderTop:`1px solid ${R(0.45)}`, borderLeft: `1px solid ${R(0.45)}`  }} />
-        <div style={{ position:"absolute", top:8, right:8, width:9, height:9, borderTop:`1px solid ${R(0.45)}`, borderRight:`1px solid ${R(0.45)}`  }} />
+    <div style={{ position:"fixed", inset:0, zIndex:100, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,0.85)", backdropFilter:"blur(8px)", padding:16 }}>
+      <div style={{ width:"100%", maxWidth:360, background:"#0a0900", border:`1px solid ${RED(0.35)}`, boxShadow:`0 32px 64px rgba(0,0,0,0.7)`, position:"relative", overflow:"hidden" }}>
         <div style={{ padding:"22px 22px 20px" }}>
-          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.5rem", letterSpacing:"0.3em", color:R(0.5), marginBottom:6 }}>SYS · CONFIRM DELETE</div>
-          <h3 style={{ fontFamily:"'IBM Plex Sans Condensed',sans-serif", fontWeight:700, fontSize:"1.2rem", color:R(0.88), margin:"0 0 8px" }}>Delete Product</h3>
-          <p style={{ fontFamily:"'IBM Plex Sans',sans-serif", fontWeight:300, fontSize:"0.84rem", color:D(0.4), marginBottom:22 }}>
-            This action is permanent and cannot be undone.
-          </p>
-          <div style={{ height:1, background:`linear-gradient(to right,${R(0.12)},transparent)`, marginBottom:16 }} />
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.5rem", letterSpacing:"0.3em", color:RED(0.5), marginBottom:6 }}>SYS · CONFIRM DELETE</div>
+          <h3 style={{ fontFamily:"'IBM Plex Sans Condensed',sans-serif", fontWeight:700, fontSize:"1.2rem", color:RED(0.88), margin:"0 0 8px" }}>Delete Product</h3>
+          <p style={{ fontFamily:"'IBM Plex Sans',sans-serif", fontWeight:300, fontSize:"0.84rem", color:DIMWHITE(0.4), marginBottom:22 }}>Permanent action cannot be undone.</p>
           <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
-            <button onClick={onCancel}
-              onMouseEnter={() => setHovC(true)} onMouseLeave={() => setHovC(false)}
-              style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"8px 16px", background:"transparent", border:`1px solid ${hovC ? A(0.3) : A(0.15)}`, color:hovC ? A(0.65) : A(0.4), cursor:"pointer", transition:"all 0.18s" }}
-            >CANCEL</button>
-            <button onClick={onConfirm} disabled={deleting}
-              style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"8px 20px", background:deleting ? R(0.5) : R(0.85), border:"none", color:"#0a0900", fontWeight:600, cursor:deleting?"not-allowed":"pointer", position:"relative", overflow:"hidden", boxShadow:deleting?"none":`0 0 14px ${R(0.3)}`, transition:"all 0.18s" }}
-            >
+            <button onClick={onCancel} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"8px 16px", background:"transparent", border:`1px solid ${AMBER(0.15)}`, color:AMBER(0.4), cursor:"pointer" }}>CANCEL</button>
+            <button onClick={onConfirm} disabled={deleting} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:"0.58rem", letterSpacing:"0.2em", padding:"8px 20px", background:deleting ? RED(0.5) : RED(0.85), border:"none", color:"#0a0900", fontWeight:600, cursor:deleting?"not-allowed":"pointer" }}>
               {deleting ? "DELETING..." : "DELETE"}
             </button>
           </div>
@@ -351,174 +310,93 @@ function DeleteConfirmModal({ onConfirm, onCancel, deleting }: {
   )
 }
 
-
 /* ── PRODUCT MODAL ── */
 function ProductModal({ open, onClose, product }: {
   open: boolean; onClose: () => void; product: Product | null
 }) {
-  const blank = {
-    title: "", short_description: "", full_description: "",
-    category: "", status: "", price: "", is_paid: false,
-    demo_url: "", github_url: "", docs_url: "", image_url: "",
-    technologies: "", team_size: "", is_featured: false, is_active: true,
-  }
-
-  const [form,    setForm]    = useState<any>(blank)
-  const [saving,  setSaving]  = useState(false)
+  const blank = { title: "", short_description: "", full_description: "", category: "", status: "", price: "", is_paid: false, demo_url: "", github_url: "", docs_url: "", image_url: "", technologies: "", team_size: "", is_featured: false, is_active: true }
+  const [form, setForm] = useState<any>(blank)
+  const [saving, setSaving] = useState(false)
   const [imgLoad, setImgLoad] = useState(false)
 
   useEffect(() => {
     if (product) {
       setForm({ ...product, technologies: Array.isArray(product.technologies) ? (product.technologies as any[]).join(", ") : product.technologies || "" })
-    } else {
-      setForm(blank)
-    }
+    } else { setForm(blank) }
   }, [product, open])
 
   if (!open) return null
 
-  /* cloudinary upload — unchanged */
   async function uploadImage(e: any) {
     const file = e.target.files?.[0]; if (!file) return; setImgLoad(true)
-    const data = new FormData()
-    data.append("file", file); data.append("upload_preset", "idea_lab_profiles")
+    const data = new FormData(); data.append("file", file); data.append("upload_preset", "idea_lab_profiles")
     const res  = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: data })
-    const json = await res.json()
-    setForm((prev: any) => ({ ...prev, image_url: json.secure_url }))
-    setImgLoad(false)
+    const json = await res.json(); setForm((prev: any) => ({ ...prev, image_url: json.secure_url })); setImgLoad(false)
   }
 
-  /* save — unchanged */
   async function save() {
     setSaving(true)
-    const payload = {
-      title: form.title, short_description: form.short_description, full_description: form.full_description,
-      category: form.category, status: form.status,
-      price: form.price ? Number(form.price) : null,
-      is_paid: form.is_paid, demo_url: form.demo_url, github_url: form.github_url,
-      docs_url: form.docs_url, image_url: form.image_url,
-      technologies: form.technologies ? form.technologies.split(",").map((t: string) => t.trim()) : [],
-      team_size: form.team_size ? Number(form.team_size) : null,
-      is_featured: form.is_featured, is_active: form.is_active,
-    }
+    const payload = { title: form.title, short_description: form.short_description, full_description: form.full_description, category: form.category, status: form.status, price: form.price ? Number(form.price) : null, is_paid: form.is_paid, demo_url: form.demo_url, github_url: form.github_url, docs_url: form.docs_url, image_url: form.image_url, technologies: form.technologies ? form.technologies.split(",").map((t: string) => t.trim()) : [], team_size: form.team_size ? Number(form.team_size) : null, is_featured: form.is_featured, is_active: form.is_active }
     let error
     if (product) { const res = await supabase.from("products").update(payload).eq("id", product.id).select(); error = res.error }
-    else         { const res = await supabase.from("products").insert(payload).select(); error = res.error }
-    setSaving(false)
-    if (error) { alert(error.message); return }
-    onClose()
+    else { const res = await supabase.from("products").insert(payload).select(); error = res.error }
+    setSaving(false); if (error) { alert(error.message); return }; onClose()
   }
 
-  const isEdit = !!product
-
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <style>{`
-        @keyframes prdshimmer { from{left:-40%} to{left:140%} }
-        .prdscroll::-webkit-scrollbar { width:3px;background:#0a0900 }
-        .prdscroll::-webkit-scrollbar-thumb { background:rgba(255,176,0,0.2) }
-        .prdscroll { scrollbar-width:thin;scrollbar-color:rgba(255,176,0,0.2) #0a0900 }
-      `}</style>
-
-      <div className="prdscroll" style={{ width: "100%", maxWidth: 580, maxHeight: "92vh", overflowY: "auto", background: BG, border: `1px solid ${AMBER(0.2)}`, boxShadow: `0 40px 80px rgba(0,0,0,0.7)`, position: "relative" }}>
-
-        {/* shimmer bar */}
-        <div style={{ height: 1, overflow: "hidden", background: AMBER(0.1), position: "relative" }}>
-          <div style={{ position: "absolute", top: 0, bottom: 0, width: "40%", background: `linear-gradient(to right,transparent,${AMBER(0.65)},transparent)`, animation: "prdshimmer 2.5s linear infinite" }} />
-        </div>
-
-        {/* HUD corners */}
-        <div style={{ position: "absolute", top: 8, left: 8,   width: 10, height: 10, borderTop: `1px solid ${AMBER(0.4)}`, borderLeft:  `1px solid ${AMBER(0.4)}`  }} />
-        <div style={{ position: "absolute", top: 8, right: 8,  width: 10, height: 10, borderTop: `1px solid ${AMBER(0.4)}`, borderRight: `1px solid ${AMBER(0.4)}`  }} />
-        <div style={{ position: "absolute", bottom: 8, left: 8,  width: 10, height: 10, borderBottom: `1px solid ${AMBER(0.18)}`, borderLeft:  `1px solid ${AMBER(0.18)}` }} />
-        <div style={{ position: "absolute", bottom: 8, right: 8, width: 10, height: 10, borderBottom: `1px solid ${AMBER(0.18)}`, borderRight: `1px solid ${AMBER(0.18)}` }} />
-
-        <div style={{ padding: "22px 22px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
-
-          {/* header */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
+      <div className="prdscroll" style={{ width: "100%", maxWidth: 600, maxHeight: "95vh", overflowY: "auto", background: BG, border: `1px solid ${AMBER(0.2)}`, boxShadow: `0 40px 80px rgba(0,0,0,0.7)`, position: "relative" }}>
+        <div style={{ height: 1, background: AMBER(0.1) }} />
+        <div style={{ padding: "24px 20px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
             <div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.3em", color: AMBER(0.4), marginBottom: 4 }}>
-                {isEdit ? "SYS · EDIT RECORD" : "SYS · NEW RECORD"}
-              </div>
-              <h2 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.3rem", letterSpacing: "-0.01em", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
-                {isEdit ? "Edit Product" : "Add Product"}
-              </h2>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.3em", color: AMBER(0.4) }}>SYS · {product ? "EDIT RECORD" : "NEW RECORD"}</div>
+              <h2 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.4rem", color: AMBER(0.9), margin: 0 }}>{product ? "Edit Product" : "Add Product"}</h2>
             </div>
-            <button onClick={onClose}
-              style={{ width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: `1px solid ${AMBER(0.18)}`, color: AMBER(0.45), cursor: "pointer", fontSize: "0.65rem", fontFamily: "'IBM Plex Mono', monospace", flexShrink: 0 }}
-              onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = AMBER(0.45); b.style.color = AMBER(0.8) }}
-              onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = AMBER(0.18); b.style.color = AMBER(0.45) }}
-            >X</button>
+            <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), cursor: "pointer", width: 28, height: 28 }}>X</button>
           </div>
 
-          {/* IMAGE */}
           <SRule label="PRD · IMAGE" />
-          <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-            <div style={{ width: 110, height: 80, flexShrink: 0, border: `1px solid ${AMBER(0.2)}`, background: AMBER(0.04), overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-              {form.image_url
-                ? <img src={form.image_url} alt="Preview" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem", letterSpacing: "0.15em", color: AMBER(0.25), textAlign: "center", padding: "0 6px" }}>NO IMAGE</span>
-              }
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ width: 100, height: 70, border: `1px solid ${AMBER(0.2)}`, background: "#000", flexShrink: 0 }}>
+              {form.image_url && <img src={form.image_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
             </div>
-            <label style={{ cursor: "pointer" }}>
+            <label style={{ cursor: "pointer", flex: 1, minWidth: 160 }}>
               <input type="file" accept="image/*" onChange={uploadImage} />
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.18em", padding: "8px 14px", background: "transparent", border: `1px solid ${AMBER(0.2)}`, color: AMBER(imgLoad ? 0.4 : 0.55) }}>
-                {imgLoad ? "UPLOADING..." : "UPLOAD / REPLACE"}
-              </div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", border: `1px solid ${AMBER(0.2)}`, padding: "10px", textAlign: "center" }}>{imgLoad ? "UPLOADING..." : "UPLOAD / REPLACE IMAGE"}</div>
             </label>
           </div>
 
-          {/* CORE */}
-          <SRule label="PRD · CORE INFO" />
           <MCInput label="TITLE" value={form.title} onChange={v => setForm({ ...form, title: v })} placeholder="Product title" />
-          <MCTextarea label="SHORT DESCRIPTION" value={form.short_description || ""} onChange={v => setForm({ ...form, short_description: v })} rows={2} placeholder="Brief one-liner..." />
-          <MCTextarea label="FULL DESCRIPTION"  value={form.full_description  || ""} onChange={v => setForm({ ...form, full_description: v })}  rows={4} placeholder="Detailed description..." />
-
-          {/* CLASSIFICATION */}
-          <SRule label="PRD · CLASSIFICATION" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <MCInput label="CATEGORY" value={form.category || ""} onChange={v => setForm({ ...form, category: v })} placeholder="e.g. Web App" />
-            <MCInput label="STATUS"   value={form.status   || ""} onChange={v => setForm({ ...form, status: v })}   placeholder="e.g. Live, Beta" />
-          </div>
-          <MCInput label="TECHNOLOGIES (comma-separated)" value={form.technologies || ""} onChange={v => setForm({ ...form, technologies: v })} placeholder="React, Supabase, Python..." />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-            <MCInput       label="TEAM SIZE"   type="number" value={form.team_size || ""}  onChange={v => setForm({ ...form, team_size: v })} placeholder="0" />
-            <MCBoolSelect  label="FEATURED"    value={form.is_featured}  onChange={v => setForm({ ...form, is_featured: v })} />
-            <MCBoolSelect  label="ACTIVE"      value={form.is_active}    onChange={v => setForm({ ...form, is_active: v })} />
+          <MCTextarea label="SHORT DESC" value={form.short_description || ""} onChange={v => setForm({ ...form, short_description: v })} rows={2} />
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <MCInput label="CATEGORY" value={form.category || ""} onChange={v => setForm({ ...form, category: v })} />
+            <MCInput label="STATUS" value={form.status || ""} onChange={v => setForm({ ...form, status: v })} />
           </div>
 
-          {/* PRICING */}
-          <SRule label="PRD · PRICING" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <MCBoolSelect label="PAID"         value={form.is_paid} onChange={v => setForm({ ...form, is_paid: v, ...(!v && { price: "" }) })} />
-            <MCInput      label="PRICE (Rs)"   type="number" value={form.price || ""} onChange={v => setForm({ ...form, price: v })} placeholder="0" />
+          <MCInput label="TECHNOLOGIES" value={form.technologies || ""} onChange={v => setForm({ ...form, technologies: v })} placeholder="React, Node..." />
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 10 }}>
+            <MCInput label="TEAM SIZE" type="number" value={form.team_size || ""} onChange={v => setForm({ ...form, team_size: v })} />
+            <MCBoolSelect label="FEATURED" value={form.is_featured} onChange={v => setForm({ ...form, is_featured: v })} />
+            <MCBoolSelect label="ACTIVE" value={form.is_active} onChange={v => setForm({ ...form, is_active: v })} />
           </div>
 
-          {/* LINKS */}
-          <SRule label="PRD · LINKS" />
-          <MCInput label="DEMO URL"   value={form.demo_url   || ""} onChange={v => setForm({ ...form, demo_url: v })}   placeholder="https://..." />
-          <MCInput label="GITHUB URL" value={form.github_url || ""} onChange={v => setForm({ ...form, github_url: v })} placeholder="https://github.com/..." />
-          <MCInput label="DOCS URL"   value={form.docs_url   || ""} onChange={v => setForm({ ...form, docs_url: v })}   placeholder="https://..." />
-
-          {/* actions */}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8, paddingTop: 16, borderTop: `1px solid ${AMBER(0.08)}` }}>
-            <button onClick={onClose}
-              style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "9px 18px", background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), cursor: "pointer" }}
-              onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = AMBER(0.3); b.style.color = AMBER(0.65) }}
-              onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = AMBER(0.15); b.style.color = AMBER(0.4) }}
-            >CANCEL</button>
-
-            <button onClick={save} disabled={saving}
-              style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.2em", padding: "9px 22px", background: saving ? AMBER(0.5) : AMBER(0.9), border: "none", color: BG, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", position: "relative", overflow: "hidden", boxShadow: saving ? "none" : `0 0 16px ${AMBER(0.25)}` }}
-            >
-              {saving && <span style={{ position: "absolute", top: 0, bottom: 0, width: "30%", background: "linear-gradient(to right,transparent,rgba(0,0,0,0.2),transparent)", animation: "prdshimmer 0.85s linear infinite" }} />}
-              <span style={{ position: "relative", zIndex: 1 }}>
-                {saving ? "SAVING..." : isEdit ? "SAVE PRODUCT" : "ADD PRODUCT"}
-              </span>
-            </button>
+          <SRule label="PRD · PRICING & LINKS" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <MCBoolSelect label="PAID" value={form.is_paid} onChange={v => setForm({ ...form, is_paid: v })} />
+            <MCInput label="PRICE (RS)" type="number" value={form.price || ""} onChange={v => setForm({ ...form, price: v })} />
           </div>
+          
+          <MCInput label="DEMO URL" value={form.demo_url || ""} onChange={v => setForm({ ...form, demo_url: v })} />
+          <MCInput label="GITHUB" value={form.github_url || ""} onChange={v => setForm({ ...form, github_url: v })} />
 
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+            <button onClick={onClose} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem", padding: "10px 20px", border: `1px solid ${AMBER(0.2)}`, background: "transparent", color: AMBER(0.5) }}>CANCEL</button>
+            <button onClick={save} disabled={saving} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem", padding: "10px 24px", background: AMBER(0.9), color: "#000", fontWeight: 700, border: "none" }}>{saving ? "SAVING..." : "SAVE PRODUCT"}</button>
+          </div>
         </div>
       </div>
     </div>

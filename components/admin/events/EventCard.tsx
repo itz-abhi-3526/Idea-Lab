@@ -34,17 +34,17 @@ export default function EventCard({ event, onEdit }: { event: Event; onEdit: () 
         position: "relative",
         background: hov ? "rgba(255,176,0,0.045)" : PANEL,
         border: `1px solid ${hov ? AMBER(0.25) : BORDER}`,
-        padding: "16px 18px 14px 20px",
+        padding: "18px 20px",
         overflow: "hidden",
         transition: "border 0.22s, background 0.22s",
       }}
     >
-      {/* top shimmer on hover */}
+      {/* Top shimmer line on hover */}
       {hov && (
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(to right, transparent, ${AMBER(0.5)}, transparent)` }} />
       )}
 
-      {/* left rail */}
+      {/* Left rail stripe */}
       <div style={{
         position: "absolute", left: 0, top: 0, bottom: 0,
         width: hov ? 2 : 1,
@@ -52,46 +52,47 @@ export default function EventCard({ event, onEdit }: { event: Event; onEdit: () 
         transition: "width 0.15s, background 0.22s",
       }} />
 
-      {/* HUD corner */}
+      {/* HUD decorative corner */}
       <div style={{ position: "absolute", top: 8, right: 8, width: 9, height: 9, borderTop: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, borderRight: `1px solid ${hov ? AMBER(0.35) : AMBER(0.15)}`, transition: "border-color 0.22s" }} />
 
-      {/* header row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 10, flexWrap: "wrap" as const }}>
-        <div>
+      {/* ── HEADER ROW ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 240px" }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.25em", color: AMBER(0.35), marginBottom: 6 }}>
-            EVT · {shortId}
+            LOG_ENTRY · {shortId}
           </div>
-          <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.1rem", color: DIMWHITE(0.9), lineHeight: 1.1 }}>
+          <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.15rem", color: DIMWHITE(0.9), lineHeight: 1.2 }}>
             {event.title}
           </div>
           <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: "0.8rem", color: DIMWHITE(0.4), marginTop: 4 }}>
-            {event.event_type ?? "—"} · {event.venue ?? "—"}
+            {event.event_type ?? "UNCLASSIFIED"} · {event.venue ?? "REMOTE_LINK"}
           </div>
         </div>
 
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.62rem", letterSpacing: "0.12em", color: AMBER(0.4), whiteSpace: "nowrap" as const }}>
-          {new Date(event.start_datetime).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-          <br />
-          <span style={{ color: AMBER(0.28), fontSize: "0.55rem" }}>
-            {new Date(event.start_datetime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-          </span>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", textAlign: "right", flex: "0 0 auto" }}>
+          <div style={{ fontSize: "0.62rem", letterSpacing: "0.12em", color: AMBER(0.4) }}>
+            {new Date(event.start_datetime).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+          </div>
+          <div style={{ color: AMBER(0.28), fontSize: "0.55rem", letterSpacing: "0.1em" }}>
+            {new Date(event.start_datetime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} UTC
+          </div>
         </div>
       </div>
 
-      {/* status badges */}
-      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, marginBottom: 12 }}>
-        <SysBadge active={event.is_active}          label={event.is_active ? "ACTIVE" : "INACTIVE"} color={GREEN(0.8)} onClick={() => toggle("is_active")} />
-        <SysBadge active={event.is_featured}         label="FEATURED"                                color={AMBER(0.9)} onClick={() => toggle("is_featured")} />
+      {/* ── STATUS BADGES ── */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+        <SysBadge active={event.is_active} label={event.is_active ? "ACTIVE" : "INACTIVE"} color={GREEN(0.8)} onClick={() => toggle("is_active")} />
+        <SysBadge active={event.is_featured} label="FEATURED" color={AMBER(0.9)} onClick={() => toggle("is_featured")} />
         <SysBadge active={event.is_registration_open} label={event.is_registration_open ? "REG OPEN" : "REG CLOSED"} color={AMBER(0.6)} />
       </div>
 
-      {/* divider */}
-      <div style={{ height: 1, background: `linear-gradient(to right, ${AMBER(0.08)}, transparent)`, marginBottom: 10 }} />
+      {/* ── DIVIDER ── */}
+      <div style={{ height: 1, background: `linear-gradient(to right, ${AMBER(0.08)}, transparent)`, marginBottom: 14 }} />
 
-      {/* actions */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-        <ActionBtn label="EDIT"   onClick={onEdit}  color={AMBER(0.7)} hoverBg={AMBER(0.07)} hoverBorder={AMBER(0.3)} />
-        <ActionBtn label="DELETE" onClick={remove}  color={RED(0.7)}   hoverBg={RED(0.07)}   hoverBorder={RED(0.3)}   />
+      {/* ── ACTION BUTTONS ── */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <ActionBtn label="EDIT_PROTOCOL" onClick={onEdit} color={AMBER(0.7)} hoverBg={AMBER(0.07)} hoverBorder={AMBER(0.3)} />
+        <ActionBtn label="PURGE" onClick={remove} color={RED(0.7)} hoverBg={RED(0.07)} hoverBorder={RED(0.3)} />
       </div>
     </div>
   )
@@ -110,12 +111,13 @@ function ActionBtn({ label, onClick, color, hoverBg, hoverBorder }: {
       onMouseLeave={() => setHov(false)}
       style={{
         fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.18em",
-        padding: "6px 14px", background: hov ? hoverBg : "transparent",
+        padding: "8px 16px", background: hov ? hoverBg : "transparent",
         borderTop: `1px solid ${hov ? hoverBorder : "rgba(255,176,0,0.12)"}`,
         borderRight: `1px solid ${hov ? hoverBorder : "rgba(255,176,0,0.12)"}`,
         borderBottom: `1px solid ${hov ? hoverBorder : "rgba(255,176,0,0.12)"}`,
         borderLeft: "none", color, cursor: "pointer",
-        position: "relative", overflow: "hidden", transition: "background 0.18s, border-color 0.18s",
+        position: "relative", overflow: "hidden", transition: "all 0.18s",
+        flex: "1 1 auto", minWidth: "110px", maxWidth: "160px"
       }}
     >
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${color}, transparent)`, opacity: hov ? 1 : 0.3, transition: "opacity 0.18s" }} />
@@ -124,7 +126,7 @@ function ActionBtn({ label, onClick, color, hoverBg, hoverBorder }: {
   )
 }
 
-/* ── SYSTEM BADGE — unchanged logic ── */
+/* ── SYSTEM BADGE ── */
 function SysBadge({ label, active = true, color, onClick }: {
   label: string; active?: boolean; color: string; onClick?: () => void
 }) {
@@ -139,12 +141,12 @@ function SysBadge({ label, active = true, color, onClick }: {
       onMouseLeave={() => setHov(false)}
       style={{
         fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.18em",
-        padding: "3px 9px",
+        padding: "4px 10px",
         background: active ? (hov && onClick ? color.replace(/[\d.]+\)$/, "0.13)") : activeBg) : "rgba(255,255,255,0.03)",
         border: `1px solid ${active ? activeBorder : "rgba(255,255,255,0.08)"}`,
         color: active ? color : "rgba(220,215,200,0.3)",
         cursor: onClick ? "pointer" : "default",
-        whiteSpace: "nowrap" as const,
+        whiteSpace: "nowrap",
         transition: "background 0.18s",
       }}
     >

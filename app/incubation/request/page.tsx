@@ -86,12 +86,6 @@ const ProtocolLoader = ({ onComplete }: { onComplete: () => void }) => {
           <span className="text-white/40">{progress}%</span>
         </div>
       </div>
-      
-      <motion.div 
-        animate={{ translateY: ['0vh', '100vh'] }}
-        transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
-        className="absolute top-0 left-0 w-full h-[1px] bg-orange-500/10 shadow-[0_0_15px_#ea580c] z-10"
-      />
     </motion.div>
   )
 }
@@ -174,67 +168,51 @@ export default function IncubationRequestPage() {
         
         {/* --- GLOBAL GRID BACKGROUND --- */}
         <div className="fixed inset-0 pointer-events-none z-0">
-          <div 
-            className="absolute inset-0 opacity-[0.03]" 
-            style={{ 
-              backgroundImage: `linear-gradient(rgba(234, 88, 12, 0.2) 1px, transparent 1px), 
-                                linear-gradient(90deg, rgba(234, 88, 12, 0.2) 1px, transparent 1px)`,
-              backgroundSize: '40px 40px' 
-            }} 
-          />
-          <div 
-            className="absolute inset-0 opacity-[0.05]" 
-            style={{ 
-              backgroundImage: `radial-gradient(#ea580c 0.5px, transparent 0.5px)`,
-              backgroundSize: '10px 10px' 
-            }} 
-          />
+          <div className="absolute inset-0 opacity-[0.03]" 
+               style={{ backgroundImage: `linear-gradient(rgba(234, 88, 12, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(234, 88, 12, 0.2) 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_90%)]" />
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 space-y-20">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-20 space-y-12 sm:space-y-20">
 
           {/* --- HEADER --- */}
-          <header className="relative border-l-4 border-orange-600 pl-8 py-2">
-            <p className="font-mono text-[10px] font-black tracking-[0.4em] text-orange-500 uppercase mb-4">
+          <header className="relative border-l-4 border-orange-600 pl-4 sm:pl-8 py-2">
+            <p className="font-mono text-[9px] font-black tracking-[0.4em] text-orange-500 uppercase mb-4">
               INCUBATION_PROTOCOL // REQ_FORM
             </p>
-            <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter leading-[0.9] uppercase font-stretch-condensed mb-10">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black italic tracking-tighter leading-[0.9] uppercase mb-10">
               AICTE IDEA LAB <br />
               <span className="text-white/20 not-italic">INCUBATION REQUEST</span>
             </h1>
 
-            <div className="grid md:grid-cols-2 gap-12 items-start border-t border-white/5 pt-8">
-              {/* Vertical Symbolic Manifest */}
-              <div className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-start border-t border-white/5 pt-8">
+              <div className="space-y-6 sm:space-y-8">
                 {[
                   { icon: <Zap size={14} />, text: "Official request portal for", highlight: "high-precision manufacturing." },
                   { icon: <AlertCircle size={14} />, text: "Use of external materials is", highlight: "strictly prohibited.", color: "text-red-500" },
                   { icon: <FileText size={14} />, text: "All operations utilize internal", highlight: "Idea Lab resources." }
                 ].map((point, idx) => (
                   <div key={idx} className="flex gap-4 items-start group">
-                    <div className="mt-1 w-8 h-8 rounded-lg bg-orange-600/10 border border-orange-600/20 flex items-center justify-center text-orange-500 shrink-0 group-hover:bg-orange-600 group-hover:text-black transition-all duration-300">
+                    <div className="mt-1 w-8 h-8 rounded-lg bg-orange-600/10 border border-orange-600/20 flex items-center justify-center text-orange-500 shrink-0">
                       {point.icon}
                     </div>
-                    <p className="text-[12px] font-black uppercase tracking-wider leading-tight text-white/90">
+                    <p className="text-[11px] sm:text-[12px] font-black uppercase tracking-wider leading-tight text-white/90">
                       {point.text} <br />
-                      <span className={`${point.color || 'text-orange-500'} italic text-[13px]`}>{point.highlight}</span>
+                      <span className={`${point.color || 'text-orange-500'} italic text-[12px] sm:text-[13px]`}>{point.highlight}</span>
                     </p>
                   </div>
                 ))}
               </div>
 
-              {/* Coordinator Details Right Side */}
               <div className="h-full flex items-center">
-                <div className="w-full bg-white/[0.03] border border-white/5 p-6 rounded-3xl flex items-center gap-5 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-orange-600/5 blur-3xl rounded-full -mr-10 -mt-10" />
-                  <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 shrink-0 border border-orange-500/20">
-                    <Clock size={24} className="animate-pulse" />
+                <div className="w-full bg-white/[0.03] border border-white/5 p-5 sm:p-6 rounded-3xl flex items-center gap-4 sm:gap-5 relative overflow-hidden group">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 shrink-0 border border-orange-500/20">
+                    <Clock size={20} className="animate-pulse" />
                   </div>
                   <div className="space-y-1 relative z-10">
-                    <p className="font-mono text-[9px] font-black text-white/30 tracking-[0.2em] uppercase">LAB_COORDINATOR</p>
-                    <h4 className="text-lg font-black italic tracking-tighter uppercase leading-none">Jithin Joseph</h4>
-                    <p className="font-mono text-xs text-orange-500 font-bold tracking-widest">+91 9895221439</p>
+                    <p className="font-mono text-[8px] sm:text-[9px] font-black text-white/30 tracking-[0.2em] uppercase">LAB_COORDINATOR</p>
+                    <h4 className="text-md sm:text-lg font-black italic tracking-tighter uppercase leading-none">Jithin Joseph</h4>
+                    <p className="font-mono text-[10px] sm:text-xs text-orange-500 font-bold tracking-widest">+91 9895221439</p>
                   </div>
                 </div>
               </div>
@@ -242,12 +220,12 @@ export default function IncubationRequestPage() {
           </header>
 
           {/* --- TYPE SELECTOR --- */}
-          <div className="flex bg-[#0a0a0a] border border-white/5 rounded-2xl p-1.5 w-fit">
+          <div className="flex bg-[#0a0a0a] border border-white/5 rounded-2xl p-1.5 w-full sm:w-fit overflow-x-auto no-scrollbar">
             {["3d", "laser"].map(v => (
               <button
                 key={v}
                 onClick={() => setType(v as any)}
-                className={`px-8 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                className={`flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap ${
                   type === v ? "bg-orange-600 text-black shadow-lg" : "text-white/30 hover:text-white"
                 }`}
               >
@@ -257,8 +235,8 @@ export default function IncubationRequestPage() {
           </div>
 
           {/* --- FORM SECTION --- */}
-          <div className="grid lg:grid-cols-3 gap-12">
-            <section className="lg:col-span-2 space-y-12">
+          <div className="grid lg:grid-cols-3 gap-10 sm:gap-12">
+            <section className="lg:col-span-2 space-y-10 sm:space-y-12">
               <div className="grid sm:grid-cols-2 gap-6">
                 <ProtocolInput label="FULL NAME" icon={<FileText size={14}/>} onChange={v => setForm({ ...form, name: v })} />
                 <ProtocolInput label="E-MAIL ADDR" icon={<FileText size={14}/>} onChange={v => setForm({ ...form, email: v })} />
@@ -276,16 +254,16 @@ export default function IncubationRequestPage() {
               </div>
 
               <div className="space-y-6">
-                <h3 className="font-mono text-[10px] font-black tracking-[0.3em] text-white/30 uppercase">FILE_UPLOADS</h3>
-                <div className="grid gap-6">
+                <h3 className="font-mono text-[9px] sm:text-[10px] font-black tracking-[0.3em] text-white/30 uppercase">FILE_UPLOADS</h3>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-6">
                   <ProtocolUploadBox 
-                    label="SLICED MODEL SCREENSHOT (WEIGHT VISIBLE)" 
+                    label="SLICED MODEL SCREENSHOT" 
                     state={slice} 
                     onFile={f => handleUpload(f, setSlice, uploadToCloudinary)} 
                     preview 
                   />
                   <ProtocolUploadBox 
-                    label="DESIGN FILE UPLOAD (STL FORMAT)" 
+                    label="DESIGN FILE (STL FORMAT)" 
                     state={stl} 
                     onFile={f => handleUpload(f, setStl, uploadSTL)} 
                   />
@@ -294,19 +272,19 @@ export default function IncubationRequestPage() {
             </section>
 
             <aside className="space-y-8">
-              <div className="bg-[#0a0a0a] border border-orange-500/20 rounded-3xl p-8 sticky top-24">
-                <div className="mb-8 pb-8 border-b border-white/5">
+              <div className="bg-[#0a0a0a] border border-orange-500/20 rounded-3xl p-6 sm:p-8 sticky top-24">
+                <div className="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-white/5">
                   <p className="font-mono text-[10px] text-orange-500 font-black tracking-widest uppercase mb-2">ESTIMATED_COST</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black italic tracking-tighter tabular-nums">₹{estimatedCost}</span>
+                    <span className="text-3xl sm:text-4xl font-black italic tracking-tighter tabular-nums">₹{estimatedCost}</span>
                     <span className="text-white/20 text-xs font-mono">.00</span>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  <p className="font-mono text-[10px] text-white/30 font-black tracking-widest uppercase text-center">SCAN_TO_AUTHORIZE</p>
-                  <div className="bg-white p-4 rounded-2xl flex justify-center">
-                    <img src={GPAY_QR_URL} className="w-full max-w-[180px] rounded-lg grayscale hover:grayscale-0 transition-all duration-500" />
+                  <p className="font-mono text-[9px] sm:text-[10px] text-white/30 font-black tracking-widest uppercase text-center">SCAN_TO_AUTHORIZE</p>
+                  <div className="bg-white p-3 sm:p-4 rounded-2xl flex justify-center">
+                    <img src={GPAY_QR_URL} className="w-full max-w-[140px] sm:max-w-[180px] rounded-lg grayscale hover:grayscale-0 transition-all duration-500" />
                   </div>
                   <ProtocolUploadBox 
                     label="PAYMENT_CONFIRMATION" 
@@ -316,8 +294,8 @@ export default function IncubationRequestPage() {
                   />
                 </div>
 
-                <div className="mt-10 pt-8 border-t border-white/5 space-y-3">
-                  <div className="flex justify-between font-mono text-[9px] font-black text-white/40 tracking-widest">
+                <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/5 space-y-3">
+                  <div className="flex justify-between font-mono text-[8px] sm:text-[9px] font-black text-white/40 tracking-widest">
                     <span>MANIFEST_COMPLETION</span>
                     <span className="text-orange-500">{formProgress}%</span>
                   </div>
@@ -333,7 +311,7 @@ export default function IncubationRequestPage() {
                 <button
                   onClick={submit}
                   disabled={formProgress < 100}
-                  className="mt-8 w-full bg-orange-600 hover:bg-white text-black py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all disabled:opacity-10 shadow-xl shadow-orange-600/10 flex items-center justify-center gap-3 group"
+                  className="mt-6 sm:mt-8 w-full bg-orange-600 hover:bg-white text-black py-4 sm:py-5 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.4em] transition-all disabled:opacity-10 shadow-xl shadow-orange-600/10 flex items-center justify-center gap-3 group"
                 >
                   SUBMIT REQUEST <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -350,8 +328,8 @@ export default function IncubationRequestPage() {
 
 function ProtocolInput({ label, onChange, icon, type = "text" }: { label: string; onChange: (v: string) => void; icon: any; type?: string }) {
   return (
-    <div className="space-y-3 group">
-      <label className="font-mono text-[9px] font-black text-white/30 tracking-widest uppercase group-focus-within:text-orange-500 transition-colors">
+    <div className="space-y-2 sm:space-y-3 group">
+      <label className="font-mono text-[8px] sm:text-[9px] font-black text-white/30 tracking-widest uppercase group-focus-within:text-orange-500 transition-colors">
         {label}
       </label>
       <div className="relative">
@@ -361,45 +339,87 @@ function ProtocolInput({ label, onChange, icon, type = "text" }: { label: string
         <input
           type={type}
           onChange={e => onChange(e.target.value)}
-          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold tracking-widest focus:outline-none focus:border-orange-500/50 transition-all placeholder:text-white/5 uppercase"
+          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-12 pr-4 py-3 sm:py-4 text-[11px] sm:text-xs font-bold tracking-widest focus:outline-none focus:border-orange-500/50 transition-all placeholder:text-white/5 uppercase"
         />
       </div>
     </div>
   )
 }
 
-function ProtocolUploadBox({ label, state, onFile, preview, compact }: { label: string; state: UploadState; onFile: (f: File) => void; preview?: boolean; compact?: boolean }) {
+function ProtocolUploadBox({ 
+  label, 
+  state, 
+  onFile, 
+  preview, 
+  compact 
+}: { 
+  label: string; 
+  state: UploadState; 
+  onFile: (f: File) => void; 
+  preview?: boolean; 
+  compact?: boolean 
+}) {
   return (
-    <div className={`bg-white/[0.02] border border-white/5 rounded-2xl transition-all duration-300 ${state.url ? 'border-emerald-500/20' : ''} ${compact ? 'p-4' : 'p-6'}`}>
-      <div className="font-mono text-[9px] font-black text-white/30 tracking-widest uppercase mb-4">{label}</div>
+    <div className={`bg-white/[0.02] border border-white/5 rounded-2xl transition-all duration-300 ${state.url ? 'border-emerald-500/20' : ''} ${compact ? 'p-4' : 'p-5 sm:p-6'}`}>
+      <div className="font-mono text-[8px] sm:text-[9px] font-black text-white/30 tracking-widest uppercase mb-4">
+        {label}
+      </div>
 
       {!state.file ? (
-        <label className="flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-xl py-8 cursor-pointer hover:border-orange-500/30 hover:bg-orange-500/[0.02] transition-all text-[10px] font-black tracking-widest text-white/20 uppercase group">
-          <Upload className="mb-3 text-white/5 group-hover:text-orange-500 transition-colors" size={24} />
+        <label className="flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-xl py-6 sm:py-8 cursor-pointer hover:border-orange-500/30 hover:bg-orange-500/[0.02] transition-all text-[9px] sm:text-[10px] font-black tracking-widest text-white/20 uppercase group">
+          {/* Fixed Icon Scaling */}
+          <Upload 
+            className="mb-3 text-white/5 group-hover:text-orange-500 transition-colors w-5 h-5 sm:w-6 sm:h-6" 
+          />
           SELECT_RESOURCE
-          <input type="file" className="hidden" onChange={e => e.target.files && onFile(e.target.files[0])} />
+          <input 
+            type="file" 
+            className="hidden" 
+            onChange={e => e.target.files && onFile(e.target.files[0])} 
+          />
         </label>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-orange-500">
-              {state.progress === 100 ? <CheckCircle2 size={16} /> : <Upload size={16} className="animate-pulse" />}
+              {state.progress === 100 ? (
+                <CheckCircle2 size={16} />
+              ) : (
+                <Upload size={16} className="animate-pulse" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black tracking-widest truncate uppercase italic">{state.file.name}</p>
-              <p className="text-[9px] font-mono text-white/20">{state.progress}% UPLOAD_COMPLETE</p>
+              <p className="text-[9px] sm:text-[10px] font-black tracking-widest truncate uppercase italic">
+                {state.file.name}
+              </p>
+              <p className="text-[8px] font-mono text-white/20">
+                {state.progress}% UPLOAD_COMPLETE
+              </p>
             </div>
           </div>
 
-          {preview && state.url && <img src={state.url} className="w-24 h-24 object-cover rounded-xl border border-white/10 grayscale hover:grayscale-0 transition-all" />}
+          {preview && state.url && (
+            <img 
+              src={state.url} 
+              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-white/10 grayscale hover:grayscale-0 transition-all" 
+            />
+          )}
 
           <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-            <motion.div initial={{ width: 0 }} animate={{ width: `${state.progress}%` }} className="h-full bg-orange-600" />
+            <motion.div 
+              initial={{ width: 0 }} 
+              animate={{ width: `${state.progress}%` }} 
+              className="h-full bg-orange-600" 
+            />
           </div>
 
-          <label className="block text-[9px] font-black text-orange-500/60 tracking-widest uppercase cursor-pointer hover:text-orange-500 underline underline-offset-4">
-            REPLACE FILE
-            <input type="file" className="hidden" onChange={e => e.target.files && onFile(e.target.files[0])} />
+          <label className="block text-[8px] sm:text-[9px] font-black text-orange-500/60 tracking-widest uppercase cursor-pointer hover:text-orange-500 underline underline-offset-4">
+            REPLACE_FILE
+            <input 
+              type="file" 
+              className="hidden" 
+              onChange={e => e.target.files && onFile(e.target.files[0])} 
+            />
           </label>
         </div>
       )}

@@ -8,6 +8,7 @@ const DIMWHITE = (a = 1) => `rgba(220,215,200,${a})`
 const BG       = "#0a0900"
 const PANEL    = "rgba(255,176,0,0.03)"
 const BORDER   = "rgba(255,176,0,0.14)"
+const RED      = (a = 1) => `rgba(255,60,60,${a})`
 
 /* ─────────────────────────────────────────
    SHIMMER BAR
@@ -54,10 +55,11 @@ function PostBtn({ onClick, loading }: { onClick: () => void; loading: boolean }
       onMouseLeave={() => setHov(false)}
       style={{
         fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem",
-        letterSpacing: "0.22em", padding: "10px 26px", border: "none",
+        letterSpacing: "0.22em", padding: "12px 26px", border: "none",
         background: loading ? AMBER(0.5) : hov ? AMBER(1) : AMBER(0.9),
         color: BG, cursor: loading ? "not-allowed" : "pointer",
         transition: "background 0.2s",
+        width: "100%", 
       }}
     >
       {loading ? "POSTING..." : "POST ANNOUNCEMENT"}
@@ -66,7 +68,7 @@ function PostBtn({ onClick, loading }: { onClick: () => void; loading: boolean }
 }
 
 /* ─────────────────────────────────────────
-   MODAL — reusable dialog
+   MODAL
 ───────────────────────────────────────── */
 function Modal({
   open, onClose, title: modalTitle, children, actions,
@@ -79,12 +81,10 @@ function Modal({
 }) {
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  // close on overlay click
   const handleOverlay = (e: React.MouseEvent) => {
     if (e.target === overlayRef.current) onClose()
   }
 
-  // close on Escape
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
@@ -100,26 +100,24 @@ function Modal({
       onClick={handleOverlay}
       style={{
         position: "fixed", inset: 0, zIndex: 1000,
-        background: "rgba(0,0,0,0.75)",
-        backdropFilter: "blur(4px)",
+        background: "rgba(0,0,0,0.85)",
+        backdropFilter: "blur(6px)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 24,
-        animation: "fadeIn 0.18s ease both",
+        padding: 16,
       }}
     >
       <div style={{
         width: "100%", maxWidth: 480,
         background: BG,
-        border: `1px solid ${BORDER}`,
+        border: `1px solid ${AMBER(0.2)}`,
         position: "relative",
-        animation: "modalRise 0.22s cubic-bezier(0.16,1,0.3,1) both",
-        overflow: "hidden",
+        maxHeight: "90vh",
+        overflowY: "auto",
       }}>
         <ShimmerBar />
 
-        {/* header */}
         <div style={{
-          padding: "18px 22px 0",
+          padding: "18px 20px 0",
           display: "flex", alignItems: "flex-start", justifyContent: "space-between",
           gap: 12,
         }}>
@@ -129,32 +127,16 @@ function Modal({
           }}>
             {modalTitle}
           </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: "transparent", border: "none", cursor: "pointer",
-              color: AMBER(0.4), fontSize: 18, lineHeight: 1, padding: "2px 4px",
-              transition: "color 0.15s", flexShrink: 0,
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = AMBER(0.9))}
-            onMouseLeave={e => (e.currentTarget.style.color = AMBER(0.4))}
-          >
-            ✕
-          </button>
+          <button onClick={onClose} style={{ background: "transparent", border: "none", color: AMBER(0.4), cursor: "pointer", fontSize: 20 }}>✕</button>
         </div>
 
-        {/* divider */}
-        <div style={{ height: 1, background: AMBER(0.08), margin: "14px 22px 0" }} />
-
-        {/* body */}
-        <div style={{ padding: "18px 22px" }}>
+        <div style={{ padding: "20px" }}>
           {children}
         </div>
 
-        {/* footer */}
         <div style={{
-          padding: "0 22px 20px",
-          display: "flex", justifyContent: "flex-end", gap: 10,
+          padding: "0 20px 20px",
+          display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 10,
         }}>
           {actions}
         </div>
@@ -164,7 +146,7 @@ function Modal({
 }
 
 /* ─────────────────────────────────────────
-   FIELD — labelled input/textarea
+   FIELD
 ───────────────────────────────────────── */
 function Field({
   label, value, onChange, multiline = false, rows = 4,
@@ -174,21 +156,21 @@ function Field({
 }) {
   const [foc, setFoc] = useState(false)
   const shared: React.CSSProperties = {
-    width: "100%", padding: "9px 10px",
-    background: "rgba(0,0,0,0.35)",
-    border: `1px solid ${foc ? AMBER(0.45) : AMBER(0.12)}`,
-    color: DIMWHITE(0.85),
-    fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.78rem",
-    outline: "none", transition: "border-color 0.2s",
+    width: "100%", padding: "10px 12px",
+    background: "rgba(0,0,0,0.4)",
+    border: `1px solid ${foc ? AMBER(0.5) : AMBER(0.12)}`,
+    color: DIMWHITE(0.9),
+    fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.8rem",
+    outline: "none", transition: "all 0.2s",
     boxSizing: "border-box",
   }
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: 16 }}>
       <label style={{
         display: "block", marginBottom: 6,
-        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem",
-        letterSpacing: "0.28em", color: AMBER(foc ? 0.7 : 0.35),
-        textTransform: "uppercase", transition: "color 0.2s",
+        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem",
+        letterSpacing: "0.2em", color: AMBER(foc ? 0.8 : 0.35),
+        textTransform: "uppercase",
       }}>
         {label}
       </label>
@@ -223,34 +205,19 @@ function DialogBtn({
   onClick: () => void; children: React.ReactNode
   variant?: "primary" | "ghost" | "danger"; disabled?: boolean
 }) {
-  const [hov, setHov] = useState(false)
   const styles: Record<string, React.CSSProperties> = {
-    primary: {
-      background: disabled ? AMBER(0.4) : hov ? AMBER(1) : AMBER(0.85),
-      color: BG, border: "none",
-    },
-    ghost: {
-      background: "transparent",
-      border: `1px solid ${AMBER(hov ? 0.4 : 0.2)}`,
-      color: AMBER(hov ? 0.8 : 0.5),
-    },
-    danger: {
-      background: hov ? "rgba(220,50,50,0.18)" : "transparent",
-      border: `1px solid rgba(220,50,50,${hov ? 0.5 : 0.25})`,
-      color: `rgba(220,100,80,${hov ? 1 : 0.7})`,
-    },
+    primary: { background: disabled ? AMBER(0.5) : AMBER(0.9), color: BG, border: "none" },
+    ghost: { background: "transparent", border: `1px solid ${AMBER(0.2)}`, color: AMBER(0.5) },
+    danger: { background: "transparent", border: `1px solid ${RED(0.3)}`, color: RED(0.7) },
   }
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       style={{
-        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem",
-        letterSpacing: "0.18em", padding: "8px 18px",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "all 0.18s",
+        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem",
+        padding: "10px 20px", cursor: disabled ? "not-allowed" : "pointer",
+        flex: 1, minWidth: "100px", transition: "all 0.18s",
         ...styles[variant],
       }}
     >
@@ -263,14 +230,11 @@ function DialogBtn({
    MAIN PAGE
 ───────────────────────────────────────── */
 export default function AdminAnnouncements() {
-
-  // ── original state ──
   const [title,   setTitle]   = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [announcements, setAnnouncements] = useState<any[]>([])
 
-  // ── modal state ──
   const [deleteTarget,  setDeleteTarget]  = useState<any | null>(null)
   const [editTarget,    setEditTarget]    = useState<any | null>(null)
   const [editTitle,     setEditTitle]     = useState("")
@@ -279,7 +243,6 @@ export default function AdminAnnouncements() {
   const [successModal,  setSuccessModal]  = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  // ── original fetch ──
   useEffect(() => { fetchAnnouncements() }, [])
 
   async function fetchAnnouncements() {
@@ -291,266 +254,106 @@ export default function AdminAnnouncements() {
     if (data) setAnnouncements(data)
   }
 
-  // ── original create ──
   async function createAnnouncement() {
+    if (!title || !message) return
     setLoading(true)
-    const { error } = await supabase
-      .from("announcements")
-      .insert([{ title, message }])
+    const { error } = await supabase.from("announcements").insert([{ title, message }])
     setLoading(false)
     if (!error) {
-      setTitle("")
-      setMessage("")
-      fetchAnnouncements()
-      setSuccessModal(true)   // ← replaces alert()
+      setTitle(""); setMessage(""); fetchAnnouncements(); setSuccessModal(true)
     }
   }
 
-  // ── original delete (confirm replaced by modal) ──
   async function deleteAnnouncement(id: string) {
     setDeleteLoading(true)
-    await supabase
-      .from("announcements")
-      .update({ is_active: false })
-      .eq("id", id)
-    setDeleteLoading(false)
-    setDeleteTarget(null)
-    fetchAnnouncements()
+    await supabase.from("announcements").update({ is_active: false }).eq("id", id)
+    setDeleteLoading(false); setDeleteTarget(null); fetchAnnouncements()
   }
 
-  // ── original edit (prompt replaced by modal) ──
   async function saveEdit() {
     if (!editTarget) return
     setEditSaving(true)
-    await supabase
-      .from("announcements")
-      .update({ title: editTitle, message: editMessage })
-      .eq("id", editTarget.id)
-    setEditSaving(false)
-    setEditTarget(null)
-    fetchAnnouncements()
+    await supabase.from("announcements").update({ title: editTitle, message: editMessage }).eq("id", editTarget.id)
+    setEditSaving(false); setEditTarget(null); fetchAnnouncements()
   }
 
   function openEdit(a: any) {
-    setEditTarget(a)
-    setEditTitle(a.title)
-    setEditMessage(a.message)
+    setEditTarget(a); setEditTitle(a.title); setEditMessage(a.message)
   }
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: DIMWHITE(0.85) }}>
-
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
         @keyframes annshinmer { from{left:-40%} to{left:140%} }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes modalRise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        textarea { resize: vertical; }
-        * { box-sizing: border-box; }
+        .main-ann-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 28px 16px 60px; }
+        
+        @media (min-width: 768px) {
+          .ann-actions-row { justify-content: flex-end !important; }
+          .ann-actions-row > button { flex: none !important; width: 100px; }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "28px 24px 48px" }}>
-
-        {/* ── CREATE PANEL ── */}
+      <div className="main-ann-container">
         <SectionLabel label="SYS · ANNOUNCEMENTS" />
 
-        <div style={{ position: "relative", overflow: "hidden", background: PANEL, border: `1px solid ${BORDER}` }}>
+        <div style={{ position: "relative", overflow: "hidden", background: PANEL, border: `1px solid ${BORDER}`, marginBottom: 40 }}>
           <ShimmerBar />
-          <div style={{ padding: "22px 22px 24px" }}>
-            <h1 style={{
-              fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700,
-              fontSize: "1.5rem", color: AMBER(0.9), marginBottom: 20, marginTop: 0,
-            }}>
+          <div style={{ padding: "22px" }}>
+            <h1 style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 700, fontSize: "clamp(1.2rem, 5vw, 1.5rem)", color: AMBER(0.95), margin: "0 0 20px" }}>
               Create Announcement
             </h1>
 
             <Field label="Title" value={title} onChange={setTitle} />
-            <Field label="Message" value={message} onChange={setMessage} multiline rows={5} />
+            <Field label="Message" value={message} onChange={setMessage} multiline rows={4} />
 
             <PostBtn onClick={createAnnouncement} loading={loading} />
           </div>
         </div>
 
-        {/* ── ACTIVE RECORDS PANEL ── */}
-        <div style={{ marginTop: 40 }}>
-          <SectionLabel label="SYS · ACTIVE RECORDS" />
+        <SectionLabel label="SYS · ACTIVE RECORDS" />
 
-          <div style={{ position: "relative", background: PANEL, border: `1px solid ${BORDER}` }}>
-            <div style={{ padding: "18px 22px" }}>
+        <div style={{ background: PANEL, border: `1px solid ${BORDER}` }}>
+          <div style={{ padding: "12px 20px" }}>
 
-              {announcements.length === 0 && (
-                <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.7rem", color: AMBER(0.3),
-                }}>
-                  NO ACTIVE ANNOUNCEMENTS
+            {announcements.length === 0 && (
+              <div style={{ padding: "20px 0", textAlign: "center", fontSize: "0.7rem", color: AMBER(0.3), fontFamily: "'IBM Plex Mono'" }}>
+                NO ACTIVE ANNOUNCEMENTS DETECTED
+              </div>
+            )}
+
+            {announcements.map((a, i) => (
+              <div key={a.id} style={{ padding: "16px 0", borderBottom: i < announcements.length - 1 ? `1px solid ${AMBER(0.08)}` : "none" }}>
+                <div style={{ fontFamily: "'IBM Plex Sans Condensed'", fontWeight: 600, color: AMBER(0.9), marginBottom: 6, fontSize: "1.05rem" }}>
+                  {a.title}
                 </div>
-              )}
 
-              {announcements.map((a, i) => (
-                <div
-                  key={a.id}
-                  style={{
-                    padding: "16px 0",
-                    borderBottom: i < announcements.length - 1 ? `1px solid ${AMBER(0.08)}` : "none",
-                  }}
-                >
-                  <div style={{
-                    fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 600,
-                    color: AMBER(0.9), marginBottom: 4, fontSize: "1rem",
-                  }}>
-                    {a.title}
-                  </div>
-
-                  <div style={{
-                    fontSize: "0.85rem", lineHeight: 1.6,
-                    marginBottom: 12, color: DIMWHITE(0.65),
-                    fontFamily: "'IBM Plex Mono', monospace",
-                  }}>
-                    {a.message}
-                  </div>
-
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button
-                      onClick={() => openEdit(a)}
-                      style={{
-                        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem",
-                        letterSpacing: "0.18em", background: "transparent",
-                        border: `1px solid ${AMBER(0.3)}`, color: AMBER(0.8),
-                        padding: "6px 10px", cursor: "pointer", transition: "all 0.18s",
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = AMBER(0.08)
-                        e.currentTarget.style.borderColor = AMBER(0.6)
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = "transparent"
-                        e.currentTarget.style.borderColor = AMBER(0.3)
-                      }}
-                    >
-                      EDIT
-                    </button>
-
-                    <button
-                      onClick={() => setDeleteTarget(a)}
-                      style={{
-                        fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem",
-                        letterSpacing: "0.18em", background: "transparent",
-                        border: "1px solid rgba(220,50,50,0.25)", color: "rgba(220,100,80,0.7)",
-                        padding: "6px 10px", cursor: "pointer", transition: "all 0.18s",
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = "rgba(220,50,50,0.1)"
-                        e.currentTarget.style.borderColor = "rgba(220,50,50,0.5)"
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = "transparent"
-                        e.currentTarget.style.borderColor = "rgba(220,50,50,0.25)"
-                      }}
-                    >
-                      DELETE
-                    </button>
-                  </div>
+                <div style={{ fontSize: "0.85rem", lineHeight: 1.6, marginBottom: 14, color: DIMWHITE(0.6), fontFamily: "inherit" }}>
+                  {a.message}
                 </div>
-              ))}
 
-            </div>
+                <div className="ann-actions-row" style={{ display: "flex", gap: 10 }}>
+                  <DialogBtn variant="ghost" onClick={() => openEdit(a)}>EDIT</DialogBtn>
+                  <DialogBtn variant="danger" onClick={() => setDeleteTarget(a)}>DELETE</DialogBtn>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          MODAL — SUCCESS
-      ══════════════════════════════════════ */}
-      <Modal
-        open={successModal}
-        onClose={() => setSuccessModal(false)}
-        title="Announcement Posted"
-        actions={
-          <DialogBtn onClick={() => setSuccessModal(false)} variant="primary">
-            CLOSE
-          </DialogBtn>
-        }
-      >
-        <p style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.78rem",
-          color: DIMWHITE(0.6), lineHeight: 1.7, margin: 0,
-        }}>
-          Your announcement has been published and is now live.
-        </p>
+      {/* Success Modal */}
+      <Modal open={successModal} onClose={() => setSuccessModal(false)} title="Mission Status" actions={<DialogBtn onClick={() => setSuccessModal(false)}>CLOSE</DialogBtn>}>
+        <p style={{ fontSize: "0.85rem", color: DIMWHITE(0.5), margin: 0 }}>The announcement has been broadcast successfully to the live system feed.</p>
       </Modal>
 
-      {/* ══════════════════════════════════════
-          MODAL — CONFIRM DELETE
-      ══════════════════════════════════════ */}
-      <Modal
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        title="Delete Announcement"
-        actions={
-          <>
-            <DialogBtn onClick={() => setDeleteTarget(null)} variant="ghost">
-              CANCEL
-            </DialogBtn>
-            <DialogBtn
-              onClick={() => deleteAnnouncement(deleteTarget.id)}
-              variant="danger"
-              disabled={deleteLoading}
-            >
-              {deleteLoading ? "DELETING..." : "CONFIRM DELETE"}
-            </DialogBtn>
-          </>
-        }
-      >
-        <p style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.78rem",
-          color: DIMWHITE(0.5), lineHeight: 1.7, margin: "0 0 12px",
-        }}>
-          This will deactivate the following announcement:
-        </p>
-        {deleteTarget && (
-          <div style={{
-            padding: "10px 14px",
-            background: "rgba(220,50,50,0.06)",
-            border: "1px solid rgba(220,50,50,0.15)",
-          }}>
-            <div style={{
-              fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 600,
-              fontSize: "0.95rem", color: AMBER(0.75), marginBottom: 4,
-            }}>
-              {deleteTarget.title}
-            </div>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem",
-              color: DIMWHITE(0.4), lineHeight: 1.5,
-            }}>
-              {deleteTarget.message}
-            </div>
-          </div>
-        )}
+      {/* Delete Confirmation */}
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Announcement" actions={<><DialogBtn onClick={() => setDeleteTarget(null)} variant="ghost">CANCEL</DialogBtn><DialogBtn onClick={() => deleteAnnouncement(deleteTarget.id)} variant="danger" disabled={deleteLoading}>{deleteLoading ? "DELETING..." : "CONFIRM"}</DialogBtn></>}>
+        <p style={{ fontSize: "0.85rem", color: DIMWHITE(0.5), marginBottom: 12 }}>Terminate the following record?</p>
+        {deleteTarget && <div style={{ padding: "12px", background: "rgba(220,50,50,0.05)", border: `1px solid ${RED(0.2)}`, fontSize: "0.9rem", color: AMBER(0.8) }}>{deleteTarget.title}</div>}
       </Modal>
 
-      {/* ══════════════════════════════════════
-          MODAL — EDIT
-      ══════════════════════════════════════ */}
-      <Modal
-        open={!!editTarget}
-        onClose={() => setEditTarget(null)}
-        title="Edit Announcement"
-        actions={
-          <>
-            <DialogBtn onClick={() => setEditTarget(null)} variant="ghost">
-              CANCEL
-            </DialogBtn>
-            <DialogBtn
-              onClick={saveEdit}
-              variant="primary"
-              disabled={editSaving || !editTitle || !editMessage}
-            >
-              {editSaving ? "SAVING..." : "SAVE CHANGES"}
-            </DialogBtn>
-          </>
-        }
-      >
+      {/* Edit Modal */}
+      <Modal open={!!editTarget} onClose={() => setEditTarget(null)} title="Modify Record" actions={<><DialogBtn onClick={() => setEditTarget(null)} variant="ghost">CANCEL</DialogBtn><DialogBtn onClick={saveEdit} disabled={editSaving}>{editSaving ? "SAVING..." : "UPDATE"}</DialogBtn></>}>
         <Field label="Title" value={editTitle} onChange={setEditTitle} />
         <Field label="Message" value={editMessage} onChange={setEditMessage} multiline rows={5} />
       </Modal>

@@ -29,129 +29,157 @@ export default async function AdminInventoryRequestsPage() {
     await getAllInventoryRequests()
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, padding: "24px" }}>
+    <div style={{ minHeight: "100vh", background: BG, color: DIMWHITE(0.85) }}>
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
         ::-webkit-scrollbar{width:5px}
         ::-webkit-scrollbar-thumb{background:${AMBER(0.25)}}
+
+        .log-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 24px 16px 48px;
+        }
+
+        .request-log-card {
+          background: ${PANEL};
+          border: 1px solid ${BORDER};
+          padding: 16px 18px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .log-status {
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.55rem;
+          letter-spacing: 0.22em;
+          margin-bottom: 8px;
+        }
+
+        @media (min-width: 768px) {
+          .log-status {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            margin-bottom: 0;
+          }
+          .log-container {
+            padding: 28px 24px 60px;
+          }
+        }
       `}</style>
 
-      {/* HEADER */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: "0.55rem",
-          letterSpacing: "0.32em",
-          color: AMBER(0.45),
-          marginBottom: 4,
-        }}>
-          SYS · INVENTORY
+      <div className="log-container">
+        {/* HEADER */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: "0.55rem",
+            letterSpacing: "0.32em",
+            color: AMBER(0.45),
+            marginBottom: 4,
+          }}>
+            SYS · INVENTORY
+          </div>
+          <h1 style={{
+            fontFamily: "'IBM Plex Sans Condensed', sans-serif",
+            fontSize: "clamp(1.4rem, 5vw, 1.8rem)",
+            fontWeight: 700,
+            color: AMBER(0.9),
+            letterSpacing: "0.02em",
+            margin: 0
+          }}>
+            Inventory Requests Log
+          </h1>
         </div>
-        <h1 style={{
-          fontFamily: "'IBM Plex Sans Condensed', sans-serif",
-          fontSize: "1.6rem",
-          fontWeight: 700,
-          color: AMBER(0.9),
-          letterSpacing: "0.02em",
-        }}>
-          Inventory Requests Log
-        </h1>
-      </div>
 
-      {/* EMPTY */}
-      {requests.length === 0 && (
-        <div style={{
-          background: PANEL,
-          border: `1px solid ${BORDER}`,
-          padding: "26px",
-          textAlign: "center",
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: "0.65rem",
-          letterSpacing: "0.2em",
-          color: AMBER(0.45),
-        }}>
-          NO INVENTORY REQUESTS FOUND
-        </div>
-      )}
+        {/* EMPTY */}
+        {requests.length === 0 && (
+          <div style={{
+            background: PANEL,
+            border: `1px solid ${BORDER}`,
+            padding: "40px 24px",
+            textAlign: "center",
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: "0.7rem",
+            letterSpacing: "0.15em",
+            color: AMBER(0.3),
+          }}>
+            NO ARCHIVED REQUESTS FOUND
+          </div>
+        )}
 
-      {/* REQUEST LIST */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {requests.map(req => {
-          const statusColor =
-            req.status === "approved" ? GREEN(0.8)
-            : req.status === "rejected" ? RED(0.8)
-            : AMBER(0.85)
+        {/* REQUEST LIST */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {requests.map(req => {
+            const statusColor =
+              req.status === "approved" ? GREEN(0.8)
+              : req.status === "rejected" ? RED(0.8)
+              : AMBER(0.85)
 
-          return (
-            <div
-              key={req.id}
-              style={{
-                background: PANEL,
-                border: `1px solid ${BORDER}`,
-                padding: "16px 18px",
-                position: "relative",
-              }}
-            >
-              {/* STATUS */}
-              <div style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: "0.55rem",
-                letterSpacing: "0.22em",
-                color: statusColor,
-              }}>
-                {req.status.toUpperCase()}
-              </div>
-
-              {/* PURPOSE */}
-              <div style={{ marginBottom: 6 }}>
-                <div style={{
-                  fontFamily: "'IBM Plex Sans Condensed', sans-serif",
-                  fontSize: "0.95rem",
-                  fontWeight: 600,
-                  color: DIMWHITE(0.9),
-                }}>
-                  {req.purpose}
+            return (
+              <div key={req.id} className="request-log-card">
+                {/* STATUS */}
+                <div className="log-status" style={{ color: statusColor }}>
+                  {req.status.toUpperCase()}
                 </div>
-                <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.15em",
-                  color: AMBER(0.45),
-                }}>
-                  {req.requester_name} · {req.email}
-                </div>
-              </div>
 
-              {/* ITEMS */}
-              <div>
-                {req.inventory_request_items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "3px 0",
-                      borderBottom: `1px solid ${AMBER(0.06)}`,
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: "0.65rem",
-                      color: DIMWHITE(0.8),
-                    }}
-                  >
-                    <span>
-                      {item.inventory_items?.[0]?.name ?? "UNKNOWN ITEM"}
-                    </span>
-                    <span style={{ color: AMBER(0.6) }}>
-                      × {item.quantity}
-                    </span>
+                {/* PURPOSE / INFO */}
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{
+                    fontFamily: "'IBM Plex Sans Condensed', sans-serif",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    color: DIMWHITE(0.95),
+                    lineHeight: 1.2,
+                    marginBottom: 4
+                  }}>
+                    {req.purpose}
                   </div>
-                ))}
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.1em",
+                    color: AMBER(0.4),
+                    wordBreak: "break-all"
+                  }}>
+                    {req.requester_name} · <span style={{ color: AMBER(0.25) }}>{req.email}</span>
+                  </div>
+                </div>
+
+                {/* ITEMS GRID-LIKE LIST */}
+                <div style={{ 
+                  background: "rgba(0,0,0,0.2)", 
+                  padding: "10px 12px", 
+                  border: `1px solid ${AMBER(0.05)}` 
+                }}>
+                  {req.inventory_request_items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "5px 0",
+                        borderBottom: idx === req.inventory_request_items.length - 1 ? "none" : `1px solid ${AMBER(0.04)}`,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: "0.65rem",
+                        color: DIMWHITE(0.8),
+                      }}
+                    >
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 10 }}>
+                        {item.inventory_items?.[0]?.name ?? "UNKNOWN_OBJECT"}
+                      </span>
+                      <span style={{ color: AMBER(0.5), flexShrink: 0 }}>
+                        [x{item.quantity}]
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

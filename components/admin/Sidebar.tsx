@@ -24,15 +24,15 @@ const NAV_GROUPS = [
   {
     group: "CORE",
     links: [
-      { id: "01", name: "Dashboard",  href: "/admin"        },
-      { id: "02", name: "Execom",     href: "/admin/execom" },
-      { id: "03", name: "Users",      href: "/admin/users"  },
+      { id: "01", name: "Dashboard",   href: "/admin"        },
+      { id: "02", name: "Execom",      href: "/admin/execom" },
+      { id: "03", name: "Users",       href: "/admin/users"  },
     ],
   },
   {
     group: "IDEAS",
     links: [
-      { id: "04", name: "Ideas",      href: "/admin/ideas"  },
+      { id: "04", name: "Ideas",       href: "/admin/ideas"  },
     ],
   },
   {
@@ -45,7 +45,7 @@ const NAV_GROUPS = [
   {
     group: "EVENTS",
     links: [
-      { id: "07", name: "Events",         href: "/admin/events"               },
+      { id: "07", name: "Events",           href: "/admin/events"               },
       { id: "08", name: "Registrations",  href: "/admin/events/registrations" },
       { id: "09", name: "Feedback",       href: "/admin/events/feedback"      },
     ],
@@ -85,57 +85,49 @@ function NavLink({ id, name, href, active, onClick }: {
           display:      "flex",
           alignItems:   "center",
           gap:          8,
-          padding:      "7px 10px 7px 10px",
+          padding:      "9px 12px",
           marginBottom: 1,
           overflow:     "hidden",
-          background:   active ? `rgba(255,176,0,0.07)` : hov ? `rgba(255,176,0,0.025)` : "transparent",
-          borderTop:    `1px solid ${active ? AMBER(0.18) : "transparent"}`,
-          borderRight:  `1px solid ${active ? AMBER(0.18) : "transparent"}`,
-          borderBottom: `1px solid ${active ? AMBER(0.18) : "transparent"}`,
-          borderLeft:   "none",
+          background:   active ? `rgba(255,176,0,0.08)` : hov ? `rgba(255,176,0,0.03)` : "transparent",
+          borderRight:  `1px solid ${active ? AMBER(0.2) : "transparent"}`,
           transition:   "background 0.18s",
         }}
       >
-        {/* left stripe */}
         <div style={{
           position: "absolute", left: 0, top: 0, bottom: 0,
-          width: active ? 2 : 1,
+          width: active ? 3 : 1,
           background: active
-            ? `linear-gradient(to bottom, transparent, ${AMBER(0.85)}, transparent)`
+            ? `linear-gradient(to bottom, ${AMBER(0.4)}, ${AMBER(0.9)}, ${AMBER(0.4)})`
             : hov
-            ? `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`
+            ? `rgba(255,176,0,0.2)`
             : `rgba(255,176,0,0.06)`,
           transition: "background 0.18s, width 0.15s",
         }} />
 
-        {/* id badge */}
         <span style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.48rem",
-          letterSpacing: "0.12em", color: active ? AMBER(0.5) : AMBER(0.16),
-          flexShrink: 0, minWidth: 20, transition: "color 0.18s",
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem",
+          letterSpacing: "0.12em", color: active ? AMBER(0.7) : AMBER(0.2),
+          flexShrink: 0, minWidth: 22, transition: "color 0.18s",
         }}>
           {id}
         </span>
 
-        {/* pip */}
-        <div style={{ width: 1, height: 8, background: active ? AMBER(0.25) : AMBER(0.07), flexShrink: 0 }} />
+        <div style={{ width: 1, height: 10, background: active ? AMBER(0.3) : AMBER(0.1), flexShrink: 0 }} />
 
-        {/* name */}
         <span style={{
           fontFamily: "'IBM Plex Sans Condensed', sans-serif",
-          fontWeight: active ? 500 : 400, fontSize: "0.82rem",
+          fontWeight: active ? 600 : 400, fontSize: "0.85rem",
           letterSpacing: "0.02em",
-          color: active ? AMBER(0.9) : hov ? DIMWHITE(0.55) : DIMWHITE(0.3),
+          color: active ? AMBER(0.95) : hov ? DIMWHITE(0.6) : DIMWHITE(0.35),
           flex: 1, transition: "color 0.18s",
         }}>
           {name}
         </span>
 
-        {/* active blip */}
         {active && (
           <div style={{
             width: 4, height: 4, borderRadius: "50%", flexShrink: 0,
-            background: AMBER(0.9), boxShadow: `0 0 5px ${AMBER(0.7)}`,
+            background: AMBER(0.9), boxShadow: `0 0 6px ${AMBER(0.6)}`,
             animation: "mcblink 2s ease-in-out infinite",
           }} />
         )}
@@ -151,59 +143,60 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside style={{
       height: "100%", width: "100%",
-      background: BG,
-      borderRight: `1px solid rgba(255,176,0,0.13)`,
+      background: "#0a0900", // Solid background to prevent dashboard bleed-through
+      borderRight: `1px solid rgba(255,176,0,0.15)`,
       display: "flex", flexDirection: "column",
-      position: "relative", overflow: "hidden",
+      position: "relative", 
+      overflow: "hidden",
+      zIndex: 200, // HIGHER than dashboard header
     }}>
       <style>{`
-        @keyframes mcblink { 0%,100%{opacity:1} 50%{opacity:0.15} }
-        @keyframes mcpulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        @keyframes mcblink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+        @keyframes mcpulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .mc-nav::-webkit-scrollbar { display:none }
-        .mc-nav { scrollbar-width:none }
+        .mc-nav { 
+          scrollbar-width:none;
+          -ms-overflow-style: none;
+          touch-action: pan-y;
+        }
       `}</style>
 
       {/* scan lines overlay */}
       <div aria-hidden style={{
         pointerEvents: "none", position: "absolute", inset: 0, zIndex: 0,
-        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,176,0,0.008) 3px, rgba(255,176,0,0.008) 4px)",
+        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,176,0,0.01) 3px, rgba(255,176,0,0.01) 4px)",
       }} />
-
-      {/* right glow edge */}
-      <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${AMBER(0.2)}, transparent)`, zIndex: 2 }} />
 
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
-        {/* ── MINIMAL TOP STRIP — just role, no logo duplication ── */}
         <div style={{
-          padding: "12px 14px",
-          borderBottom: `1px solid rgba(255,176,0,0.1)`,
-          background: "rgba(255,176,0,0.025)",
+          padding: "14px 16px",
+          borderBottom: `1px solid rgba(255,176,0,0.12)`,
+          background: "rgba(255,176,0,0.035)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-            <div style={{ width: 4, height: 4, borderRadius: "50%", background: `rgba(0,255,120,0.85)`, boxShadow: `0 0 5px rgba(0,255,120,0.5)`, animation: "mcpulse 2s ease-in-out infinite" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.25em", color: `rgba(0,255,120,0.55)` }}>
-              SYSTEM ONLINE
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: `rgba(0,255,120,0.9)`, boxShadow: `0 0 5px rgba(0,255,120,0.4)`, animation: "mcpulse 2s infinite" }} />
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.25em", color: `rgba(0,255,120,0.6)` }}>
+              SYSTEM ACTIVE
             </span>
           </div>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.52rem", letterSpacing: "0.22em", color: AMBER(0.3) }}>
-            NAV · CONSOLE
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.2em", color: AMBER(0.35) }}>
+            NAV · CONSOLE v1.0
           </div>
         </div>
 
-        {/* ── GROUPED NAV ── */}
-        <nav className="mc-nav" style={{ flex: 1, overflowY: "auto", padding: "8px 4px" }}>
+        <nav className="mc-nav" style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
           {NAV_GROUPS.map((group) => (
-            <div key={group.group} style={{ marginBottom: 4 }}>
-              {/* group label */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px 4px" }}>
+            <div key={group.group} style={{ marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px 4px" }}>
                 <span style={{
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.46rem",
-                  letterSpacing: "0.3em", color: AMBER(0.25), whiteSpace: "nowrap",
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem",
+                  letterSpacing: "0.35em", color: AMBER(0.25), whiteSpace: "nowrap",
+                  textTransform: "uppercase"
                 }}>
                   {group.group}
                 </span>
-                <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.1)}, transparent)` }} />
+                <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.12)}, transparent)` }} />
               </div>
 
               {group.links.map(link => (
@@ -220,18 +213,16 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </nav>
 
-        {/* ── FOOTER ── */}
         <div style={{
-          padding: "9px 14px",
+          padding: "12px 16px",
           borderTop: `1px solid rgba(255,176,0,0.07)`,
+          background: "rgba(10,9,0,0.5)",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.45rem", letterSpacing: "0.18em", color: AMBER(0.18) }}>
-            IDEA LAB FISAT · ADMIN v1.0
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.45rem", letterSpacing: "0.15em", color: AMBER(0.15) }}>
+            IDEA LAB FISAT
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 3, height: 3, borderRadius: "50%", background: AMBER(0.4), animation: "mcblink 3s ease-in-out infinite" }} />
-          </div>
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: AMBER(0.2) }} />
         </div>
 
       </div>

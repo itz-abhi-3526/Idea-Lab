@@ -26,7 +26,7 @@ const PANEL    = "rgba(255,176,0,0.03)"
 const BORDER   = "rgba(255,176,0,0.14)"
 
 /* ─────────────────────────────────────────
-   TYPES — unchanged
+   TYPES
 ───────────────────────────────────────── */
 type IdeaStatus = "submitted" | "approved" | "rejected" | "completed" | "cancelled"
 
@@ -50,18 +50,17 @@ const FILTERS: { key: "all" | "pending" | "ongoing" | "completed"; label: string
 ]
 
 /* ─────────────────────────────────────────
-   PAGE — all supabase/realtime/filter logic untouched
+   PAGE
 ───────────────────────────────────────── */
 export default function AdminIdeasPage() {
   useFonts()
 
   const [ideas,   setIdeas]   = useState<Idea[]>([])
   const [loading, setLoading] = useState(true)
-  const [search,  setSearch]  = useState("")
-  const [filter,  setFilter]  = useState<"all" | "pending" | "ongoing" | "completed">("all")
+  const [search,   setSearch]  = useState("")
+  const [filter,   setFilter]  = useState<"all" | "pending" | "ongoing" | "completed">("all")
   const [searchFoc, setSearchFoc] = useState(false)
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
   const fetchIdeas = async () => {
     setLoading(true)
     const { data } = await supabase
@@ -107,11 +106,37 @@ export default function AdminIdeasPage() {
         @keyframes mcpulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
         @keyframes shimmer { from{left:-40%} to{left:140%} }
         input::placeholder { color:${AMBER(0.22)};font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.06em; }
+        
+        /* The Orientation Fix */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+
+        .controls-flex {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .tabs-row {
+          display: flex;
+          gap: 4px;
+          flex-wrap: wrap; /* Fixes buttons squashing */
+        }
+
+        @media (min-width: 768px) {
+          .stats-grid { grid-template-columns: repeat(4, 1fr); }
+          .controls-flex { flex-direction: row; align-items: stretch; }
+          .search-input-wrapper { flex: 1; }
+        }
       `}</style>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 24px 48px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 16px 48px" }}>
 
-        {/* ── RULE ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
           <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.32em", color: AMBER(0.45), whiteSpace: "nowrap" }}>
             SYS · IDEA PIPELINE
@@ -119,7 +144,6 @@ export default function AdminIdeasPage() {
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.25)}, transparent)` }} />
         </div>
 
-        {/* ── HEADER ── */}
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", letterSpacing: "-0.01em", color: AMBER(0.9), lineHeight: 1, margin: 0 }}>
             Ideas
@@ -130,7 +154,7 @@ export default function AdminIdeasPage() {
         </div>
 
         {/* ── STATS STRIP ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 24 }}>
+        <div className="stats-grid">
           {[
             { label: "TOTAL",     val: stats.total,     active: filter === "all"       },
             { label: "PENDING",   val: stats.pending,   active: filter === "pending"   },
@@ -157,7 +181,7 @@ export default function AdminIdeasPage() {
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.48rem", letterSpacing: "0.28em", color: s.active ? AMBER(0.55) : AMBER(0.28), marginBottom: 5 }}>
                 {s.label}
               </div>
-              <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.4rem, 3vw, 2rem)", color: s.active ? AMBER(0.9) : DIMWHITE(0.55), lineHeight: 1 }}>
+              <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "clamp(1.4rem, 3vw, 1.8rem)", color: s.active ? AMBER(0.9) : DIMWHITE(0.55), lineHeight: 1 }}>
                 {s.val}
               </div>
             </div>
@@ -165,14 +189,11 @@ export default function AdminIdeasPage() {
         </div>
 
         {/* ── CONTROLS ── */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: 8, marginBottom: 20 }}>
-          {/* search */}
-          <div style={{ position: "relative", flex: "1 1 260px" }}>
+        <div className="controls-flex">
+          <div className="search-input-wrapper" style={{ position: "relative" }}>
             <div style={{
               position: "absolute", left: 0, top: 0, bottom: 0, width: searchFoc ? 2 : 1,
-              background: searchFoc
-                ? `linear-gradient(to bottom, transparent, ${AMBER(0.85)}, transparent)`
-                : `linear-gradient(to bottom, transparent, ${AMBER(0.18)}, transparent)`,
+              background: searchFoc ? AMBER(0.85) : AMBER(0.18),
               transition: "background 0.2s, width 0.15s",
             }} />
             <input
@@ -199,8 +220,7 @@ export default function AdminIdeasPage() {
             />
           </div>
 
-          {/* filter tabs */}
-          <div style={{ display: "flex", gap: 4 }}>
+          <div className="tabs-row">
             {FILTERS.map(f => (
               <FilterBtn
                 key={f.key}
@@ -215,10 +235,9 @@ export default function AdminIdeasPage() {
         {/* ── RESULT COUNT ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.22em", color: AMBER(0.25) }}>
-            {filteredIdeas.length} IDEA{filteredIdeas.length !== 1 ? "S" : ""} FOUND
+            {filteredIdeas.length} RECORD{filteredIdeas.length !== 1 ? "S" : ""} FOUND
           </span>
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${AMBER(0.08)}, transparent)` }} />
-          {/* live indicator */}
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 4, height: 4, borderRadius: "50%", background: `rgba(0,255,120,0.85)`, boxShadow: `0 0 4px rgba(0,255,120,0.5)`, animation: "mcpulse 2s ease-in-out infinite" }} />
             <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.2em", color: `rgba(0,255,120,0.45)` }}>LIVE</span>
@@ -241,7 +260,7 @@ export default function AdminIdeasPage() {
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filteredIdeas.map(idea => (
               <AdminIdeaCard
                 key={idea.id}
@@ -275,19 +294,20 @@ function FilterBtn({ label, active, onClick }: {
         letterSpacing: "0.18em",
         padding:       "9px 14px",
         background:    active ? `rgba(255,176,0,0.09)` : hov ? `rgba(255,176,0,0.04)` : "transparent",
-        borderTop:     `1px solid ${active ? `rgba(255,176,0,0.32)` : `rgba(255,176,0,0.1)`}`,
-        borderRight:   `1px solid ${active ? `rgba(255,176,0,0.32)` : `rgba(255,176,0,0.1)`}`,
-        borderBottom:  `1px solid ${active ? `rgba(255,176,0,0.32)` : `rgba(255,176,0,0.1)`}`,
+        borderTop:     `1px solid ${active ? AMBER(0.32) : AMBER(0.1)}`,
+        borderRight:   `1px solid ${active ? AMBER(0.32) : AMBER(0.1)}`,
+        borderBottom:  `1px solid ${active ? AMBER(0.32) : AMBER(0.1)}`,
         borderLeft:    "none",
-        color:         active ? `rgba(255,176,0,0.9)` : `rgba(220,215,200,0.3)`,
+        color:         active ? AMBER(0.9) : DIMWHITE(0.3),
         cursor:        "pointer",
         whiteSpace:    "nowrap" as const,
         transition:    "background 0.18s, color 0.18s",
         position:      "relative",
+        flex: "1 0 auto", /* Allows buttons to share width but grow if needed */
       }}
     >
       {active && (
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 2, background: `linear-gradient(to bottom, transparent, rgba(255,176,0,0.8), transparent)` }} />
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 2, background: `linear-gradient(to bottom, transparent, ${AMBER(0.8)}, transparent)` }} />
       )}
       {label}
     </button>

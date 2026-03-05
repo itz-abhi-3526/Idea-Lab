@@ -3,6 +3,9 @@
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 
+/* ─────────────────────────────────────────
+   PALETTE
+───────────────────────────────────────── */
 const AMBER    = (a = 1) => `rgba(255,176,0,${a})`
 const GREEN    = (a = 1) => `rgba(0,255,120,${a})`
 const RED      = (a = 1) => `rgba(255,60,60,${a})`
@@ -58,6 +61,7 @@ function ActionBtn({ label, onClick, disabled, color, bg, border }: {
         overflow:      "hidden",
         transition:    "background 0.18s",
         opacity:       disabled ? 0.5 : 1,
+        flex: "1 1 auto"
       }}
     >
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom, transparent, ${color}, transparent)`, opacity: hov && !disabled ? 1 : 0.4, transition: "opacity 0.18s" }} />
@@ -66,9 +70,6 @@ function ActionBtn({ label, onClick, disabled, color, bg, border }: {
   )
 }
 
-/* ─────────────────────────────────────────
-   COMPONENT — all supabase logic untouched
-───────────────────────────────────────── */
 export default function AdminIdeaDialog({
   idea,
   onStatusChange,
@@ -77,9 +78,8 @@ export default function AdminIdeaDialog({
   onStatusChange: () => void
 }) {
   const [loading, setLoading] = useState(false)
-  const [open,    setOpen]    = useState(false)
+  const [open,     setOpen]    = useState(false)
 
-  /* ── ALL ORIGINAL LOGIC — UNCHANGED ── */
   const updateStatus = async (status: "approved" | "rejected") => {
     setLoading(true)
     const { error } = await supabase
@@ -87,22 +87,82 @@ export default function AdminIdeaDialog({
       .update({ status })
       .eq("id", idea.id)
     setLoading(false)
-    if (!error) { onStatusChange() }
+    if (!error) { 
+      setOpen(false);
+      onStatusChange(); 
+    }
   }
 
   const cfg = STATUS_CFG[idea.status] ?? STATUS_FALLBACK
 
   return (
-    <details
-      open={open}
-      onToggle={e => setOpen((e.currentTarget as HTMLDetailsElement).open)}
-      style={{ position: "relative" }}
-    >
+    <div style={{ position: "relative" }}>
+      <style>{`
+        @keyframes dlgshimmer { from{left:-40%} to{left:140%} }
+        
+        .dialog-panel {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          background: ${BG};
+          border-top: 1px solid ${BORDER};
+          box-shadow: 0 -10px 50px rgba(0,0,0,0.8);
+          transform: translateY(100%);
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dialog-panel.is-open {
+          transform: translateY(0);
+        }
+
+        .dialog-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+          z-index: 999;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        .dialog-overlay.is-open {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        @media (min-width: 640px) {
+          .dialog-panel {
+            position: absolute;
+            bottom: auto;
+            top: 100%;
+            left: auto;
+            right: 0;
+            width: 420px;
+            margin-top: 8px;
+            border: 1px solid ${BORDER};
+            border-radius: 4px;
+            transform: translateY(10px) scale(0.98);
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+          }
+          .dialog-panel.is-open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+          }
+          .dialog-overlay { display: none; }
+        }
+      `}</style>
+
       {/* ── TRIGGER ── */}
-      <summary
+      <div
+        onClick={() => setOpen(!open)}
         style={{
           cursor:        "pointer",
-          listStyle:     "none",
           fontFamily:    "'IBM Plex Mono', monospace",
           fontSize:      "0.55rem",
           letterSpacing: "0.2em",
@@ -115,96 +175,63 @@ export default function AdminIdeaDialog({
         }}
       >
         {open ? "CLOSE ▲" : "VIEW ▼"}
-      </summary>
+      </div>
+
+      {/* ── MOBILE OVERLAY ── */}
+      <div className={`dialog-overlay ${open ? 'is-open' : ''}`} onClick={() => setOpen(false)} />
 
       {/* ── PANEL ── */}
-      <div style={{
-        position:       "fixed",
-        bottom:         0,
-        left:           0,
-        right:          0,
-        zIndex:         50,
-        // sm: absolute, right-aligned
-      }}
-      className="sm:!fixed-none"
-      >
-        {/* Use a wrapper to handle sm vs mobile layout */}
-        <div style={{
-          background:     BG,
-          border:         `1px solid ${BORDER}`,
-          boxShadow:      `0 -4px 40px rgba(0,0,0,0.7), 0 0 0 1px ${AMBER(0.05)}`,
-          maxHeight:      "85vh",
-          overflowY:      "auto",
-          position:       "relative",
-          overflow:       "hidden",
-        }}
-          className="w-full sm:absolute sm:bottom-auto sm:right-0 sm:w-[420px] sm:mt-2 sm:max-h-[85vh] sm:overflow-y-auto"
-        >
-          {/* top shimmer */}
-          <div style={{ height: 1, overflow: "hidden", background: AMBER(0.1), position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, bottom: 0, width: "40%", background: `linear-gradient(to right, transparent, ${AMBER(0.65)}, transparent)`, animation: "dlgshimmer 2.5s linear infinite" }} />
+      <div className={`dialog-panel ${open ? 'is-open' : ''}`}>
+        {/* top shimmer */}
+        <div style={{ height: 1, overflow: "hidden", background: AMBER(0.1), position: "relative" }}>
+          <div style={{ position: "absolute", top: 0, bottom: 0, width: "40%", background: `linear-gradient(to right, transparent, ${AMBER(0.65)}, transparent)`, animation: "dlgshimmer 2.5s linear infinite" }} />
+        </div>
+
+        {/* HUD corners (Desktop only visual) */}
+        <div className="hidden sm:block" style={{ position: "absolute", top: 6, left: 6, width: 8, height: 8, borderTop: `1px solid ${AMBER(0.4)}`, borderLeft: `1px solid ${AMBER(0.4)}` }} />
+        <div className="hidden sm:block" style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderTop: `1px solid ${AMBER(0.4)}`, borderRight: `1px solid ${AMBER(0.4)}` }} />
+
+        <div style={{ padding: "20px 20px 24px" }}>
+          {/* id + close row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.22em", color: AMBER(0.3) }}>
+              RECORD_ID·{idea.id.slice(0, 8).toUpperCase()}
+            </span>
+            <button
+              onClick={() => setOpen(false)}
+              style={{ background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem", width: 24, height: 24, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >✕</button>
           </div>
-          <style>{`@keyframes dlgshimmer{from{left:-40%}to{left:140%}} details>summary::-webkit-details-marker{display:none}`}</style>
 
-          {/* HUD corners */}
-          <div style={{ position: "absolute", top: 6, left: 6,  width: 8, height: 8, borderTop: `1px solid ${AMBER(0.4)}`, borderLeft: `1px solid ${AMBER(0.4)}` }} />
-          <div style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderTop: `1px solid ${AMBER(0.4)}`, borderRight: `1px solid ${AMBER(0.4)}` }} />
+          <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.1rem", color: DIMWHITE(0.92), lineHeight: 1.2, margin: "0 0 12px" }}>
+            {idea.idea_title}
+          </h3>
 
-          <div style={{ padding: "18px 18px 16px" }}>
+          <p style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.85rem", color: DIMWHITE(0.45), lineHeight: 1.6, margin: "0 0 16px", maxHeight: "200px", overflowY: "auto" }}>
+            {idea.idea_description}
+          </p>
 
-            {/* id + close row */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.47rem", letterSpacing: "0.22em", color: AMBER(0.3) }}>
-                IDEA·{idea.id.slice(0, 8).toUpperCase()}
-              </span>
-              <button
-                onClick={() => setOpen(false)}
-                style={{ background: "transparent", border: `1px solid ${AMBER(0.15)}`, color: AMBER(0.4), fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.6rem", width: 22, height: 22, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "border-color 0.18s, color 0.18s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = AMBER(0.4); (e.currentTarget as HTMLButtonElement).style.color = AMBER(0.8) }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = AMBER(0.15); (e.currentTarget as HTMLButtonElement).style.color = AMBER(0.4) }}
-              >✕</button>
-            </div>
-
-            {/* title */}
-            <h3 style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: "1.1rem", color: DIMWHITE(0.92), lineHeight: 1.15, margin: "0 0 8px" }}>
-              {idea.idea_title}
-            </h3>
-
-            {/* description */}
-            <p style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 300, fontSize: "0.85rem", color: DIMWHITE(0.45), lineHeight: 1.7, margin: "0 0 12px" }}>
-              {idea.idea_description}
-            </p>
-
-            {/* domain */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 20 }}>
             {idea.domain && (
-              <div style={{ marginBottom: 12 }}>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.18em", padding: "3px 10px", color: AMBER(0.7), background: AMBER(0.07), border: `1px solid ${AMBER(0.22)}` }}>
-                  {idea.domain.toUpperCase()}
-                </span>
-              </div>
-            )}
-
-            {/* status row */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.15em", color: AMBER(0.3) }}>STATUS</span>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.18em", padding: "2px 9px", color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
-                {cfg.label}
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.18em", padding: "3px 10px", color: AMBER(0.7), background: AMBER(0.07), border: `1px solid ${AMBER(0.22)}` }}>
+                {idea.domain.toUpperCase()}
               </span>
-            </div>
-
-            {/* divider */}
-            <div style={{ height: 1, background: `linear-gradient(to right, ${AMBER(0.12)}, transparent)`, margin: "12px 0" }} />
-
-            {/* actions */}
-            {idea.status === "submitted" && (
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-                <ActionBtn label="REJECT"  onClick={() => updateStatus("rejected")} disabled={loading} color={RED(0.8)}   bg={RED(0.08)}   border={RED(0.28)}   />
-                <ActionBtn label="APPROVE" onClick={() => updateStatus("approved")} disabled={loading} color={GREEN(0.8)} bg={GREEN(0.08)} border={GREEN(0.28)} />
-              </div>
             )}
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.18em", padding: "3px 10px", color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+              {cfg.label}
+            </span>
           </div>
+
+          <div style={{ height: 1, background: `linear-gradient(to right, ${AMBER(0.12)}, transparent)`, margin: "16px 0" }} />
+
+          {idea.status === "submitted" && (
+            <div style={{ display: "flex", gap: 8 }}>
+              <ActionBtn label="REJECT"  onClick={() => updateStatus("rejected")} disabled={loading} color={RED(0.8)}   bg={RED(0.08)}   border={RED(0.28)}   />
+              <ActionBtn label="APPROVE" onClick={() => updateStatus("approved")} disabled={loading} color={GREEN(0.8)} bg={GREEN(0.08)} border={GREEN(0.28)} />
+            </div>
+          )}
         </div>
       </div>
-    </details>
+    </div>
   )
 }
