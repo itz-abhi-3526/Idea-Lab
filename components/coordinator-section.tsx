@@ -1,7 +1,7 @@
 "use client"
 
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import { Mail, Phone, ExternalLink, MapPin } from "lucide-react"
+import { Mail, Phone, ExternalLink, MapPin, ShieldCheck, Cpu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 function ContactItem({
@@ -13,39 +13,24 @@ function ContactItem({
   label: string
   href?: string
 }) {
-  const content = (
-    <>
-      <m.div
-        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full
-                   bg-neutral-800/60 backdrop-blur
-                   flex items-center justify-center
-                   group-hover:bg-orange-500/10 transition-colors"
-        whileHover={{ scale: 1.06 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-      >
-        <Icon className="w-4 h-4 text-neutral-500 group-hover:text-orange-500 transition-colors" />
-      </m.div>
-
-      <span className="text-sm sm:text-base font-medium text-neutral-300 group-hover:text-white transition-colors break-all">
-        {label}
-      </span>
-    </>
-  )
-
   return (
     <m.div
-      whileHover={{ x: 3 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="group flex items-center gap-3 sm:gap-4 transition-all"
+      whileHover={{ x: 5 }}
+      transition={{ duration: 0.2 }}
+      className="group flex items-center gap-4 transition-all"
     >
+      <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-black transition-all duration-300 text-orange-500">
+        <Icon size={18} />
+      </div>
+
       {href ? (
-        <a href={href} className="flex items-center gap-3 sm:gap-4 w-full">
-          {content}
+        <a href={href} className="text-sm font-['Outfit'] font-light text-neutral-400 group-hover:text-white transition-colors">
+          {label}
         </a>
       ) : (
-        <div className="flex items-center gap-3 sm:gap-4 w-full cursor-default">
-          {content}
-        </div>
+        <span className="text-sm font-['Outfit'] font-light text-neutral-400 group-hover:text-white transition-colors">
+          {label}
+        </span>
       )}
     </m.div>
   )
@@ -55,152 +40,125 @@ export function CoordinatorSection() {
   return (
     <LazyMotion features={domAnimation}>
       <section
-        className="relative w-full py-16 sm:py-24 md:py-32 bg-black text-white overflow-hidden"
+        className="relative w-full py-24 sm:py-32 bg-black text-white overflow-hidden border-t border-white/[0.05]"
         id="coordinator"
       >
-        {/* ambient glows */}
-        <div className="absolute top-0 left-1/4 w-[320px] h-[320px] sm:w-[500px] sm:h-[500px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[260px] h-[260px] sm:w-[420px] sm:h-[420px] bg-orange-500/5 rounded-full blur-[140px] pointer-events-none" />
+        {/* CONTINUATION BRIDGE */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-orange-500/50 via-orange-500/10 to-transparent">
+            <m.div 
+              animate={{ top: ["0%", "100%"], opacity: [0, 1, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full"
+            />
+        </div>
 
-        <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-24 max-w-7xl mx-auto relative z-10">
-          <m.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center"
-          >
-            {/* LEFT */}
-            <div className="lg:col-span-5 space-y-8 sm:space-y-10 text-center lg:text-left">
-              <div className="space-y-5 sm:space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 text-xs font-bold tracking-widest uppercase">
-                  Service Portal
-                </div>
+        {/* AMBIENT BACKGROUND */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/[0.03] blur-[150px] rounded-full" />
+          <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+        </div>
 
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight leading-tight">
-                  IDEA Lab <br />
-                  <span className="text-neutral-500">
-                    Incubation & Fabrication Support
-                  </span>
-                </h2>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            
+            {/* LEFT: CONTENT AREA */}
+            <m.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-px bg-orange-500" />
+                <span className="text-[10px] tracking-[0.4em] uppercase text-orange-500 font-bold font-['Outfit']">Incubation Office</span>
               </div>
 
-              <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md mx-auto lg:mx-0 font-light">
-                Open to <span className="text-white font-medium">FISAT students</span>, startups,
-                innovators, and industry partners — leverage IDEA Lab’s incubation
-                ecosystem for prototyping, 3D printing, laser cutting, and
-                product development support.
+              <h2 className="text-white font-[800] tracking-tighter leading-[1] uppercase" style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}>
+                Incubation & <br/>
+                <span className="text-neutral-600">Fabrication Support</span>
+              </h2>
+
+              <p className="text-neutral-500 font-['Outfit'] font-light text-lg max-w-md leading-relaxed">
+                Open to <span className="text-white font-medium">FISAT students</span> and industry partners. Leverage our ecosystem for prototyping, 3D printing, and product development.
               </p>
 
-              <m.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-block w-full sm:w-auto"
-                transition={{ duration: 0.2 }}
-              >
+              <div className="space-y-4 pt-4">
+                 <div className="flex items-center gap-3 text-neutral-400 group">
+                    <ShieldCheck className="text-orange-500" size={18} />
+                    <span className="text-xs uppercase tracking-widest font-['Outfit'] group-hover:text-white transition-colors">Direct Technical Mentorship</span>
+                 </div>
+                 <div className="flex items-center gap-3 text-neutral-400 group">
+                    <Cpu className="text-orange-500" size={18} />
+                    <span className="text-xs uppercase tracking-widest font-['Outfit'] group-hover:text-white transition-colors">Advanced Prototyping Access</span>
+                 </div>
+              </div>
+
+              <m.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="pt-6">
                 <Button
-                  className="bg-white text-black hover:bg-neutral-200 transition-all duration-300 rounded-xl px-8 sm:px-10 py-6 sm:py-7 h-auto text-sm sm:text-base font-bold group border border-white/10 w-full sm:w-auto shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+                  className="bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-500 rounded-2xl px-10 py-7 h-auto text-xs uppercase tracking-[0.2em] font-bold font-['Syne'] shadow-2xl group"
                   asChild
                 >
-                  <a
-                    href="/incubation/request"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="/incubation/request" target="_blank" rel="noopener noreferrer">
                     Submit Incubation Request
-                    <ExternalLink className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <ExternalLink className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                   </a>
                 </Button>
               </m.div>
-            </div>
+            </m.div>
 
-            {/* RIGHT */}
+            {/* RIGHT: COORDINATOR PROFILE CARD */}
             <m.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-7 bg-neutral-900/50 backdrop-blur-xl border border-neutral-800/60 rounded-3xl p-5 sm:p-8 md:p-12 space-y-10 sm:space-y-12 shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+              transition={{ duration: 0.8 }}
+              className="relative"
             >
-              <div className="flex flex-col md:flex-row gap-10 sm:gap-12 items-center md:items-start text-center md:text-left">
-                {/* Avatar */}
-                <m.div
-                  className="relative group"
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-neutral-800 group-hover:border-orange-500/50 transition-colors duration-500">
-                    <img
-                      src="https://res.cloudinary.com/dudp2imxs/image/upload/v1766381472/IMG-20251218-WA0096_wtyhpd.jpg"
-                      alt="Mr. Jithin Joseph"
-                      className="w-full h-full object-cover transition-transform duration-700 scale-105 group-hover:scale-110"
-                    />
-                  </div>
+              <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-orange-500/40" />
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-orange-500/40" />
 
-                  <div className="absolute -inset-4 bg-orange-500/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-                </m.div>
+              <div className="relative bg-neutral-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-2xl group">
+                
+                {/* Background ID Scan effect */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent group-hover:top-full transition-all duration-[3s] ease-linear" />
 
-                {/* Info */}
-                <div className="space-y-6 sm:space-y-8 flex-1">
-                  <div className="space-y-1 sm:space-y-2">
-                    <h3 className="text-xs uppercase tracking-[0.3em] text-orange-500 font-bold">
-                      Project Coordinator
-                    </h3>
-
-                    <h4 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-                      Mr. Jithin Joseph
-                    </h4>
-
-                    <p className="text-neutral-400 font-medium tracking-wide italic">
-                      FISAT AICTE IDEA Lab
-                    </p>
-                  </div>
-
-                  <m.div
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    variants={{
-                      hidden: {},
-                      visible: { transition: { staggerChildren: 0.06 } },
-                    }}
-                    className="grid grid-cols-1 gap-4 sm:gap-5"
-                  >
-                    <m.div
-                      variants={{
-                        hidden: { opacity: 0, y: 6 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                    >
-                      <ContactItem
-                        icon={Mail}
-                        label="jithinjoseph@fisat.ac.in"
-                        href="mailto:jithinjoseph@fisat.ac.in"
+                <div className="flex flex-col md:flex-row gap-10 items-center md:items-start">
+                  
+                  {/* Portrait */}
+                  <div className="relative shrink-0">
+                    <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-2xl overflow-hidden border border-white/10 relative z-10">
+                      <img
+                        src="https://res.cloudinary.com/dudp2imxs/image/upload/v1766381472/IMG-20251218-WA0096_wtyhpd.jpg"
+                        alt="Mr. Jithin Joseph"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
                       />
-                    </m.div>
+                    </div>
+                    <div className="absolute -inset-4 bg-orange-500/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
 
-                    <m.div
-                      variants={{
-                        hidden: { opacity: 0, y: 6 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                    >
+                  {/* Bio Info */}
+                  <div className="space-y-8 flex-1 text-center md:text-left">
+                    <div className="space-y-2">
+                      <h4 className="text-3xl font-bold font-['Syne'] tracking-tight text-white uppercase">
+                        Mr. Jithin Joseph
+                      </h4>
+                      <p className="text-sm font-['Outfit'] font-light text-neutral-500 tracking-[0.1em] uppercase">
+                        Project Coordinator • FISAT AICTE IDEA Lab
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-5">
+                      <ContactItem icon={Mail} label="jithinjoseph@fisat.ac.in" href="mailto:jithinjoseph@fisat.ac.in" />
                       <ContactItem icon={Phone} label="+91 9895221439" />
-                    </m.div>
-
-                    <m.div
-                      variants={{
-                        hidden: { opacity: 0, y: 6 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                    >
                       <ContactItem icon={MapPin} label="FISAT, Angamaly" />
-                    </m.div>
-                  </m.div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </m.div>
-          </m.div>
+
+          </div>
         </div>
       </section>
     </LazyMotion>

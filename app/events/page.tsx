@@ -3,9 +3,28 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import QRCode from "react-qr-code"
-import { Calendar, MapPin, ArrowRight } from "lucide-react"
+import { Calendar, MapPin, ArrowRight, Ticket, Zap } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
+/* ─────────────────────────────────────────
+   FONTS
+───────────────────────────────────────── */
+function useFonts() {
+  useEffect(() => {
+    const id = "events-fonts"
+    if (document.getElementById(id)) return
+    const l = document.createElement("link")
+    l.id = id
+    l.rel = "stylesheet"
+    l.href =
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600;1,700&family=Azeret+Mono:wght@300;400;500&family=DM+Sans:wght@300;400&display=swap"
+    document.head.prepend(l)
+  }, [])
+}
+
+/* ─────────────────────────────────────────
+   TYPES — unchanged from original
+───────────────────────────────────────── */
 type Event = {
   id: string
   title: string
@@ -13,13 +32,338 @@ type Event = {
   start_datetime: string
   registration_deadline: string | null
   venue: string | null
-
-  // 🆕 Paid event support
   is_paid: boolean
   price: number | null
 }
 
+/* ─────────────────────────────────────────
+   ACCENT PALETTE — earthy luxury
+───────────────────────────────────────── */
+const ACCENTS = [
+  { hex: "#d4af37", rgb: "212,175,55",  dark: true  }, // gold
+  { hex: "#e07b54", rgb: "224,123,84",  dark: false }, // terracotta
+  { hex: "#7eb8c9", rgb: "126,184,201", dark: false }, // slate blue
+  { hex: "#b09a7e", rgb: "176,154,126", dark: true  }, // warm tan
+]
+
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
+const DAYS   = ["SUN","MON","TUE","WED","THU","FRI","SAT"]
+
+function parseDate(iso: string) {
+  const d = new Date(iso)
+  return {
+    raw:   d,
+    date:  d.getDate(),
+    month: MONTHS[d.getMonth()],
+    day:   DAYS[d.getDay()],
+    year:  d.getFullYear(),
+  }
+}
+
+/* ─────────────────────────────────────────
+   GRAIN OVERLAY
+───────────────────────────────────────── */
+function Grain() {
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 999, pointerEvents: "none", opacity: 0.022,
+      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+      backgroundRepeat: "repeat", backgroundSize: "128px 128px",
+    }} />
+  )
+}
+
+/* ─────────────────────────────────────────
+   SHIMMER TOP BAR
+───────────────────────────────────────── */
+function ShimmerBar({ accentHex, accentRgb }: { accentHex: string; accentRgb: string }) {
+  return (
+    <div style={{ height: 2, position: "relative", overflow: "hidden" }}>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `linear-gradient(90deg, transparent, ${accentHex}, rgba(${accentRgb},0.3), transparent)`,
+      }} />
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)",
+        animation: "shimmer 3s ease-in-out infinite",
+      }} />
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────
+   PERFORATED DIVIDER
+───────────────────────────────────────── */
+function Perforation({ accentRgb }: { accentRgb: string }) {
+  return (
+    <div style={{ position: "relative", width: 1, flexShrink: 0, alignSelf: "stretch" }}>
+      <svg width="2" height="100%" style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+        <line
+          x1="1" y1="0" x2="1" y2="100%"
+          stroke={`rgba(${accentRgb},0.22)`} strokeWidth="1.5" strokeDasharray="6 5"
+        />
+      </svg>
+      <div style={{
+        position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)",
+        width: 28, height: 28, borderRadius: "50%",
+        background: "#080808", border: "1px solid rgba(255,255,255,0.04)", zIndex: 10,
+      }} />
+      <div style={{
+        position: "absolute", bottom: -14, left: "50%", transform: "translateX(-50%)",
+        width: 28, height: 28, borderRadius: "50%",
+        background: "#080808", border: "1px solid rgba(255,255,255,0.04)", zIndex: 10,
+      }} />
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────
+   SINGLE TICKET CARD
+───────────────────────────────────────── */
+function EventTicket({
+  event,
+  index,
+  isOpen,
+  now,
+}: {
+  event: Event
+  index: number
+  isOpen: boolean
+  now: Date
+}) {
+  const accent = ACCENTS[index % ACCENTS.length]
+  const d = parseDate(event.start_datetime)
+  const isPast = d.raw < now
+
+  return (
+    <div style={{
+      position: "relative",
+      borderRadius: 22,
+      overflow: "visible",
+      opacity: isPast ? 0.48 : 1,
+      animation: `riseIn 0.6s cubic-bezier(0.16,1,0.3,1) ${index * 0.1}s both`,
+    }}>
+      {/* glow ring */}
+      <div style={{
+        position: "absolute", inset: -1, borderRadius: 23, zIndex: 0, pointerEvents: "none",
+        background: `linear-gradient(135deg, rgba(${accent.rgb},0.16) 0%, transparent 55%)`,
+      }} />
+
+      <div style={{
+        position: "relative", zIndex: 1, borderRadius: 22, overflow: "hidden",
+        background: "linear-gradient(155deg, #131313 0%, #0c0c0c 100%)",
+        border: `1px solid rgba(${accent.rgb},0.15)`,
+        boxShadow: "0 24px 64px -16px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}>
+
+        <ShimmerBar accentHex={accent.hex} accentRgb={accent.rgb} />
+
+        <div style={{ display: "flex" }}>
+
+          {/* ── DATE COLUMN ── */}
+          <div style={{
+            width: 112, flexShrink: 0,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            padding: "30px 14px", gap: 2,
+            background: `linear-gradient(180deg, rgba(${accent.rgb},0.09) 0%, rgba(${accent.rgb},0.02) 100%)`,
+          }}>
+            <span style={{
+              fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+              letterSpacing: "0.28em", color: accent.hex,
+              textTransform: "uppercase", opacity: 0.85,
+            }}>{d.day}</span>
+
+            <span style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 700,
+              fontSize: 66, lineHeight: 0.9, color: "#fff",
+              letterSpacing: "-0.03em", margin: "8px 0 6px",
+            }}>{String(d.date).padStart(2, "0")}</span>
+
+            <span style={{
+              fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+              letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)",
+            }}>{d.month} '{String(d.year).slice(2)}</span>
+          </div>
+
+          {/* perforated tear */}
+          <Perforation accentRgb={accent.rgb} />
+
+          {/* ── MAIN INFO ── */}
+          <div style={{ flex: 1, padding: "24px 28px 22px", minWidth: 0 }}>
+
+            {/* badges */}
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 13 }}>
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
+                padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
+                background: isOpen ? "rgba(34,197,94,0.09)" : "rgba(239,68,68,0.09)",
+                color: isOpen ? "#4ade80" : "#f87171",
+                border: `1px solid ${isOpen ? "rgba(34,197,94,0.17)" : "rgba(239,68,68,0.17)"}`,
+              }}>
+                {isPast ? "● Concluded" : isOpen ? "● Registration Open" : "● Closed"}
+              </span>
+
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
+                padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
+                background: event.is_paid ? `rgba(${accent.rgb},0.09)` : "rgba(255,255,255,0.04)",
+                color: event.is_paid ? accent.hex : "rgba(255,255,255,0.32)",
+                border: `1px solid ${event.is_paid ? `rgba(${accent.rgb},0.2)` : "rgba(255,255,255,0.07)"}`,
+              }}>
+                {event.is_paid ? `₹${event.price}` : "Free"}
+              </span>
+            </div>
+
+            {/* title */}
+            <h3 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
+              fontSize: "clamp(1.2rem, 2.4vw, 1.65rem)",
+              color: "#fff", lineHeight: 1.18, letterSpacing: "-0.02em", marginBottom: 14,
+            }}>
+              {event.title}
+            </h3>
+
+            {/* meta */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <Calendar size={11} color={`rgba(${accent.rgb},0.5)`} />
+                <span style={{
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+                  fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+                }}>
+                  {new Date(event.start_datetime).toLocaleString()}
+                </span>
+              </span>
+
+              {event.venue && (
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <MapPin size={11} color={`rgba(${accent.rgb},0.5)`} />
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+                    fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+                  }}>
+                    {event.venue}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {/* description */}
+            {event.description && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontStyle: "italic",
+                fontSize: "clamp(0.9rem, 1.6vw, 1.05rem)",
+                color: "rgba(255,255,255,0.3)",
+                lineHeight: 1.72, marginTop: 14, paddingTop: 14,
+                borderTop: `1px solid rgba(${accent.rgb},0.07)`,
+                maxWidth: 480, margin: "14px 0 0",
+              }}>
+                {event.description}
+              </p>
+            )}
+
+            {/* deadline */}
+            {isOpen && (
+              <p style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.18em", color: `rgba(${accent.rgb},0.42)`,
+                marginTop: 12, textTransform: "uppercase",
+              }}>
+                Registration closes {new Date(event.registration_deadline!).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+
+          {/* ── QR + ACTION ── */}
+          <div style={{
+            width: 156, flexShrink: 0,
+            display: "flex", flexDirection: "column", alignItems: "center",
+            justifyContent: "center", gap: 16, padding: "24px 20px",
+            background: "rgba(0,0,0,0.28)",
+            borderLeft: `1px solid rgba(${accent.rgb},0.09)`,
+          }}>
+            <div style={{
+              padding: 10, background: "#fff", borderRadius: 12, display: "inline-flex",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+            }}>
+              <QRCode
+                value={`${location.origin}/events/${event.id}`}
+                size={72}
+                bgColor="#ffffff"
+                fgColor="#0a0a0a"
+              />
+            </div>
+
+            <span style={{
+              fontFamily: "'Azeret Mono', monospace", fontSize: 8,
+              letterSpacing: "0.22em", color: "rgba(255,255,255,0.14)",
+              textTransform: "uppercase", textAlign: "center",
+            }}>Scan to open</span>
+
+            <Link
+              href={`/events/${event.id}`}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "9px 18px", borderRadius: 99, textDecoration: "none",
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.16em", textTransform: "uppercase",
+                transition: "all 0.28s cubic-bezier(0.16,1,0.3,1)",
+                background: isOpen && !isPast
+                  ? `linear-gradient(135deg, rgba(${accent.rgb},0.9), rgba(${accent.rgb},0.65))`
+                  : "rgba(255,255,255,0.04)",
+                color: isOpen && !isPast
+                  ? (accent.dark ? "#0a0800" : "#fff")
+                  : "rgba(255,255,255,0.2)",
+                border: `1px solid ${isOpen && !isPast ? `rgba(${accent.rgb},0.4)` : "rgba(255,255,255,0.06)"}`,
+                boxShadow: isOpen && !isPast ? `0 4px 20px rgba(${accent.rgb},0.22)` : "none",
+              }}
+            >
+              View Details
+              <ArrowRight size={10} />
+            </Link>
+          </div>
+        </div>
+
+        {/* footer stub */}
+        <div style={{
+          height: 32, borderTop: `1px solid rgba(${accent.rgb},0.06)`,
+          display: "flex", alignItems: "center", paddingLeft: 22, gap: 8,
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", inset: 0, display: "flex", alignItems: "center",
+            overflow: "hidden", opacity: 0.04, pointerEvents: "none",
+          }}>
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span key={i} style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 10,
+                letterSpacing: "0.4em", color: accent.hex,
+                whiteSpace: "nowrap", paddingRight: 24, textTransform: "uppercase",
+              }}>IDEA LAB · FISAT ·</span>
+            ))}
+          </div>
+          <Ticket size={10} color={`rgba(${accent.rgb},0.28)`} />
+          <span style={{
+            fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+            letterSpacing: "0.2em", color: `rgba(${accent.rgb},0.28)`,
+            textTransform: "uppercase", position: "relative", zIndex: 1,
+          }}>
+            {event.is_paid ? `Paid · ₹${event.price}` : "Complimentary"} · FISAT IDEA Lab · {d.year}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────
+   PAGE — DB logic verbatim from original
+───────────────────────────────────────── */
 export default function EventsPage() {
+  useFonts()
+
   const [events, setEvents] = useState<Event[]>([])
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
   const now = new Date()
@@ -43,162 +387,138 @@ export default function EventsPage() {
   )
 
   return (
-    <section className="min-h-screen max-w-6xl mx-auto px-4 sm:px-8 py-20">
+    <>
+      <style>{`
+        @keyframes shimmer {
+          0%   { transform: translateX(-100%); }
+          60%  { transform: translateX(100%);  }
+          100% { transform: translateX(100%);  }
+        }
+        @keyframes riseIn {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        * { box-sizing: border-box; }
+      `}</style>
 
-      {/* HEADER */}
-      <div className="text-center mb-16 space-y-4">
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          Explore the Events
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Tickets, passes & experiences at IDEA Lab
-        </p>
-      </div>
+      <Grain />
 
-      {/* TABS */}
-      <div className="flex justify-center gap-6 mb-12">
-        {(["upcoming", "past"] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition ${
-              tab === t
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t === "upcoming" ? "Upcoming" : "Past"}
-          </button>
-        ))}
-      </div>
+      <section style={{
+        minHeight: "100vh",
+        background: "#080808",
+        padding: "88px 0 120px",
+        position: "relative",
+      }}>
+        {/* ambient glow */}
+        <div style={{
+          position: "fixed", top: "20%", left: "50%", transform: "translateX(-50%)",
+          width: 700, height: 500, pointerEvents: "none", zIndex: 0,
+          background: "radial-gradient(ellipse, rgba(212,175,55,0.04) 0%, transparent 70%)",
+        }} />
 
-      {/* TICKETS */}
-      <div className="space-y-8">
-        {filtered.map(event => {
-          const d = new Date(event.start_datetime)
+        <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
 
-          return (
-            <div
-              key={event.id}
-              className="
-                relative overflow-hidden
-                rounded-[28px]
-                bg-gradient-to-br from-white/10 to-white/5
-                backdrop-blur-xl
-                border border-white/10
-                shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]
-              "
-            >
-              {/* TOP STRIP */}
-              <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-accent via-orange-400 to-accent" />
-
-              <div className="flex flex-col sm:flex-row">
-
-                {/* DATE / STATUS */}
-                <div className="sm:w-36 flex flex-row sm:flex-col items-center justify-center gap-4 px-6 py-5 bg-black/30 text-center">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold">
-                      {d.getDate()}
-                    </div>
-                    <div className="text-xs uppercase text-muted-foreground">
-                      {d.toLocaleString("default", { month: "short" })}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <span
-                      className={`text-[11px] px-3 py-1 rounded-full ${
-                        isOpen(event)
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {isOpen(event) ? "Registration Open" : "Closed"}
-                    </span>
-
-                    <span
-                      className={`text-[11px] px-3 py-1 rounded-full ${
-                        event.is_paid
-                          ? "bg-orange-500/20 text-orange-400"
-                          : "bg-blue-500/20 text-blue-400"
-                      }`}
-                    >
-                      {event.is_paid ? `₹${event.price}` : "Free"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* MAIN INFO */}
-                <div className="flex-1 px-6 py-6 space-y-3">
-                  <h3 className="text-xl font-semibold">
-                    {event.title}
-                  </h3>
-
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {d.toLocaleString()}
-                    </span>
-
-                    {event.venue && (
-                      <span className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {event.venue}
-                      </span>
-                    )}
-                  </div>
-
-                  {event.description && (
-                    <p className="text-sm text-muted-foreground max-w-xl">
-                      {event.description}
-                    </p>
-                  )}
-
-                  {isOpen(event) && (
-                    <p className="text-xs text-muted-foreground">
-                      Registration closes on{" "}
-                      {new Date(
-                        event.registration_deadline!
-                      ).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-
-                {/* QR / ACTION */}
-                <div
-                  className="
-                    sm:w-56 px-6 py-6
-                    border-t sm:border-t-0 sm:border-l border-white/10
-                    flex sm:flex-col items-center justify-between gap-4
-                  "
-                >
-                  <div className="bg-black/40 rounded-xl p-3">
-                    <QRCode
-                      value={`${location.origin}/events/${event.id}`}
-                      size={80}
-                      bgColor="transparent"
-                      fgColor="#fff"
-                    />
-                  </div>
-
-                  <Link
-                    href={`/events/${event.id}`}
-                    className="
-                      inline-flex items-center gap-2
-                      text-accent font-medium text-sm
-                      hover:underline
-                    "
-                  >
-                    View Details
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-
-              </div>
+          {/* ── HEADER ── */}
+          <div style={{
+            marginBottom: 72,
+            animation: "riseIn 0.7s cubic-bezier(0.16,1,0.3,1) both",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22 }}>
+              <Zap size={11} color="#d4af37" />
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.38em", color: "rgba(212,175,55,0.6)", textTransform: "uppercase",
+              }}>FISAT IDEA Lab · Events & Programs</span>
             </div>
-          )
-        })}
-      </div>
-    </section>
+
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+              fontSize: "clamp(3.2rem, 8vw, 6rem)",
+              lineHeight: 0.95, color: "rgba(255,255,255,0.88)",
+              margin: "0 0 2px", letterSpacing: "-0.03em",
+            }}>Explore the</h1>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontWeight: 700, fontStyle: "italic",
+              fontSize: "clamp(3.5rem, 9vw, 6.8rem)",
+              lineHeight: 0.9, margin: "0 0 24px", letterSpacing: "-0.03em",
+              background: "linear-gradient(135deg, #b8860b 0%, #d4af37 40%, #f5d070 65%, #d4af37 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+            }}>Events.</h1>
+
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+              fontSize: 14.5, color: "rgba(255,255,255,0.28)",
+              maxWidth: 360, lineHeight: 1.75, margin: 0,
+            }}>
+              Tickets, passes & experiences at IDEA Lab
+            </p>
+
+            <div style={{
+              marginTop: 36, height: 1,
+              background: "linear-gradient(90deg, rgba(212,175,55,0.22), transparent)",
+              maxWidth: 200,
+            }} />
+          </div>
+
+          {/* ── TABS ── */}
+          <div style={{
+            display: "flex", gap: 4, marginBottom: 40,
+            padding: 4, background: "rgba(255,255,255,0.03)",
+            borderRadius: 99, width: "fit-content",
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            {(["upcoming", "past"] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                style={{
+                  padding: "8px 26px", borderRadius: 99, border: "none", cursor: "pointer",
+                  fontFamily: "'Azeret Mono', monospace", fontSize: 10,
+                  letterSpacing: "0.22em", textTransform: "uppercase",
+                  transition: "all 0.25s ease",
+                  background: tab === t
+                    ? "linear-gradient(135deg, #b8860b, #d4af37)"
+                    : "transparent",
+                  color: tab === t ? "#0a0800" : "rgba(255,255,255,0.26)",
+                  boxShadow: tab === t ? "0 4px 18px rgba(212,175,55,0.25)" : "none",
+                  fontWeight: tab === t ? 500 : 300,
+                }}
+              >
+                {t === "upcoming" ? "Upcoming" : "Past"}
+              </button>
+            ))}
+          </div>
+
+          {/* ── TICKET LIST ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {filtered.length === 0 && (
+              <div style={{
+                textAlign: "center", padding: "72px 40px",
+                border: "1px dashed rgba(212,175,55,0.1)", borderRadius: 22,
+              }}>
+                <Ticket size={28} color="rgba(212,175,55,0.15)" style={{ margin: "0 auto 14px" }} />
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontStyle: "italic",
+                  color: "rgba(255,255,255,0.18)", fontSize: 18, margin: 0,
+                }}>
+                  No {tab} events at the moment.
+                </p>
+              </div>
+            )}
+
+            {filtered.map((event, i) => (
+              <EventTicket
+                key={event.id}
+                event={event}
+                index={i}
+                isOpen={!!isOpen(event)}
+                now={now}
+              />
+            ))}
+          </div>
+
+        </div>
+      </section>
+    </>
   )
 }

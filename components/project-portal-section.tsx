@@ -97,9 +97,9 @@ export function ProjectPortalSection() {
             {/* Features */}
             <div className="space-y-3 pt-2">
               {[
-                "Showcase student innovations",
-                "Real-time collaboration tools",
-                "Track innovation milestones",
+                "Ongoing: Vending Machine",
+                "Ongoing: Raspberry Pi Diagnosing System",
+                "Completed: Staff Room Monitoring",
               ].map((text, idx) => (
                 <div
                   key={idx}

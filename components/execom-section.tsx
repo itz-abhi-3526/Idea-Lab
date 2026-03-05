@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, ShieldCheck, Fingerprint, Network } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 /* -------------------- TYPES -------------------- */
@@ -17,18 +17,7 @@ type ExecomMember = {
   image_url: string | null
 }
 
-/* -------------------- MOTION -------------------- */
-
 const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1]
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: easeOut },
-  },
-}
 
 /* -------------------- COMPONENT -------------------- */
 
@@ -49,127 +38,130 @@ export function ExecomSection() {
 
   useEffect(() => {
     fetchExecom()
-
     const channel = supabase
       .channel("execom-section-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "execom_members" },
-        fetchExecom
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "execom_members" }, fetchExecom)
       .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   if (loading || members.length === 0) return null
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="relative w-full py-16 sm:py-24 md:py-32 bg-background/50 overflow-hidden">
-        {/* ambient wash */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-        >
-          <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
-          <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
-        </div>
+      <section className="relative w-full py-24 sm:py-32 bg-black overflow-hidden border-t border-white/5">
+        
+        {/* CONNECTION BRIDGE: Final drop from the Portal Core */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-orange-500/50 via-orange-500/10 to-transparent z-10" />
 
-        <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-24">
+        {/* Ambient Grid Background */}
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
+             style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
 
-          {/* Heading */}
-          <m.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.55, ease: easeOut }}
-            className="mb-12 sm:mb-16"
-          >
-            <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-                Executive Committee
-              </h2>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
 
-              <div className="relative h-[2px] w-24 overflow-hidden rounded-full bg-gradient-to-r from-accent/0 via-accent to-accent/0">
-                <m.span
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                  animate={{ x: ["-100%", "100%"] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                />
+          {/* Header Block */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+            <m.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 text-[10px] font-bold tracking-[0.3em] uppercase font-['Outfit']">
+                  Lab Administration
+                </div>
+                <div className="h-px w-12 bg-white/10 hidden sm:block" />
+                <span className="text-[10px] font-mono text-neutral-600 tracking-widest uppercase">Verified_Nodes</span>
               </div>
 
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Organised. Driven. Committed.
-              </p>
-            </div>
-          </m.div>
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-[800] font-['Syne'] tracking-tighter uppercase leading-[0.85] text-white">
+                Executive <br/>
+                <span className="text-neutral-800 font-black">Committee</span>
+              </h2>
+            </m.div>
 
-          {/* Cards */}
+            <m.div 
+              initial={{ opacity: 0 }} 
+              whileInView={{ opacity: 1 }} 
+              className="hidden lg:flex items-center gap-4 text-neutral-500 font-mono text-[10px]"
+            >
+              <Network size={16} className="text-orange-500/50" />
+              <span className="tracking-tighter uppercase">Protocol: LEADERSHIP_HUB_V1</span>
+            </m.div>
+          </div>
+
+          {/* Cards Grid */}
           <m.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: 0.08 } },
+              visible: { transition: { staggerChildren: 0.1 } },
             }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-10 sm:mb-12"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {members.map((member) => (
-              <m.div key={member.id} variants={cardVariants}>
-                <Card
-                  className="
-                    h-full
-                    relative
-                    overflow-hidden
-                    bg-white/5 backdrop-blur-xl
-                    border border-white/10
-                    rounded-2xl
-                    shadow-[0_12px_30px_rgba(0,0,0,0.25)]
-                    transition-all duration-300
-                    hover:-translate-y-1
-                    hover:shadow-[0_20px_45px_rgba(0,0,0,0.35)]
-                  "
-                >
-                  {/* soft hover glow */}
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-accent/5 opacity-0 hover:opacity-100 transition-opacity"
-                  />
+              <m.div 
+                key={member.id} 
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                className="group relative"
+              >
+                <div className="absolute inset-0 bg-orange-500/20 blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
+                
+                <Card className="relative overflow-hidden bg-neutral-900/40 border border-white/5 backdrop-blur-3xl rounded-[2rem] transition-all duration-500 group-hover:border-orange-500/30">
+                  <CardContent className="p-8 space-y-6 relative z-10">
+                    
+                    {/* ID Chip Top Bar */}
+                    <div className="flex justify-between items-start">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-black transition-all duration-500 text-neutral-500">
+                        <Fingerprint size={18} />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-mono text-neutral-600 uppercase tracking-tighter">Auth_Level</p>
+                        <p className="text-[10px] font-bold text-orange-500 uppercase font-['Outfit']">Level_01</p>
+                      </div>
+                    </div>
 
-                  <CardContent className="p-4 sm:p-6 space-y-3 sm:space-y-4 relative z-10">
-                    <div className="flex justify-center">
-                      <m.div
-                        whileHover={{ scale: 1.03 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-accent/10 ring-2 ring-white/10"
-                      >
+                    {/* Member Avatar */}
+                    <div className="flex justify-center relative">
+                      <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-neutral-800 group-hover:border-orange-500/50 transition-colors duration-500 ring-8 ring-black/50 shadow-2xl">
                         <img
                           src={member.image_url ?? "/placeholder-avatar.png"}
                           alt={member.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
                         />
-                      </m.div>
+                      </div>
+                      <div className="absolute -bottom-2 bg-orange-500 text-black px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest font-['Syne'] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Verified
+                      </div>
                     </div>
 
-                    <div className="text-center space-y-1">
-                      <h3 className="text-base sm:text-lg font-semibold leading-snug">
+                    {/* Member Info */}
+                    <div className="text-center space-y-2">
+                      <h3 className="text-xl font-bold font-['Syne'] text-white leading-none tracking-tight">
                         {member.name}
                       </h3>
-
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {member.designation}
-                      </p>
-
-                      {member.role && (
-                        <p className="text-xs text-muted-foreground">
-                          {member.role}
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold tracking-[0.2em] text-orange-500 uppercase font-['Outfit']">
+                          {member.designation}
                         </p>
-                      )}
+                        {member.role && (
+                          <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-tighter">
+                            &gt; {member.role}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tech Footer Decal */}
+                    <div className="pt-6 border-t border-white/5 flex justify-center gap-4">
+                       <ShieldCheck size={14} className="text-neutral-800 group-hover:text-orange-500/50 transition-colors" />
+                       <div className="h-1 w-1 rounded-full bg-neutral-800 mt-1.5" />
+                       <div className="h-1 w-1 rounded-full bg-neutral-800 mt-1.5" />
+                       <div className="h-1 w-1 rounded-full bg-neutral-800 mt-1.5" />
                     </div>
                   </CardContent>
                 </Card>
@@ -177,34 +169,24 @@ export function ExecomSection() {
             ))}
           </m.div>
 
-          {/* CTA */}
+          {/* CTA Hub */}
           <m.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.45, ease: easeOut }}
-            className="flex justify-center"
+            className="mt-20 flex justify-center"
           >
-            <Link href="/execom" className="w-full sm:w-auto">
+            <Link href="/execom" prefetch={false}>
               <m.button
-                whileHover={{ scale: 1.03 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.2 }}
-                className="
-                  w-full sm:w-auto
-                  group
-                  flex items-center justify-center gap-2
-                  px-6 py-3
-                  border border-accent/30
-                  rounded-xl
-                  bg-accent/15
-                  hover:bg-accent/25
-                  transition-all
-                  text-sm sm:text-base
-                "
+                className="group relative px-10 py-6 bg-white text-black rounded-2xl text-xs uppercase tracking-[0.25em] font-bold font-['Syne'] overflow-hidden transition-all duration-500 hover:bg-orange-500 hover:text-white border-none"
               >
-                View Full Executive Committee
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center gap-3">
+                  View All Members
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-500" />
+                </span>
+                <div className="absolute inset-0 bg-neutral-200 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
               </m.button>
             </Link>
           </m.div>
