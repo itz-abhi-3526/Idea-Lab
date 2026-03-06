@@ -199,7 +199,6 @@ export default function ProductPage() {
 
             {/* purchase card */}
             <div className="pd-buy-card">
-              {/* top shimmer line */}
               <div className="pd-buy-line" aria-hidden />
 
               <div className="pd-buy-inner">
@@ -333,7 +332,7 @@ export default function ProductPage() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   STYLES  — same design system as ProductsPage
+   STYLES
 ═══════════════════════════════════════════════════════════════════ */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap');
@@ -363,6 +362,7 @@ const CSS = `
   color:       var(--text);
   min-height:  100vh;
   position:    relative;
+  overflow-x:  hidden;
 }
 
 /* noise */
@@ -440,8 +440,8 @@ const CSS = `
 }
 .pd-badge--cat    { color: var(--accent); border-color: rgba(0,210,130,0.25); background: var(--accent-lo); }
 .pd-badge--status { color: var(--text-mid); }
-.pd-badge--completed { color: #4DFFB0; border-color: rgba(77,255,176,0.25); background: rgba(77,255,176,0.08); }
-.pd-badge--demo_ready { color: var(--gold); border-color: rgba(245,200,66,0.25); background: rgba(245,200,66,0.08); }
+.pd-badge--completed   { color: #4DFFB0; border-color: rgba(77,255,176,0.25); background: rgba(77,255,176,0.08); }
+.pd-badge--demo_ready  { color: var(--gold); border-color: rgba(245,200,66,0.25); background: rgba(245,200,66,0.08); }
 .pd-badge--in_progress { color: #7C9FFF; border-color: rgba(124,159,255,0.25); background: rgba(124,159,255,0.08); }
 
 .pd-title {
@@ -453,10 +453,11 @@ const CSS = `
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: fadein .4s .1s both;
+  word-break: break-word;
 }
 
 .pd-lead {
-  font-size: 1.15rem; font-weight: 500; line-height: 1.6;
+  font-size: 1.1rem; font-weight: 500; line-height: 1.6;
   color: var(--text-mid); margin-bottom: 32px;
   animation: fadein .4s .15s both;
 }
@@ -491,7 +492,7 @@ const CSS = `
 }
 .pd-tech:hover { border-color: var(--border-hi); color: var(--accent); background: var(--accent-lo); }
 
-/* mobile link row */
+/* mobile link row — hidden on desktop */
 .pd-links-mobile { display: none; }
 .pd-link-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .pd-link-btn {
@@ -500,9 +501,7 @@ const CSS = `
   padding: 10px 20px; border-radius: 9px; text-decoration: none;
   transition: all .18s;
 }
-.pd-link-btn--primary {
-  background: var(--accent); color: #07090E;
-}
+.pd-link-btn--primary { background: var(--accent); color: #07090E; }
 .pd-link-btn--primary:hover { background: #00f097; }
 .pd-link-btn--ghost {
   background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-mid);
@@ -531,7 +530,10 @@ const CSS = `
   display: flex; align-items: baseline;
   justify-content: space-between; margin-bottom: 6px;
 }
-.pd-price-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.14em; text-transform: uppercase; }
+.pd-price-label {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
 .pd-price { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; color: var(--gold); }
 .pd-free-badge {
   font-family: var(--mono); font-size: 13px; font-weight: 500;
@@ -610,15 +612,11 @@ const CSS = `
   text-transform: uppercase; color: var(--text-dim);
 }
 .pd-meta-val { font-size: 12.5px; font-weight: 600; color: var(--text-mid); }
-.pd-meta-status {
-  display: flex; align-items: center; gap: 6px;
-}
-.pd-meta-status-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim);
-}
+.pd-meta-status { display: flex; align-items: center; gap: 6px; }
+.pd-meta-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
 .pd-meta-status--completed   .pd-meta-status-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 .pd-meta-status--demo_ready  .pd-meta-status-dot { background: var(--gold);   box-shadow: 0 0 6px var(--gold); }
-.pd-meta-status--in_progress .pd-meta-status-dot { background: #7C9FFF;       box-shadow: 0 0 6px #7C9FFF; animation: blink 2s ease-in-out infinite; }
+.pd-meta-status--in_progress .pd-meta-status-dot { background: #7C9FFF; box-shadow: 0 0 6px #7C9FFF; animation: blink 2s ease-in-out infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── SKELETON ────────────────────────────────────────────────────── */
@@ -645,7 +643,7 @@ const CSS = `
 }
 
 /* ── NOT FOUND ───────────────────────────────────────────────────── */
-.pd-not-found { text-align: center; padding: 120px 0; }
+.pd-not-found { text-align: center; padding: 120px 20px; }
 .pd-nf-sym    { display: block; font-size: 5rem; font-weight: 800; letter-spacing: -0.06em; color: var(--text-dim); }
 .pd-nf-title  { font-size: 1.2rem; color: var(--text-mid); margin: 12px 0 28px; }
 .pd-back-link {
@@ -659,21 +657,104 @@ const CSS = `
   to   { opacity: 1; transform: none; }
 }
 
-/* ── RESPONSIVE ──────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤ 1024px)
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .pd-back-wrap     { padding: 24px 40px 0; }
+  .pd-hero-img-wrap { padding: 0 40px; }
+  .pd-layout {
+    padding: 40px 40px 80px;
+    grid-template-columns: 1fr 300px;
+    gap: 36px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — SMALL TABLET  (≤ 960px)
+   Sidebar collapses below content
+════════════════════════════════════════════════════════════════ */
 @media (max-width: 960px) {
+  .pd-back-wrap     { padding: 20px 24px 0; }
+  .pd-hero-img-wrap { padding: 0 24px; }
+
   .pd-layout {
     grid-template-columns: 1fr;
     padding: 32px 24px 72px;
     gap: 32px;
   }
-  .pd-hero-img-wrap { padding: 0 24px; }
-  .pd-back-wrap     { padding: 20px 24px 0; }
-  .pd-sidebar       { position: static; }
+
+  /* Sidebar unsticks and becomes a normal block */
+  .pd-sidebar { position: static; }
+
+  /* On tablet, show sidebar buy card first, then meta — reorder via order */
+  .pd-buy-card     { order: 0; }
+  .pd-sidebar-meta { order: 1; }
+
+  /* Desktop links hidden → mobile links shown */
   .pd-links-desktop { display: none !important; }
   .pd-links-mobile  { display: block; }
+
+  /* Skeleton adjusts padding */
+  .pd-loading { padding: 32px 24px; }
+  .pd-skel-hero { height: 220px; }
 }
-@media (max-width: 480px) {
-  .pd-title { font-size: 2rem; }
-  .pd-hero-img-shell { aspect-ratio: 16/9; }
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE  (≤ 640px)
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .pd-back-wrap     { padding: 16px 16px 0; }
+  .pd-hero-img-wrap { padding: 0 16px; margin-top: 16px; }
+
+  /* Hero image shorter on phone */
+  .pd-hero-img-shell { aspect-ratio: 16/9; border-radius: 12px; }
+
+  .pd-layout { padding: 24px 16px 60px; gap: 24px; }
+
+  /* Title & lead */
+  .pd-title { font-size: clamp(1.8rem, 7vw, 2.4rem); margin-bottom: 14px; }
+  .pd-lead  { font-size: 1rem; margin-bottom: 24px; }
+
+  /* Section spacing */
+  .pd-section { margin-bottom: 28px; }
+
+  /* Buy card inner padding */
+  .pd-buy-inner { padding: 18px 16px; }
+  .pd-price { font-size: 1.7rem; }
+  .pd-buy-btn { padding: 13px 16px; font-size: 13px; }
+
+  /* Sidebar meta rows — allow text to wrap */
+  .pd-meta-row { align-items: flex-start; flex-wrap: wrap; gap: 4px; }
+  .pd-meta-val { font-size: 12px; }
+
+  /* Link buttons — stack on very narrow */
+  .pd-link-row { flex-direction: column; }
+  .pd-link-btn { width: 100%; justify-content: center; }
+
+  /* Skeleton */
+  .pd-loading { padding: 20px 16px; }
+  .pd-skel-hero  { height: 180px; }
+  .pd-skel-title { width: 75%; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE  (≤ 400px)
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+  .pd-title { font-size: 1.7rem; }
+  .pd-badge { font-size: 9px; padding: 3px 10px; }
+  .pd-hero-img-shell { aspect-ratio: 4/3; }
+  .pd-buy-inner { padding: 16px 14px; }
+  .pd-price { font-size: 1.5rem; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TOUCH — remove hover transforms
+════════════════════════════════════════════════════════════════ */
+@media (hover: none) {
+  .pd-buy-btn:hover  { transform: none; }
+  .pd-back:hover     { gap: 6px; }
+  .pd-slink-arrow    { opacity: 0.4; }
 }
 `

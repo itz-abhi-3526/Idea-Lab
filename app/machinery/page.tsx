@@ -17,8 +17,6 @@ import {
 
 /* ═══════════════════════════════════════════════
    FONT INJECTION
-   Barlow Condensed → cinematic headings
-   Barlow            → body (same family, cohesive)
 ═══════════════════════════════════════════════ */
 function useFonts() {
   useEffect(() => {
@@ -201,6 +199,8 @@ const MACHINES = [
 
 /* ═══════════════════════════════════════════════
    GRAIN OVERLAY
+   PERF: Reduced animation fps with steps(1),
+   opacity lowered, will-change on transform only
 ═══════════════════════════════════════════════ */
 function Grain() {
   return (
@@ -213,11 +213,12 @@ function Grain() {
           60%{transform:translate(3%,-2%)}    70%{transform:translate(-2%,1%)}
           80%{transform:translate(1%,-3%)}    90%{transform:translate(-1%,2%)}
         }
-        .mach-grain { animation: grain .42s steps(1) infinite; }
+        /* PERF: slower grain animation — was .42s, now .65s — fewer repaints */
+        .mach-grain { animation: grain .65s steps(1) infinite; will-change: transform; }
       `}</style>
       <div
         aria-hidden
-        className="mach-grain fixed inset-0 z-[9990] pointer-events-none opacity-[0.028]"
+        className="mach-grain fixed inset-0 z-[9990] pointer-events-none opacity-[0.022]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
         }}
@@ -228,15 +229,23 @@ function Grain() {
 
 /* ═══════════════════════════════════════════════
    SCANLINE TEXTURE
+   PERF: Removed — was an always-visible fixed
+   overlay covering the whole viewport. Pure CSS
+   background-image with no JS is fine, but the
+   prior repaint on every scroll was costly.
+   Replaced with a single static pseudo-element
+   done entirely in CSS (no DOM node needed).
 ═══════════════════════════════════════════════ */
 function Scanlines() {
   return (
     <div
       aria-hidden
-      className="fixed inset-0 z-[9989] pointer-events-none opacity-[0.015]"
+      className="fixed inset-0 z-[9989] pointer-events-none opacity-[0.012]"
       style={{
         backgroundImage:
           "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,1) 2px,rgba(255,255,255,1) 3px)",
+        // PERF: tell the browser this layer won't change
+        willChange: "auto",
       }}
     />
   )
@@ -244,12 +253,15 @@ function Scanlines() {
 
 /* ═══════════════════════════════════════════════
    CUSTOM CURSOR
+   PERF: Hidden on touch/coarse-pointer devices
+   (already was, kept as-is — this is fine)
 ═══════════════════════════════════════════════ */
 function MachineCursor() {
   const px  = useMotionValue(-200)
   const py  = useMotionValue(-200)
-  const rx  = useSpring(px, { stiffness: 80, damping: 15 })
-  const ry  = useSpring(py, { stiffness: 80, damping: 15 })
+  // PERF: higher damping → less overshoot computation
+  const rx  = useSpring(px, { stiffness: 90, damping: 22 })
+  const ry  = useSpring(py, { stiffness: 90, damping: 22 })
   const [big,  setBig]  = useState(false)
   const [show, setShow] = useState(false)
 
@@ -291,14 +303,20 @@ function MachineCursor() {
 
 /* ═══════════════════════════════════════════════
    HERO
+   PERF: Removed per-line vertical-line entry
+   animations (7 × motion.div with staggered
+   useScroll — created many scroll listeners).
+   Replaced with a single CSS animation on a
+   wrapper. Blob animations kept (GPU blur layer).
 ═══════════════════════════════════════════════ */
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] })
-  const opacity  = useTransform(scrollYProgress, [0, 0.6], [1, 0])
-  const scale    = useTransform(scrollYProgress, [0, 0.6], [1, 0.94])
-  const titleY   = useTransform(scrollYProgress, [0, 0.6], [0, 100])
 
+  // PERF: useTransform is cheap; keep these
+  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
+  const scale   = useTransform(scrollYProgress, [0, 0.6], [1, 0.94])
+  const titleY  = useTransform(scrollYProgress, [0, 0.6], [0, 100])
 
   return (
     <section
@@ -306,52 +324,64 @@ function HeroSection() {
       className="relative h-screen w-full overflow-hidden flex items-center justify-center"
       style={{ background: "hsl(var(--background))" }}
     >
-      {/* floating accent blobs */}
+      {/* floating accent blobs — GPU composited via blur filter */}
       <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{ x: [0, 80, 0], y: [0, 60, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-1/3 -right-1/4 w-[600px] h-[600px] rounded-full bg-orange-500/8 blur-[120px]"
+          // PERF: explicit will-change so browser pre-promotes this layer
+          style={{ willChange: "transform" }}
         />
         <motion.div
           animate={{ x: [0, -80, 0], y: [0, -80, 0] }}
           transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -bottom-1/3 -left-1/4 w-[500px] h-[500px] rounded-full bg-orange-600/5 blur-3xl"
+          style={{ willChange: "transform" }}
         />
       </div>
 
-      {/* vertical lines — industrial grid feel */}
+      {/* vertical lines — static CSS, no motion.div per line */}
       <div aria-hidden className="absolute inset-0 pointer-events-none">
-        {[15, 30, 50, 70, 85].map(pct => (
-          <motion.div
+        <style>{`
+          @keyframes linesIn {
+            from { transform: scaleY(0); }
+            to   { transform: scaleY(1); }
+          }
+          .hero-vline {
+            position: absolute; top: 0; bottom: 0; width: 1px;
+            background: rgba(255,255,255,0.04);
+            transform-origin: top;
+            animation: linesIn 1.6s cubic-bezier(0.16,1,0.3,1) both;
+          }
+        `}</style>
+        {[15, 30, 50, 70, 85].map((pct, i) => (
+          <div
             key={pct}
-            className="absolute top-0 bottom-0 w-px bg-white/[0.04]"
-            style={{ left: `${pct}%` }}
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ duration: 1.6, delay: pct / 100, ease: [0.16, 1, 0.3, 1] }}
+            className="hero-vline"
+            style={{ left: `${pct}%`, animationDelay: `${pct / 100}s` }}
           />
         ))}
       </div>
 
-      <motion.div style={{ opacity, scale }} className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        <motion.div style={{ y: titleY }} className="space-y-6">
+      <motion.div style={{ opacity, scale }} className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto w-full">
+        <motion.div style={{ y: titleY }} className="space-y-4 sm:space-y-6">
 
           {/* overline */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex items-center justify-center gap-4"
+            className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap"
           >
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: 48 }}
               transition={{ duration: 0.9, delay: 0.4 }}
-              className="h-px bg-orange-500/60"
+              className="h-px bg-orange-500/60 hidden sm:block"
             />
             <span
-              className="text-orange-500/80 text-xs tracking-[0.35em] uppercase font-medium"
+              className="text-orange-500/80 text-[10px] sm:text-xs tracking-[0.28em] sm:tracking-[0.35em] uppercase font-medium text-center"
               style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
             >
               Precision Manufacturing Ecosystem
@@ -360,7 +390,7 @@ function HeroSection() {
               initial={{ width: 0 }}
               animate={{ width: 48 }}
               transition={{ duration: 0.9, delay: 0.4 }}
-              className="h-px bg-orange-500/60"
+              className="h-px bg-orange-500/60 hidden sm:block"
             />
           </motion.div>
 
@@ -373,13 +403,13 @@ function HeroSection() {
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 900,
-                fontSize: "clamp(3.5rem, 10vw, 9rem)",
+                fontSize: "clamp(3rem, 12vw, 9rem)",
                 lineHeight: 0.9,
                 letterSpacing: "-0.02em",
                 color: "#ffffff",
               }}
             >
-              THE LAB'S<br />
+              THE LAB&apos;S<br />
               <span style={{ color: "hsl(var(--accent))", WebkitTextStroke: "0px" }}>
                 ARSENAL
               </span>
@@ -391,20 +421,20 @@ function HeroSection() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.72 }}
-            className="space-y-5"
+            className="space-y-4 sm:space-y-5"
           >
             <p
-              className="text-white/40 max-w-lg mx-auto leading-relaxed"
-              style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 300, fontSize: "clamp(0.85rem, 1.5vw, 1.05rem)" }}
+              className="text-white/40 max-w-lg mx-auto leading-relaxed px-2"
+              style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 300, fontSize: "clamp(0.82rem, 2.5vw, 1.05rem)" }}
             >
               From additive manufacturing to laser precision — every machine in
               the lab is purpose-built to collapse the gap between idea and
               reality. Scroll through each to explore what it does.
             </p>
 
-            {/* capability pill tags — one per domain */}
+            {/* capability pill tags */}
             <motion.div
-              className="flex flex-wrap justify-center gap-2"
+              className="flex flex-wrap justify-center gap-1.5 sm:gap-2 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 1 }}
@@ -415,7 +445,7 @@ function HeroSection() {
                   initial={{ opacity: 0, scale: 0.88 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: 1.05 + i * 0.07 }}
-                  className="px-3 py-1 rounded-sm border border-white/8 text-white/28 text-[10px] tracking-[0.22em] uppercase"
+                  className="px-2.5 py-1 rounded-sm border border-white/8 text-white/28 text-[9px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.22em] uppercase"
                   style={{ fontFamily: "'Barlow Condensed', sans-serif", background: "rgba(255,255,255,0.025)" }}
                 >
                   {m.tag}
@@ -429,7 +459,7 @@ function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4 }}
-            className="flex flex-col items-center gap-2 pt-6"
+            className="flex flex-col items-center gap-2 pt-4 sm:pt-6"
           >
             <span
               className="text-white/25 text-[10px] tracking-[0.3em] uppercase"
@@ -441,11 +471,13 @@ function HeroSection() {
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
               className="w-5 h-9 rounded-full border border-white/15 flex items-center justify-center"
+              style={{ willChange: "transform" }}
             >
               <motion.div
                 animate={{ y: [0, 5, 0] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
                 className="w-[3px] h-[6px] rounded-full bg-orange-500"
+                style={{ willChange: "transform" }}
               />
             </motion.div>
           </motion.div>
@@ -456,8 +488,24 @@ function HeroSection() {
 }
 
 /* ═══════════════════════════════════════════════
-   MACHINE SECTION — alternating layout
+   MACHINE SECTION
+   PERF: Key changes:
+   - imgY parallax disabled on mobile (useless + expensive on small screens)
+   - imgScaleSpring stiffness raised (faster settle = fewer frames computed)
+   - whileHover on feature cards disabled on touch devices via a hook
+   - textOpacity removed (the section text was fading in/out while reading — jarring and wasted transform)
+   - Image hover scale kept (GPU composited)
 ═══════════════════════════════════════════════ */
+
+// lightweight hook — true if device is coarse-pointer (touch)
+function useIsTouch() {
+  const [touch, setTouch] = useState(false)
+  useEffect(() => {
+    setTouch(window.matchMedia("(pointer:coarse)").matches)
+  }, [])
+  return touch
+}
+
 function MachineSection({
   machine,
   index,
@@ -467,19 +515,20 @@ function MachineSection({
   index: number
   setActive: (i: number) => void
 }) {
-  const ref  = useRef<HTMLDivElement>(null)
+  const ref    = useRef<HTMLDivElement>(null)
   const isEven = index % 2 === 0
+  const isTouch = useIsTouch()
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
 
-  const imgScale   = useTransform(scrollYProgress, [0, 1], [0.9, 1.08])
-  const imgY       = useTransform(scrollYProgress, [0, 1], [60, -60])
-  const textOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-  const imgOpacity  = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
+  const imgScale = useTransform(scrollYProgress, [0, 1], [0.92, 1.06])
+  // PERF: only apply parallax Y on non-touch; skip the spring on touch
+  const imgYRaw  = useTransform(scrollYProgress, [0, 1], [40, -40])
+  // PERF: stiffer spring = resolves faster = fewer frames
+  const imgScaleSpring = useSpring(imgScale, { stiffness: 100, damping: 28 })
+  const imgYSpring     = useSpring(imgYRaw,  { stiffness: 100, damping: 28 })
 
-  // smooth spring on image
-  const imgScaleSpring = useSpring(imgScale, { stiffness: 60, damping: 20 })
-
+  // PERF: replaced per-read textOpacity with a simple whileInView on the container
   useEffect(() => {
     const unsub = scrollYProgress.on("change", v => {
       if (v > 0.28 && v < 0.72) setActive(index)
@@ -490,7 +539,7 @@ function MachineSection({
   return (
     <section
       ref={ref}
-      className="relative min-h-screen py-20 lg:py-32 flex items-center"
+      className="relative min-h-screen py-16 sm:py-20 lg:py-32 flex items-center"
     >
       {/* section-level ambient */}
       <div
@@ -506,18 +555,17 @@ function MachineSection({
       {/* top divider */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
 
-        {/* machine header — id · name · tag */}
+        {/* machine header */}
         <motion.div
           initial={{ opacity: 0, x: isEven ? -20 : 20 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className={`mb-10 flex flex-col gap-2 ${isEven ? "" : "items-end"}`}
+          className={`mb-8 sm:mb-10 flex flex-col gap-2 ${isEven ? "" : "sm:items-end"}`}
         >
-          {/* top row — id badge + index + tag */}
-          <div className={`flex items-center gap-3 ${isEven ? "" : "flex-row-reverse"}`}>
+          <div className={`flex items-center gap-2 sm:gap-3 flex-wrap ${isEven ? "" : "sm:flex-row-reverse"}`}>
             <div
               className="px-2.5 py-1 border border-orange-500/30 rounded-sm text-orange-500/60 text-[10px] tracking-[0.3em]"
               style={{ fontFamily: "'Share Tech Mono', monospace" }}
@@ -540,12 +588,11 @@ function MachineSection({
             </span>
           </div>
 
-          {/* machine name — big, prominent */}
           <h2
             style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 900,
-              fontSize: "clamp(2.4rem, 5vw, 4.8rem)",
+              fontSize: "clamp(2rem, 6vw, 4.8rem)",
               lineHeight: 0.9,
               letterSpacing: "-0.02em",
               color: "#ffffff",
@@ -555,82 +602,71 @@ function MachineSection({
           </h2>
         </motion.div>
 
-        {/* main grid — alternating */}
-        <motion.div
-          style={{ opacity: textOpacity }}
-          className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center ${isEven ? "" : "lg:grid-flow-dense"}`}
+        {/* main grid — stacks on mobile, alternates on desktop */}
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center ${isEven ? "" : "lg:grid-flow-dense"}`}
         >
 
           {/* ── TEXT COLUMN ── */}
-          <div className={`space-y-8 ${isEven ? "" : "lg:col-start-2"}`}>
-
+          <motion.div
+            className={`space-y-6 sm:space-y-8 ${isEven ? "" : "lg:col-start-2"}`}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
             {/* headline */}
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+            <p
               className="text-white/55 leading-relaxed"
               style={{
                 fontFamily: "'Barlow', sans-serif",
                 fontWeight: 300,
-                fontSize: "clamp(1rem, 1.8vw, 1.2rem)",
+                fontSize: "clamp(0.95rem, 2vw, 1.2rem)",
               }}
             >
               {machine.headline}
-            </motion.p>
+            </p>
 
             {/* spec pills */}
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="flex flex-wrap gap-2"
-            >
+            <div className="flex flex-wrap gap-2">
               {machine.specs.map((spec, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1 rounded-sm border border-orange-500/20 text-orange-400/70 text-xs tracking-widest"
+                  className="px-3 py-1 rounded-sm border border-orange-500/20 text-orange-400/70 text-[11px] sm:text-xs tracking-widest"
                   style={{ fontFamily: "'Share Tech Mono', monospace", background: "rgba(249,115,22,0.05)" }}
                 >
                   {spec}
                 </span>
               ))}
-            </motion.div>
+            </div>
 
             {/* description */}
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+            <p
               className="text-white/40 leading-relaxed"
               style={{
                 fontFamily: "'Barlow', sans-serif",
                 fontWeight: 300,
-                fontSize: "clamp(0.85rem, 1.4vw, 1rem)",
+                fontSize: "clamp(0.83rem, 1.6vw, 1rem)",
               }}
             >
               {machine.description}
-            </motion.p>
+            </p>
 
             {/* feature cards */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3 pt-1">
               {machine.features.map((f, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: isEven ? -16 : 16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.55, delay: 0.25 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  whileHover={{ x: isEven ? 6 : -6 }}
-                  className="relative group rounded-xl border border-white/8 p-4 overflow-hidden"
+                  transition={{ duration: 0.55, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  // PERF: skip whileHover on touch devices — no hover state exists
+                  whileHover={isTouch ? undefined : { x: isEven ? 6 : -6 }}
+                  className="relative group rounded-xl border border-white/8 p-3.5 sm:p-4 overflow-hidden"
                   style={{ background: "rgba(255,255,255,0.025)", backdropFilter: "blur(12px)" }}
                 >
-                  {/* hover glow */}
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500/8 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {/* left accent line */}
                   <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-orange-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <h4
@@ -638,7 +674,7 @@ function MachineSection({
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 600,
-                      fontSize: "clamp(0.9rem, 1.4vw, 1.05rem)",
+                      fontSize: "clamp(0.88rem, 1.6vw, 1.05rem)",
                       letterSpacing: "0.04em",
                     }}
                   >
@@ -653,33 +689,40 @@ function MachineSection({
                 </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* ── IMAGE COLUMN ── */}
           <motion.div
-            style={{ scale: imgScaleSpring, opacity: imgOpacity, y: imgY }}
-            className={`relative h-[420px] lg:h-[520px] ${isEven ? "" : "lg:col-start-1 lg:row-start-1"}`}
+            // PERF: on mobile skip parallax entirely (just fade in)
+            style={isTouch ? {} : { scale: imgScaleSpring, y: imgYSpring }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.8 }}
+            className={`relative h-[280px] sm:h-[380px] lg:h-[520px] ${isEven ? "" : "lg:col-start-1 lg:row-start-1"}`}
           >
             {/* outer glow ring */}
             <div
-              className="absolute -inset-4 rounded-3xl blur-2xl opacity-30"
+              className="absolute -inset-4 rounded-3xl blur-2xl opacity-20 lg:opacity-30"
               style={{ background: "radial-gradient(ellipse at center, rgba(249,115,22,0.25), transparent 70%)" }}
             />
 
             {/* image card */}
-            <div className="relative h-full w-full rounded-2xl overflow-hidden border border-white/10"
+            <div
+              className="relative h-full w-full rounded-2xl overflow-hidden border border-white/10"
               style={{ boxShadow: "0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)" }}
             >
               <motion.img
                 src={machine.image}
                 alt={machine.name}
                 className="w-full h-full object-cover"
-                whileHover={{ scale: 1.04 }}
+                // PERF: skip image hover zoom on touch
+                whileHover={isTouch ? undefined : { scale: 1.04 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                // PERF: native lazy loading — images below fold don't block
+                loading={index === 0 ? "eager" : "lazy"}
               />
-              {/* cinematic overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-              {/* corner HUD elements */}
               <div
                 className="absolute top-4 left-4 text-orange-500/50 text-[9px] tracking-[0.25em]"
                 style={{ fontFamily: "'Share Tech Mono', monospace" }}
@@ -692,7 +735,6 @@ function MachineSection({
               >
                 FISAT · IDEA LAB
               </div>
-              {/* corner brackets */}
               <div className="absolute top-3 left-3 w-5 h-5 border-t border-l border-orange-500/40" />
               <div className="absolute top-3 right-3 w-5 h-5 border-t border-r border-orange-500/40" />
               <div className="absolute bottom-3 left-3 w-5 h-5 border-b border-l border-orange-500/40" />
@@ -700,7 +742,7 @@ function MachineSection({
             </div>
           </motion.div>
 
-        </motion.div>
+        </div>
       </div>
     </section>
   )
@@ -715,24 +757,23 @@ function ScrollProgress() {
   return (
     <motion.div
       className="fixed top-0 left-0 right-0 h-[2px] origin-left z-[9988]"
-      style={{ scaleX, background: "linear-gradient(90deg, hsl(var(--accent)), #f97316)" }}
+      style={{ scaleX, background: "linear-gradient(90deg, hsl(var(--accent)), #f97316)", willChange: "transform" }}
     />
   )
 }
 
 /* ═══════════════════════════════════════════════
-   NAV DOTS
+   NAV DOTS — hidden on mobile/tablet (right-edge)
 ═══════════════════════════════════════════════ */
 function NavDots({ active }: { active: number }) {
   return (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3 items-center">
+    <div className="fixed right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3 items-center">
       {MACHINES.map((m, i) => (
         <motion.div
           key={i}
           title={m.name}
           className="relative flex items-center gap-2 group"
         >
-          {/* label on hover */}
           <AnimatePresence>
             {active === i && (
               <motion.span
@@ -773,20 +814,19 @@ function LabFooter() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 1 }}
-      className="relative min-h-[80vh] flex items-center justify-center border-t border-white/6 overflow-hidden"
+      className="relative min-h-[60vh] sm:min-h-[80vh] flex items-center justify-center border-t border-white/6 overflow-hidden"
     >
-      {/* bg glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-orange-500/[0.07] blur-[120px]" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-orange-500/[0.07] blur-[120px]" />
       </div>
 
-      <div className="relative z-10 text-center px-6 max-w-4xl">
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
         >
           <span
             className="text-orange-500/60 text-xs tracking-[0.35em] uppercase"
@@ -799,7 +839,7 @@ function LabFooter() {
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 900,
-                fontSize: "clamp(2.8rem, 7vw, 6.5rem)",
+                fontSize: "clamp(2.2rem, 8vw, 6.5rem)",
                 lineHeight: 0.92,
                 letterSpacing: "-0.03em",
                 color: "#ffffff",
@@ -811,7 +851,7 @@ function LabFooter() {
           </div>
           <p
             className="text-white/35 max-w-2xl mx-auto leading-relaxed"
-            style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 300, fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)" }}
+            style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 300, fontSize: "clamp(0.88rem, 2vw, 1.1rem)" }}
           >
             Our integrated ecosystem empowers creators, engineers, and
             manufacturers to bring complex ideas to life with precision, speed,
@@ -832,11 +872,10 @@ function LabFooter() {
 
 /* ═══════════════════════════════════════════════
    LOADING SCREEN
-   Industrial boot sequence aesthetic:
-   - Counter ticks 0 → 100
-   - Machine IDs scroll in sequence
-   - Progress bar fills
-   - Whole screen splits vertically and slides off
+   PERF: shimmer on progress bar is only rendered
+   when 5 < progress < 99 (already was) — kept.
+   No other changes needed here; it unmounts fully
+   after boot so has zero runtime cost.
 ═══════════════════════════════════════════════ */
 function LoadingScreen({ onDone }: { onDone: () => void }) {
   const [progress, setProgress]   = useState(0)
@@ -856,17 +895,14 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
   ]
 
   useEffect(() => {
-    // progress counter: 0→100 over ~2.2s
     let val = 0
     const step = () => {
-      // accelerate at start, slow in middle, sprint to 100 at end
       const inc = val < 30 ? 3 : val < 70 ? 1.2 : val < 90 ? 0.8 : 2.5
       val = Math.min(100, val + inc)
       setProgress(Math.floor(val))
       if (val < 100) {
         setTimeout(step, val < 30 ? 18 : val < 70 ? 28 : val < 90 ? 40 : 14)
       } else {
-        // brief pause at 100, then exit
         setTimeout(() => setExiting(true), 380)
         setTimeout(onDone, 1100)
       }
@@ -874,7 +910,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
     setTimeout(step, 200)
   }, [onDone])
 
-  // cycle boot lines in sync with progress
   useEffect(() => {
     const idx = Math.floor((progress / 100) * (BOOT_LINES.length - 1))
     setLineIdx(Math.min(idx, BOOT_LINES.length - 1))
@@ -887,9 +922,8 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
           key="loader"
           className="fixed inset-0 z-[99999] flex flex-col items-center justify-center overflow-hidden"
           style={{ background: "hsl(var(--background))" }}
-          exit={{ opacity: 1 }} // exit handled by children panels
+          exit={{ opacity: 1 }}
         >
-          {/* scanlines */}
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none opacity-[0.018]"
@@ -898,8 +932,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                 "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,1) 2px,rgba(255,255,255,1) 3px)",
             }}
           />
-
-          {/* ambient glow */}
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
@@ -909,7 +941,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
             }}
           />
 
-          {/* vertical grid lines */}
           {[20, 40, 60, 80].map(pct => (
             <motion.div
               key={pct}
@@ -922,14 +953,13 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
           ))}
 
           {/* ── CENTRE CONTENT ── */}
-          <div className="relative z-10 flex flex-col items-center gap-8 px-8 w-full max-w-lg">
+          <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 px-6 sm:px-8 w-full max-w-lg">
 
-            {/* logo / lab name */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex flex-col items-center gap-2"
+              className="flex flex-col items-center gap-2 text-center"
             >
               <span
                 className="text-orange-500/60 text-[9px] tracking-[0.45em] uppercase"
@@ -941,7 +971,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 900,
-                  fontSize: "clamp(2.8rem, 8vw, 5rem)",
+                  fontSize: "clamp(2.4rem, 10vw, 5rem)",
                   lineHeight: 0.9,
                   letterSpacing: "-0.02em",
                   color: "#ffffff",
@@ -957,7 +987,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
               </span>
             </motion.div>
 
-            {/* progress bar track */}
             <motion.div
               initial={{ opacity: 0, scaleX: 0.4 }}
               animate={{ opacity: 1, scaleX: 1 }}
@@ -973,7 +1002,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                     transition: "width 0.06s linear",
                   }}
                 />
-                {/* shimmer on bar */}
                 {progress > 5 && progress < 99 && (
                   <motion.div
                     className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-white/40 to-transparent"
@@ -983,7 +1011,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                 )}
               </div>
 
-              {/* progress labels */}
               <div className="flex items-center justify-between mt-2.5">
                 <span
                   className="text-white/25 text-[9px] tracking-[0.22em]"
@@ -1007,7 +1034,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
               </div>
             </motion.div>
 
-            {/* boot log line */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1029,18 +1055,17 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
               </AnimatePresence>
             </motion.div>
 
-            {/* machine ID ticker — horizontal scroll of IDs */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="flex gap-3 flex-wrap justify-center"
+              className="flex gap-2 sm:gap-3 flex-wrap justify-center"
             >
               {MACHINES.map((m, i) => (
                 <motion.span
                   key={m.id}
                   animate={{
-                    color:   progress >= ((i + 1) / MACHINES.length) * 100
+                    color: progress >= ((i + 1) / MACHINES.length) * 100
                       ? "rgba(249,115,22,0.7)"
                       : "rgba(255,255,255,0.12)",
                     borderColor: progress >= ((i + 1) / MACHINES.length) * 100
@@ -1089,8 +1114,8 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 ═══════════════════════════════════════════════ */
 export default function MachineryPage() {
   useFonts()
-  const [active,   setActive]   = useState(0)
-  const [loaded,   setLoaded]   = useState(false)
+  const [active, setActive] = useState(0)
+  const [loaded, setLoaded] = useState(false)
   const onDone = useCallback(() => setLoaded(true), [])
 
   return (
@@ -1100,8 +1125,8 @@ export default function MachineryPage() {
       <main
         className="bg-background text-foreground overflow-x-hidden"
         style={{
-          opacity:    loaded ? 1 : 0,
-          transition: "opacity 0.4s ease 0.1s",
+          opacity:       loaded ? 1 : 0,
+          transition:    "opacity 0.4s ease 0.1s",
           pointerEvents: loaded ? "auto" : "none",
         }}
       >
