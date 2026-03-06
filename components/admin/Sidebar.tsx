@@ -68,6 +68,13 @@ const NAV_GROUPS = [
       { id: "12", name: "Products",  href: "/admin/products" },
     ],
   },
+  {
+    group: "CONSULTANCY",
+    links: [
+      { id: "13", name: "Consultancy",  href: "/admin/consultancy" },
+      { id: "14", name: "Requests",      href: "/admin/consultancy/requests" },
+    ],
+  },
 ]
 
 function NavLink({ id, name, href, active, onClick }: {

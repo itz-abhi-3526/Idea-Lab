@@ -469,7 +469,7 @@ export function HeroSection() {
                 Explore our Creations <ArrowRight className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link href="/products" className="w-full sm:flex-1">
+            <Link href="/consultancy" className="w-full sm:flex-1">
               <Button variant="outline" onClick={() => handleSmoothScroll("events")}
                 className="h-10 sm:h-12 w-full sm:flex-1 border-white/20 bg-black/40 text-white hover:border-white font-black font-['Syne'] uppercase tracking-[0.1em] sm:tracking-[0.2em] rounded-none text-[8px] sm:text-[10px] backdrop-blur-md transition-all">
                 Get Expert Guidance
