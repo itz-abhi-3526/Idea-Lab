@@ -11,7 +11,7 @@ import {
   Upload,
 } from "lucide-react"
 
-/* -------------------- TYPES -------------------- */
+/* -------------------- TYPES — unchanged -------------------- */
 
 type Event = {
   id: string
@@ -24,7 +24,7 @@ type Event = {
   upi_qr_url: string | null
 }
 
-/* -------------------- FONTS -------------------- */
+/* -------------------- FONTS — unchanged -------------------- */
 
 function useFonts() {
   useEffect(() => {
@@ -39,7 +39,21 @@ function useFonts() {
   }, [])
 }
 
-/* -------------------- FIELD CONFIG -------------------- */
+/* -------------------- VIEWPORT HOOK (SSR-safe) --------------------
+   Only new code added to this file.
+------------------------------------------------------------------- */
+function useViewport() {
+  const [vw, setVw] = useState(1280)
+  useEffect(() => {
+    const update = () => setVw(window.innerWidth)
+    update()
+    window.addEventListener("resize", update, { passive: true })
+    return () => window.removeEventListener("resize", update)
+  }, [])
+  return vw
+}
+
+/* -------------------- FIELD CONFIG — unchanged -------------------- */
 
 const FIELDS: { key: string; label: string; type?: string; span?: boolean }[] = [
   { key: "full_name",  label: "Full Name",   span: true },
@@ -50,7 +64,7 @@ const FIELDS: { key: string; label: string; type?: string; span?: boolean }[] = 
   { key: "section",    label: "Section" },
 ]
 
-/* -------------------- GRAIN -------------------- */
+/* -------------------- GRAIN — unchanged -------------------- */
 
 function Grain() {
   return (
@@ -62,7 +76,7 @@ function Grain() {
   )
 }
 
-/* -------------------- SHIMMER BAR -------------------- */
+/* -------------------- SHIMMER BAR — unchanged -------------------- */
 
 function ShimmerBar() {
   return (
@@ -80,7 +94,7 @@ function ShimmerBar() {
   )
 }
 
-/* -------------------- INPUT FIELD -------------------- */
+/* -------------------- INPUT FIELD — unchanged -------------------- */
 
 function Field({
   label, value, onChange, type = "text", span = false,
@@ -93,7 +107,6 @@ function Field({
 
   return (
     <div style={{ gridColumn: span ? "1 / -1" : undefined, position: "relative" }}>
-      {/* floating label */}
       <label style={{
         position: "absolute", left: 16, zIndex: 2, pointerEvents: "none",
         transition: "all 0.22s cubic-bezier(0.16,1,0.3,1)",
@@ -139,11 +152,12 @@ function Field({
 
 export default function EventRegisterPage() {
   useFonts()
+  const vw = useViewport()
 
   const router = useRouter()
   const { eventId } = useParams<{ eventId: string }>()
 
-  // ── original state ──
+  /* original state — unchanged */
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -163,7 +177,7 @@ export default function EventRegisterPage() {
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
 
-  // ── original load ──
+  /* original load — unchanged */
   useEffect(() => {
     if (!eventId) return
 
@@ -203,7 +217,7 @@ export default function EventRegisterPage() {
     load()
   }, [eventId, router])
 
-  // ── original loading state ──
+  /* original loading state — unchanged */
   if (loading) {
     return (
       <div style={{
@@ -225,7 +239,7 @@ export default function EventRegisterPage() {
     )
   }
 
-  // ── original error state ──
+  /* original error state — unchanged */
   if (error || !event) {
     return (
       <div style={{
@@ -240,10 +254,10 @@ export default function EventRegisterPage() {
     )
   }
 
-  // ── original derived values ──
+  /* original derived values — unchanged */
   const registrationClosed = new Date(event.registration_deadline) < new Date()
 
-  // ── original upload ──
+  /* original upload — unchanged */
   const uploadPaymentSS = async (file: File) => {
     setUploading(true)
     setPreview(URL.createObjectURL(file))
@@ -262,7 +276,7 @@ export default function EventRegisterPage() {
     if (json.secure_url) setForm(f => ({ ...f, payment_ss_url: json.secure_url }))
   }
 
-  // ── original validation ──
+  /* original validation — unchanged */
   const formValid =
     form.full_name &&
     form.email &&
@@ -272,7 +286,7 @@ export default function EventRegisterPage() {
     form.section &&
     (!event.is_paid || form.payment_ss_url)
 
-  // ── original register ──
+  /* original register — unchanged */
   const register = async () => {
     setSubmitting(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -284,6 +298,11 @@ export default function EventRegisterPage() {
     setAlreadyRegistered(true)
     setSubmitting(false)
   }
+
+  /* responsive helpers */
+  const isMobile = vw <= 600
+  /* side padding for the card interior — tighter on mobile */
+  const cardPad = isMobile ? 20 : 36
 
   /* -------------------- UI -------------------- */
 
@@ -300,9 +319,7 @@ export default function EventRegisterPage() {
           from { opacity: 0; transform: translateY(28px); }
           to   { opacity: 1; transform: translateY(0);    }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; } to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         * { box-sizing: border-box; }
         input:-webkit-autofill {
           -webkit-box-shadow: 0 0 0 100px #111 inset !important;
@@ -324,10 +341,11 @@ export default function EventRegisterPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "80px 24px",
+        /* vertical breathing room — tighter on mobile */
+        padding: isMobile ? "40px 14px" : "80px 24px",
         position: "relative",
       }}>
-        {/* ambient glow */}
+        {/* ambient glow — unchanged */}
         <div style={{
           position: "fixed", top: "30%", left: "50%", transform: "translateX(-50%)",
           width: 600, height: 400, pointerEvents: "none", zIndex: 0,
@@ -341,7 +359,8 @@ export default function EventRegisterPage() {
 
           {/* ── CARD ── */}
           <div style={{
-            borderRadius: 28,
+            /* slightly smaller radius on mobile */
+            borderRadius: isMobile ? 20 : 28,
             overflow: "hidden",
             background: "linear-gradient(160deg, #141414 0%, #0d0d0d 100%)",
             border: "1px solid rgba(255,255,255,0.06)",
@@ -351,8 +370,10 @@ export default function EventRegisterPage() {
             <ShimmerBar />
 
             {/* ── EVENT INFO HEADER ── */}
-            <div style={{ padding: "32px 36px 28px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-              {/* eyebrow */}
+            <div style={{
+              padding: `32px ${cardPad}px 28px`,
+              borderBottom: "1px solid rgba(255,255,255,0.05)",
+            }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <div style={{ height: 1, width: 16, background: "#d4af37" }} />
                 <span style={{
@@ -363,7 +384,7 @@ export default function EventRegisterPage() {
 
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
-                fontSize: "clamp(1.5rem, 3.5vw, 2rem)",
+                fontSize: "clamp(1.4rem, 4.5vw, 2rem)",
                 color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em", margin: "0 0 16px",
               }}>
                 {event.title}
@@ -394,9 +415,9 @@ export default function EventRegisterPage() {
             </div>
 
             {/* ── BODY ── */}
-            <div style={{ padding: "32px 36px 36px" }}>
+            <div style={{ padding: `32px ${cardPad}px 36px` }}>
 
-              {/* ── ALREADY REGISTERED ── */}
+              {/* ── ALREADY REGISTERED — unchanged ── */}
               {alreadyRegistered ? (
                 <div style={{
                   borderRadius: 16, padding: "20px 24px",
@@ -419,7 +440,7 @@ export default function EventRegisterPage() {
                 </div>
 
               ) : registrationClosed ? (
-                /* ── CLOSED ── */
+                /* ── CLOSED — unchanged ── */
                 <div style={{
                   borderRadius: 16, padding: "20px 24px",
                   background: "rgba(239,68,68,0.06)",
@@ -443,10 +464,14 @@ export default function EventRegisterPage() {
                 /* ── FORM ── */
                 <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
 
-                  {/* fields grid */}
+                  {/* fields grid
+                      Desktop/tablet: 2-col (original)
+                      Mobile: single column — `span` fields still full-width,
+                              non-span fields each take full width too
+                  ── */}
                   <div style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                     gap: 12,
                     marginBottom: 24,
                   }}>
@@ -455,7 +480,9 @@ export default function EventRegisterPage() {
                         key={key}
                         label={label}
                         type={type}
-                        span={span}
+                        /* on mobile every field is already 1-col so span is irrelevant,
+                           but we pass it through so the component stays unchanged */
+                        span={isMobile ? true : span}
                         value={(form as any)[key]}
                         onChange={v => setForm({ ...form, [key]: v })}
                       />
@@ -470,7 +497,7 @@ export default function EventRegisterPage() {
                       background: "rgba(212,175,55,0.04)",
                       marginBottom: 24,
                     }}>
-                      {/* payment header */}
+                      {/* payment header — unchanged */}
                       <div style={{
                         padding: "18px 24px",
                         borderBottom: "1px solid rgba(212,175,55,0.1)",
@@ -495,7 +522,7 @@ export default function EventRegisterPage() {
                       </div>
 
                       <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
-                        {/* QR code */}
+                        {/* QR code — unchanged */}
                         {event.upi_qr_url && (
                           <div style={{ display: "flex", justifyContent: "center" }}>
                             <div style={{
@@ -506,13 +533,18 @@ export default function EventRegisterPage() {
                               <img
                                 src={event.upi_qr_url}
                                 alt="UPI QR"
-                                style={{ width: 160, height: 160, display: "block" }}
+                                /* slightly smaller on mobile so it doesn't dominate */
+                                style={{
+                                  width: isMobile ? 140 : 160,
+                                  height: isMobile ? 140 : 160,
+                                  display: "block",
+                                }}
                               />
                             </div>
                           </div>
                         )}
 
-                        {/* upload zone */}
+                        {/* upload zone — unchanged */}
                         <label
                           className="upload-zone"
                           style={{
@@ -531,7 +563,11 @@ export default function EventRegisterPage() {
                             letterSpacing: "0.25em", textTransform: "uppercase",
                             color: uploading ? "#d4af37" : "rgba(255,255,255,0.25)",
                           }}>
-                            {uploading ? "Uploading…" : form.payment_ss_url ? "Screenshot uploaded ✓" : "Upload payment screenshot"}
+                            {uploading
+                              ? "Uploading…"
+                              : form.payment_ss_url
+                              ? "Screenshot uploaded ✓"
+                              : "Upload payment screenshot"}
                           </span>
                           <input
                             type="file"
@@ -541,7 +577,7 @@ export default function EventRegisterPage() {
                           />
                         </label>
 
-                        {/* preview */}
+                        {/* preview — unchanged */}
                         {preview && (
                           <div style={{ display: "flex", justifyContent: "center" }}>
                             <img
@@ -550,6 +586,8 @@ export default function EventRegisterPage() {
                                 maxHeight: 180, borderRadius: 12,
                                 border: "1px solid rgba(212,175,55,0.15)",
                                 objectFit: "cover",
+                                /* prevent preview overflowing card on mobile */
+                                maxWidth: "100%",
                               }}
                             />
                           </div>
@@ -558,13 +596,13 @@ export default function EventRegisterPage() {
                     </div>
                   )}
 
-                  {/* divider */}
+                  {/* divider — unchanged */}
                   <div style={{
                     height: 1, marginBottom: 20,
                     background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
                   }} />
 
-                  {/* submit */}
+                  {/* submit — unchanged */}
                   <button
                     onClick={register}
                     disabled={!formValid || submitting || uploading}
@@ -598,9 +636,10 @@ export default function EventRegisterPage() {
             {/* ── FOOTER STRIP ── */}
             <div style={{
               borderTop: "1px solid rgba(255,255,255,0.04)",
-              padding: "14px 36px",
+              padding: `14px ${cardPad}px`,
               display: "flex", alignItems: "center", justifyContent: "space-between",
               position: "relative", overflow: "hidden",
+              flexWrap: "wrap", gap: 6,
             }}>
               <div style={{
                 position: "absolute", inset: 0, display: "flex", alignItems: "center",

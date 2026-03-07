@@ -7,7 +7,7 @@ import { Calendar, MapPin, ArrowRight, Ticket, Zap } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 /* ─────────────────────────────────────────
-   FONTS
+   FONTS — unchanged
 ───────────────────────────────────────── */
 function useFonts() {
   useEffect(() => {
@@ -23,7 +23,23 @@ function useFonts() {
 }
 
 /* ─────────────────────────────────────────
-   TYPES — unchanged from original
+   VIEWPORT HOOK  (SSR-safe)
+   ─ Only new code added to this file.
+   ─ Used solely to switch ticket layout.
+───────────────────────────────────────── */
+function useViewport() {
+  const [vw, setVw] = useState(1280)
+  useEffect(() => {
+    const update = () => setVw(window.innerWidth)
+    update()
+    window.addEventListener("resize", update, { passive: true })
+    return () => window.removeEventListener("resize", update)
+  }, [])
+  return vw
+}
+
+/* ─────────────────────────────────────────
+   TYPES — unchanged
 ───────────────────────────────────────── */
 type Event = {
   id: string
@@ -37,13 +53,13 @@ type Event = {
 }
 
 /* ─────────────────────────────────────────
-   ACCENT PALETTE — earthy luxury
+   ACCENT PALETTE — unchanged
 ───────────────────────────────────────── */
 const ACCENTS = [
-  { hex: "#d4af37", rgb: "212,175,55",  dark: true  }, // gold
-  { hex: "#e07b54", rgb: "224,123,84",  dark: false }, // terracotta
-  { hex: "#7eb8c9", rgb: "126,184,201", dark: false }, // slate blue
-  { hex: "#b09a7e", rgb: "176,154,126", dark: true  }, // warm tan
+  { hex: "#d4af37", rgb: "212,175,55",  dark: true  },
+  { hex: "#e07b54", rgb: "224,123,84",  dark: false },
+  { hex: "#7eb8c9", rgb: "126,184,201", dark: false },
+  { hex: "#b09a7e", rgb: "176,154,126", dark: true  },
 ]
 
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
@@ -61,7 +77,7 @@ function parseDate(iso: string) {
 }
 
 /* ─────────────────────────────────────────
-   GRAIN OVERLAY
+   GRAIN — unchanged
 ───────────────────────────────────────── */
 function Grain() {
   return (
@@ -74,7 +90,7 @@ function Grain() {
 }
 
 /* ─────────────────────────────────────────
-   SHIMMER TOP BAR
+   SHIMMER TOP BAR — unchanged
 ───────────────────────────────────────── */
 function ShimmerBar({ accentHex, accentRgb }: { accentHex: string; accentRgb: string }) {
   return (
@@ -94,8 +110,34 @@ function ShimmerBar({ accentHex, accentRgb }: { accentHex: string; accentRgb: st
 
 /* ─────────────────────────────────────────
    PERFORATED DIVIDER
+   Added `horizontal` prop for mobile.
+   Original vertical path is byte-for-byte
+   identical to the source.
 ───────────────────────────────────────── */
-function Perforation({ accentRgb }: { accentRgb: string }) {
+function Perforation({ accentRgb, horizontal = false }: { accentRgb: string; horizontal?: boolean }) {
+  if (horizontal) {
+    return (
+      <div style={{ position: "relative", height: 1, width: "100%", flexShrink: 0 }}>
+        <svg width="100%" height="2" style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+          <line
+            x1="14" y1="1" x2="99%" y2="1"
+            stroke={`rgba(${accentRgb},0.22)`} strokeWidth="1.5" strokeDasharray="6 5"
+          />
+        </svg>
+        <div style={{
+          position: "absolute", left: -14, top: "50%", transform: "translateY(-50%)",
+          width: 28, height: 28, borderRadius: "50%",
+          background: "#080808", border: "1px solid rgba(255,255,255,0.04)", zIndex: 10,
+        }} />
+        <div style={{
+          position: "absolute", right: -14, top: "50%", transform: "translateY(-50%)",
+          width: 28, height: 28, borderRadius: "50%",
+          background: "#080808", border: "1px solid rgba(255,255,255,0.04)", zIndex: 10,
+        }} />
+      </div>
+    )
+  }
+  // original — unchanged
   return (
     <div style={{ position: "relative", width: 1, flexShrink: 0, alignSelf: "stretch" }}>
       <svg width="2" height="100%" style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
@@ -119,49 +161,421 @@ function Perforation({ accentRgb }: { accentRgb: string }) {
 }
 
 /* ─────────────────────────────────────────
+   TICKET FOOTER STUB
+   Extracted to avoid copy-pasting across
+   the three layout branches. Identical markup.
+───────────────────────────────────────── */
+function TicketFooter({
+  accent, d, event,
+}: {
+  accent: typeof ACCENTS[number]
+  d: ReturnType<typeof parseDate>
+  event: Event
+}) {
+  return (
+    <div style={{
+      height: 32, borderTop: `1px solid rgba(${accent.rgb},0.06)`,
+      display: "flex", alignItems: "center", paddingLeft: 22, gap: 8,
+      position: "relative", overflow: "hidden",
+    }}>
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", alignItems: "center",
+        overflow: "hidden", opacity: 0.04, pointerEvents: "none",
+      }}>
+        {Array.from({ length: 20 }).map((_, i) => (
+          <span key={i} style={{
+            fontFamily: "'Azeret Mono', monospace", fontSize: 10,
+            letterSpacing: "0.4em", color: accent.hex,
+            whiteSpace: "nowrap", paddingRight: 24, textTransform: "uppercase",
+          }}>IDEA LAB · FISAT ·</span>
+        ))}
+      </div>
+      <Ticket size={10} color={`rgba(${accent.rgb},0.28)`} />
+      <span style={{
+        fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+        letterSpacing: "0.2em", color: `rgba(${accent.rgb},0.28)`,
+        textTransform: "uppercase", position: "relative", zIndex: 1,
+      }}>
+        {event.is_paid ? `Paid · ₹${event.price}` : "Complimentary"} · FISAT IDEA Lab · {d.year}
+      </span>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────
+   MAIN INFO BODY
+   Extracted so all three layout branches
+   share the same markup. All style values
+   are identical to the original.
+───────────────────────────────────────── */
+function TicketBody({
+  event, accent, d, isOpen, isPast, titleFontSize,
+}: {
+  event: Event
+  accent: typeof ACCENTS[number]
+  d: ReturnType<typeof parseDate>
+  isOpen: boolean
+  isPast: boolean
+  titleFontSize: string
+}) {
+  return (
+    <>
+      {/* badges */}
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 13 }}>
+        <span style={{
+          fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
+          padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
+          background: isOpen ? "rgba(34,197,94,0.09)" : "rgba(239,68,68,0.09)",
+          color: isOpen ? "#4ade80" : "#f87171",
+          border: `1px solid ${isOpen ? "rgba(34,197,94,0.17)" : "rgba(239,68,68,0.17)"}`,
+        }}>
+          {isPast ? "● Concluded" : isOpen ? "● Registration Open" : "● Closed"}
+        </span>
+        <span style={{
+          fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
+          padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
+          background: event.is_paid ? `rgba(${accent.rgb},0.09)` : "rgba(255,255,255,0.04)",
+          color: event.is_paid ? accent.hex : "rgba(255,255,255,0.32)",
+          border: `1px solid ${event.is_paid ? `rgba(${accent.rgb},0.2)` : "rgba(255,255,255,0.07)"}`,
+        }}>
+          {event.is_paid ? `₹${event.price}` : "Free"}
+        </span>
+      </div>
+
+      {/* title */}
+      <h3 style={{
+        fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
+        fontSize: titleFontSize,
+        color: "#fff", lineHeight: 1.18, letterSpacing: "-0.02em", marginBottom: 14,
+      }}>
+        {event.title}
+      </h3>
+
+      {/* meta */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <Calendar size={11} color={`rgba(${accent.rgb},0.5)`} />
+          <span style={{
+            fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+            fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+          }}>
+            {new Date(event.start_datetime).toLocaleString()}
+          </span>
+        </span>
+        {event.venue && (
+          <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <MapPin size={11} color={`rgba(${accent.rgb},0.5)`} />
+            <span style={{
+              fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+              fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+            }}>
+              {event.venue}
+            </span>
+          </span>
+        )}
+      </div>
+
+      {/* description */}
+      {event.description && (
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontStyle: "italic",
+          fontSize: "clamp(0.9rem, 1.6vw, 1.05rem)",
+          color: "rgba(255,255,255,0.3)",
+          lineHeight: 1.72, marginTop: 14, paddingTop: 14,
+          borderTop: `1px solid rgba(${accent.rgb},0.07)`,
+          maxWidth: 480, margin: "14px 0 0",
+        }}>
+          {event.description}
+        </p>
+      )}
+
+      {/* deadline */}
+      {isOpen && (
+        <p style={{
+          fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+          letterSpacing: "0.18em", color: `rgba(${accent.rgb},0.42)`,
+          marginTop: 12, textTransform: "uppercase",
+        }}>
+          Registration closes {new Date(event.registration_deadline!).toLocaleDateString()}
+        </p>
+      )}
+    </>
+  )
+}
+
+/* ─────────────────────────────────────────
    SINGLE TICKET CARD
+   `vw` is the only new prop.
+
+   DESKTOP  ≥ 861px → original layout, zero changes
+   TABLET   601–860px → horizontal, QR col hidden
+   MOBILE   ≤ 600px → stacked column
 ───────────────────────────────────────── */
 function EventTicket({
-  event,
-  index,
-  isOpen,
-  now,
+  event, index, isOpen, now, vw,
 }: {
   event: Event
   index: number
   isOpen: boolean
   now: Date
+  vw: number
 }) {
-  const accent = ACCENTS[index % ACCENTS.length]
-  const d = parseDate(event.start_datetime)
-  const isPast = d.raw < now
+  const accent  = ACCENTS[index % ACCENTS.length]
+  const d       = parseDate(event.start_datetime)
+  const isPast  = d.raw < now
 
+  const isMobile = vw <= 600
+  const isTablet = vw > 600 && vw <= 860
+
+  /* shared outer shell — unchanged values */
+  const outerStyle: React.CSSProperties = {
+    position: "relative", borderRadius: 22, overflow: "visible",
+    opacity: isPast ? 0.48 : 1,
+    animation: `riseIn 0.6s cubic-bezier(0.16,1,0.3,1) ${index * 0.1}s both`,
+  }
+  const glowStyle: React.CSSProperties = {
+    position: "absolute", inset: -1, borderRadius: 23, zIndex: 0, pointerEvents: "none",
+    background: `linear-gradient(135deg, rgba(${accent.rgb},0.16) 0%, transparent 55%)`,
+  }
+  const innerStyle: React.CSSProperties = {
+    position: "relative", zIndex: 1, borderRadius: 22, overflow: "hidden",
+    background: "linear-gradient(155deg, #131313 0%, #0c0c0c 100%)",
+    border: `1px solid rgba(${accent.rgb},0.15)`,
+    boxShadow: "0 24px 64px -16px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.04)",
+  }
+
+  /* shared View Details button — same styles everywhere */
+  const viewDetailsBtn = (
+    <Link
+      href={`/events/${event.id}`}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "9px 18px", borderRadius: 99, textDecoration: "none",
+        fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+        letterSpacing: "0.16em", textTransform: "uppercase",
+        transition: "all 0.28s cubic-bezier(0.16,1,0.3,1)",
+        background: isOpen && !isPast
+          ? `linear-gradient(135deg, rgba(${accent.rgb},0.9), rgba(${accent.rgb},0.65))`
+          : "rgba(255,255,255,0.04)",
+        color: isOpen && !isPast ? (accent.dark ? "#0a0800" : "#fff") : "rgba(255,255,255,0.2)",
+        border: `1px solid ${isOpen && !isPast ? `rgba(${accent.rgb},0.4)` : "rgba(255,255,255,0.06)"}`,
+        boxShadow: isOpen && !isPast ? `0 4px 20px rgba(${accent.rgb},0.22)` : "none",
+      }}
+    >
+      View Details <ArrowRight size={10} />
+    </Link>
+  )
+
+  /* ══════════════════════════════════════
+     MOBILE  (≤ 600px)
+     Date + title side-by-side on top row,
+     horizontal perforation, meta+CTA below.
+     QR hidden (accessible via link).
+  ══════════════════════════════════════ */
+  if (isMobile) {
+    return (
+      <div style={outerStyle}>
+        <div style={glowStyle} />
+        <div style={innerStyle}>
+          <ShimmerBar accentHex={accent.hex} accentRgb={accent.rgb} />
+
+          {/* top row: date block + title/badges */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 20, padding: "20px 22px 18px",
+            background: `linear-gradient(90deg, rgba(${accent.rgb},0.09) 0%, rgba(${accent.rgb},0.02) 100%)`,
+          }}>
+            {/* compact date block */}
+            <div style={{
+              flexShrink: 0, display: "flex", flexDirection: "column",
+              alignItems: "center", gap: 2,
+            }}>
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.28em", color: accent.hex,
+                textTransform: "uppercase", opacity: 0.85,
+              }}>{d.day}</span>
+              <span style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 700,
+                fontSize: 56, lineHeight: 0.9, color: "#fff",
+                letterSpacing: "-0.03em", margin: "6px 0 5px",
+              }}>{String(d.date).padStart(2, "0")}</span>
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)",
+              }}>{d.month} '{String(d.year).slice(2)}</span>
+            </div>
+
+            {/* title + mini-badges beside date */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 9 }}>
+                <span style={{
+                  fontFamily: "'Azeret Mono', monospace", fontSize: 8, letterSpacing: "0.16em",
+                  padding: "3px 9px", borderRadius: 99, textTransform: "uppercase",
+                  background: isOpen ? "rgba(34,197,94,0.09)" : "rgba(239,68,68,0.09)",
+                  color: isOpen ? "#4ade80" : "#f87171",
+                  border: `1px solid ${isOpen ? "rgba(34,197,94,0.17)" : "rgba(239,68,68,0.17)"}`,
+                }}>
+                  {isPast ? "● Concluded" : isOpen ? "● Open" : "● Closed"}
+                </span>
+                <span style={{
+                  fontFamily: "'Azeret Mono', monospace", fontSize: 8, letterSpacing: "0.16em",
+                  padding: "3px 9px", borderRadius: 99, textTransform: "uppercase",
+                  background: event.is_paid ? `rgba(${accent.rgb},0.09)` : "rgba(255,255,255,0.04)",
+                  color: event.is_paid ? accent.hex : "rgba(255,255,255,0.32)",
+                  border: `1px solid ${event.is_paid ? `rgba(${accent.rgb},0.2)` : "rgba(255,255,255,0.07)"}`,
+                }}>
+                  {event.is_paid ? `₹${event.price}` : "Free"}
+                </span>
+              </div>
+              <h3 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
+                fontSize: "clamp(1.05rem, 4.5vw, 1.35rem)",
+                color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0,
+              }}>{event.title}</h3>
+            </div>
+          </div>
+
+          {/* horizontal tear */}
+          <Perforation accentRgb={accent.rgb} horizontal />
+
+          {/* body */}
+          <div style={{ padding: "16px 22px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <Calendar size={11} color={`rgba(${accent.rgb},0.5)`} />
+                <span style={{
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+                  fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+                }}>
+                  {new Date(event.start_datetime).toLocaleString()}
+                </span>
+              </span>
+              {event.venue && (
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <MapPin size={11} color={`rgba(${accent.rgb},0.5)`} />
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
+                    fontSize: 12.5, color: "rgba(255,255,255,0.36)",
+                  }}>{event.venue}</span>
+                </span>
+              )}
+            </div>
+
+            {event.description && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontStyle: "italic",
+                fontSize: "clamp(0.9rem, 3.8vw, 1.05rem)",
+                color: "rgba(255,255,255,0.3)", lineHeight: 1.72,
+                marginTop: 14, paddingTop: 14,
+                borderTop: `1px solid rgba(${accent.rgb},0.07)`,
+                margin: "14px 0 0",
+              }}>{event.description}</p>
+            )}
+
+            {isOpen && (
+              <p style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.18em", color: `rgba(${accent.rgb},0.42)`,
+                marginTop: 10, textTransform: "uppercase",
+              }}>
+                Closes {new Date(event.registration_deadline!).toLocaleDateString()}
+              </p>
+            )}
+
+            {/* full-width CTA */}
+            <Link
+              href={`/events/${event.id}`}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                marginTop: 16, padding: "10px 18px", borderRadius: 99, textDecoration: "none",
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.16em", textTransform: "uppercase",
+                background: isOpen && !isPast
+                  ? `linear-gradient(135deg, rgba(${accent.rgb},0.9), rgba(${accent.rgb},0.65))`
+                  : "rgba(255,255,255,0.04)",
+                color: isOpen && !isPast ? (accent.dark ? "#0a0800" : "#fff") : "rgba(255,255,255,0.2)",
+                border: `1px solid ${isOpen && !isPast ? `rgba(${accent.rgb},0.4)` : "rgba(255,255,255,0.06)"}`,
+                boxShadow: isOpen && !isPast ? `0 4px 20px rgba(${accent.rgb},0.22)` : "none",
+              }}
+            >
+              View Details <ArrowRight size={10} />
+            </Link>
+          </div>
+
+          <TicketFooter accent={accent} d={d} event={event} />
+        </div>
+      </div>
+    )
+  }
+
+  /* ══════════════════════════════════════
+     TABLET  (601–860px)
+     Horizontal layout, QR col hidden.
+     Date col width trimmed to 96px.
+  ══════════════════════════════════════ */
+  if (isTablet) {
+    return (
+      <div style={outerStyle}>
+        <div style={glowStyle} />
+        <div style={innerStyle}>
+          <ShimmerBar accentHex={accent.hex} accentRgb={accent.rgb} />
+
+          <div style={{ display: "flex" }}>
+            {/* date col — slightly narrower */}
+            <div style={{
+              width: 96, flexShrink: 0,
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              padding: "28px 12px", gap: 2,
+              background: `linear-gradient(180deg, rgba(${accent.rgb},0.09) 0%, rgba(${accent.rgb},0.02) 100%)`,
+            }}>
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.28em", color: accent.hex,
+                textTransform: "uppercase", opacity: 0.85,
+              }}>{d.day}</span>
+              <span style={{
+                fontFamily: "'Cormorant Garamond', serif", fontWeight: 700,
+                fontSize: 62, lineHeight: 0.9, color: "#fff",
+                letterSpacing: "-0.03em", margin: "8px 0 6px",
+              }}>{String(d.date).padStart(2, "0")}</span>
+              <span style={{
+                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
+                letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)",
+              }}>{d.month} '{String(d.year).slice(2)}</span>
+            </div>
+
+            <Perforation accentRgb={accent.rgb} />
+
+            {/* main info */}
+            <div style={{ flex: 1, padding: "22px 24px 20px", minWidth: 0 }}>
+              <TicketBody
+                event={event} accent={accent} d={d}
+                isOpen={isOpen} isPast={isPast}
+                titleFontSize="clamp(1.15rem, 2.8vw, 1.55rem)"
+              />
+              <div style={{ marginTop: 16 }}>{viewDetailsBtn}</div>
+            </div>
+          </div>
+
+          <TicketFooter accent={accent} d={d} event={event} />
+        </div>
+      </div>
+    )
+  }
+
+  /* ══════════════════════════════════════
+     DESKTOP  (≥ 861px)
+     Original layout — zero changes.
+  ══════════════════════════════════════ */
   return (
-    <div style={{
-      position: "relative",
-      borderRadius: 22,
-      overflow: "visible",
-      opacity: isPast ? 0.48 : 1,
-      animation: `riseIn 0.6s cubic-bezier(0.16,1,0.3,1) ${index * 0.1}s both`,
-    }}>
-      {/* glow ring */}
-      <div style={{
-        position: "absolute", inset: -1, borderRadius: 23, zIndex: 0, pointerEvents: "none",
-        background: `linear-gradient(135deg, rgba(${accent.rgb},0.16) 0%, transparent 55%)`,
-      }} />
-
-      <div style={{
-        position: "relative", zIndex: 1, borderRadius: 22, overflow: "hidden",
-        background: "linear-gradient(155deg, #131313 0%, #0c0c0c 100%)",
-        border: `1px solid rgba(${accent.rgb},0.15)`,
-        boxShadow: "0 24px 64px -16px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}>
-
+    <div style={outerStyle}>
+      <div style={glowStyle} />
+      <div style={innerStyle}>
         <ShimmerBar accentHex={accent.hex} accentRgb={accent.rgb} />
 
         <div style={{ display: "flex" }}>
 
-          {/* ── DATE COLUMN ── */}
+          {/* DATE COLUMN — unchanged */}
           <div style={{
             width: 112, flexShrink: 0,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
@@ -173,109 +587,29 @@ function EventTicket({
               letterSpacing: "0.28em", color: accent.hex,
               textTransform: "uppercase", opacity: 0.85,
             }}>{d.day}</span>
-
             <span style={{
               fontFamily: "'Cormorant Garamond', serif", fontWeight: 700,
               fontSize: 66, lineHeight: 0.9, color: "#fff",
               letterSpacing: "-0.03em", margin: "8px 0 6px",
             }}>{String(d.date).padStart(2, "0")}</span>
-
             <span style={{
               fontFamily: "'Azeret Mono', monospace", fontSize: 9,
               letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)",
             }}>{d.month} '{String(d.year).slice(2)}</span>
           </div>
 
-          {/* perforated tear */}
           <Perforation accentRgb={accent.rgb} />
 
-          {/* ── MAIN INFO ── */}
+          {/* MAIN INFO — unchanged */}
           <div style={{ flex: 1, padding: "24px 28px 22px", minWidth: 0 }}>
-
-            {/* badges */}
-            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 13 }}>
-              <span style={{
-                fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
-                padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
-                background: isOpen ? "rgba(34,197,94,0.09)" : "rgba(239,68,68,0.09)",
-                color: isOpen ? "#4ade80" : "#f87171",
-                border: `1px solid ${isOpen ? "rgba(34,197,94,0.17)" : "rgba(239,68,68,0.17)"}`,
-              }}>
-                {isPast ? "● Concluded" : isOpen ? "● Registration Open" : "● Closed"}
-              </span>
-
-              <span style={{
-                fontFamily: "'Azeret Mono', monospace", fontSize: 9, letterSpacing: "0.2em",
-                padding: "4px 11px", borderRadius: 99, textTransform: "uppercase",
-                background: event.is_paid ? `rgba(${accent.rgb},0.09)` : "rgba(255,255,255,0.04)",
-                color: event.is_paid ? accent.hex : "rgba(255,255,255,0.32)",
-                border: `1px solid ${event.is_paid ? `rgba(${accent.rgb},0.2)` : "rgba(255,255,255,0.07)"}`,
-              }}>
-                {event.is_paid ? `₹${event.price}` : "Free"}
-              </span>
-            </div>
-
-            {/* title */}
-            <h3 style={{
-              fontFamily: "'Cormorant Garamond', serif", fontWeight: 600,
-              fontSize: "clamp(1.2rem, 2.4vw, 1.65rem)",
-              color: "#fff", lineHeight: 1.18, letterSpacing: "-0.02em", marginBottom: 14,
-            }}>
-              {event.title}
-            </h3>
-
-            {/* meta */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <Calendar size={11} color={`rgba(${accent.rgb},0.5)`} />
-                <span style={{
-                  fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
-                  fontSize: 12.5, color: "rgba(255,255,255,0.36)",
-                }}>
-                  {new Date(event.start_datetime).toLocaleString()}
-                </span>
-              </span>
-
-              {event.venue && (
-                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <MapPin size={11} color={`rgba(${accent.rgb},0.5)`} />
-                  <span style={{
-                    fontFamily: "'DM Sans', sans-serif", fontWeight: 300,
-                    fontSize: 12.5, color: "rgba(255,255,255,0.36)",
-                  }}>
-                    {event.venue}
-                  </span>
-                </span>
-              )}
-            </div>
-
-            {/* description */}
-            {event.description && (
-              <p style={{
-                fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontStyle: "italic",
-                fontSize: "clamp(0.9rem, 1.6vw, 1.05rem)",
-                color: "rgba(255,255,255,0.3)",
-                lineHeight: 1.72, marginTop: 14, paddingTop: 14,
-                borderTop: `1px solid rgba(${accent.rgb},0.07)`,
-                maxWidth: 480, margin: "14px 0 0",
-              }}>
-                {event.description}
-              </p>
-            )}
-
-            {/* deadline */}
-            {isOpen && (
-              <p style={{
-                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
-                letterSpacing: "0.18em", color: `rgba(${accent.rgb},0.42)`,
-                marginTop: 12, textTransform: "uppercase",
-              }}>
-                Registration closes {new Date(event.registration_deadline!).toLocaleDateString()}
-              </p>
-            )}
+            <TicketBody
+              event={event} accent={accent} d={d}
+              isOpen={isOpen} isPast={isPast}
+              titleFontSize="clamp(1.2rem, 2.4vw, 1.65rem)"
+            />
           </div>
 
-          {/* ── QR + ACTION ── */}
+          {/* QR + ACTION — unchanged */}
           <div style={{
             width: 156, flexShrink: 0,
             display: "flex", flexDirection: "column", alignItems: "center",
@@ -294,75 +628,29 @@ function EventTicket({
                 fgColor="#0a0a0a"
               />
             </div>
-
             <span style={{
               fontFamily: "'Azeret Mono', monospace", fontSize: 8,
               letterSpacing: "0.22em", color: "rgba(255,255,255,0.14)",
               textTransform: "uppercase", textAlign: "center",
             }}>Scan to open</span>
-
-            <Link
-              href={`/events/${event.id}`}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "9px 18px", borderRadius: 99, textDecoration: "none",
-                fontFamily: "'Azeret Mono', monospace", fontSize: 9,
-                letterSpacing: "0.16em", textTransform: "uppercase",
-                transition: "all 0.28s cubic-bezier(0.16,1,0.3,1)",
-                background: isOpen && !isPast
-                  ? `linear-gradient(135deg, rgba(${accent.rgb},0.9), rgba(${accent.rgb},0.65))`
-                  : "rgba(255,255,255,0.04)",
-                color: isOpen && !isPast
-                  ? (accent.dark ? "#0a0800" : "#fff")
-                  : "rgba(255,255,255,0.2)",
-                border: `1px solid ${isOpen && !isPast ? `rgba(${accent.rgb},0.4)` : "rgba(255,255,255,0.06)"}`,
-                boxShadow: isOpen && !isPast ? `0 4px 20px rgba(${accent.rgb},0.22)` : "none",
-              }}
-            >
-              View Details
-              <ArrowRight size={10} />
-            </Link>
+            {viewDetailsBtn}
           </div>
         </div>
 
-        {/* footer stub */}
-        <div style={{
-          height: 32, borderTop: `1px solid rgba(${accent.rgb},0.06)`,
-          display: "flex", alignItems: "center", paddingLeft: 22, gap: 8,
-          position: "relative", overflow: "hidden",
-        }}>
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", alignItems: "center",
-            overflow: "hidden", opacity: 0.04, pointerEvents: "none",
-          }}>
-            {Array.from({ length: 20 }).map((_, i) => (
-              <span key={i} style={{
-                fontFamily: "'Azeret Mono', monospace", fontSize: 10,
-                letterSpacing: "0.4em", color: accent.hex,
-                whiteSpace: "nowrap", paddingRight: 24, textTransform: "uppercase",
-              }}>IDEA LAB · FISAT ·</span>
-            ))}
-          </div>
-          <Ticket size={10} color={`rgba(${accent.rgb},0.28)`} />
-          <span style={{
-            fontFamily: "'Azeret Mono', monospace", fontSize: 9,
-            letterSpacing: "0.2em", color: `rgba(${accent.rgb},0.28)`,
-            textTransform: "uppercase", position: "relative", zIndex: 1,
-          }}>
-            {event.is_paid ? `Paid · ₹${event.price}` : "Complimentary"} · FISAT IDEA Lab · {d.year}
-          </span>
-        </div>
-
+        <TicketFooter accent={accent} d={d} event={event} />
       </div>
     </div>
   )
 }
 
 /* ─────────────────────────────────────────
-   PAGE — DB logic verbatim from original
+   PAGE
+   DB logic verbatim. Only change: vw hook
+   added and threaded into EventTicket.
 ───────────────────────────────────────── */
 export default function EventsPage() {
   useFonts()
+  const vw = useViewport()
 
   const [events, setEvents] = useState<Event[]>([])
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
@@ -409,16 +697,21 @@ export default function EventsPage() {
         padding: "88px 0 120px",
         position: "relative",
       }}>
-        {/* ambient glow */}
+        {/* ambient glow — unchanged */}
         <div style={{
           position: "fixed", top: "20%", left: "50%", transform: "translateX(-50%)",
           width: 700, height: 500, pointerEvents: "none", zIndex: 0,
           background: "radial-gradient(ellipse, rgba(212,175,55,0.04) 0%, transparent 70%)",
         }} />
 
-        <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
+        {/* container — only change is responsive padding */}
+        <div style={{
+          maxWidth: 920, margin: "0 auto",
+          padding: vw <= 400 ? "0 14px" : vw <= 640 ? "0 18px" : "0 24px",
+          position: "relative", zIndex: 1,
+        }}>
 
-          {/* ── HEADER ── */}
+          {/* HEADER — unchanged */}
           <div style={{
             marginBottom: 72,
             animation: "riseIn 0.7s cubic-bezier(0.16,1,0.3,1) both",
@@ -460,7 +753,7 @@ export default function EventsPage() {
             }} />
           </div>
 
-          {/* ── TABS ── */}
+          {/* TABS — unchanged */}
           <div style={{
             display: "flex", gap: 4, marginBottom: 40,
             padding: 4, background: "rgba(255,255,255,0.03)",
@@ -489,7 +782,7 @@ export default function EventsPage() {
             ))}
           </div>
 
-          {/* ── TICKET LIST ── */}
+          {/* TICKET LIST — unchanged */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {filtered.length === 0 && (
               <div style={{
@@ -513,6 +806,7 @@ export default function EventsPage() {
                 index={i}
                 isOpen={!!isOpen(event)}
                 now={now}
+                vw={vw}
               />
             ))}
           </div>

@@ -280,7 +280,7 @@ function Navbar() {
     { name: "HOME",      id: "home"      },
     { name: "ABOUT",     id: "about"     },
     { name: "EVENTS",    id: "events"    },
-    { name: "INVENTORY", id: "inventory" },
+    { name: "MACHINERY", id: "machinery" },
   ]
 
   return (
@@ -303,12 +303,25 @@ function Navbar() {
 
           {/* DESKTOP LINKS */}
           <div className="hidden md:flex items-center gap-8 lg:gap-10">
-            {navLinks.map((link) => (
-              <button key={link.name} onClick={() => handleSmoothScroll(link.id)}
-                className="text-[10px] font-bold font-['Syne'] uppercase tracking-[0.2em] text-neutral-400 hover:text-white transition-colors cursor-pointer">
-                {link.name}
-              </button>
-            ))}
+            {navLinks.map((link) =>
+  link.id === "machinery" ? (
+    <Link
+      key={link.name}
+      href="/machinery"
+      className="text-[10px] font-bold font-['Syne'] uppercase tracking-[0.2em] text-neutral-400 hover:text-white transition-colors"
+    >
+      {link.name}
+    </Link>
+  ) : (
+    <button
+      key={link.name}
+      onClick={() => handleSmoothScroll(link.id)}
+      className="text-[10px] font-bold font-['Syne'] uppercase tracking-[0.2em] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+    >
+      {link.name}
+    </button>
+  )
+)}
 
             {/* RECENTS — desktop, holds the ref for outside-click detection */}
             <button
@@ -378,12 +391,26 @@ function Navbar() {
               className="absolute top-20 left-4 right-4 bg-black/95 border border-white/10 backdrop-blur-3xl rounded-3xl overflow-hidden md:hidden z-[100] shadow-2xl"
             >
               <div className="p-8 flex flex-col gap-6 items-center">
-                {navLinks.map((link) => (
-                  <button key={link.name} onClick={() => { handleSmoothScroll(link.id); setIsOpen(false) }}
-                    className="text-[12px] font-bold font-['Syne'] uppercase tracking-[0.4em] text-neutral-400 hover:text-orange-500">
-                    {link.name}
-                  </button>
-                ))}
+                {navLinks.map((link) =>
+  link.id === "machinery" ? (
+    <Link
+      key={link.name}
+      href="/machinery"
+      onClick={() => setIsOpen(false)}
+      className="text-[12px] font-bold font-['Syne'] uppercase tracking-[0.4em] text-neutral-400 hover:text-orange-500"
+    >
+      {link.name}
+    </Link>
+  ) : (
+    <button
+      key={link.name}
+      onClick={() => { handleSmoothScroll(link.id); setIsOpen(false) }}
+      className="text-[12px] font-bold font-['Syne'] uppercase tracking-[0.4em] text-neutral-400 hover:text-orange-500"
+    >
+      {link.name}
+    </button>
+  )
+)}
                 <Link href="/execom" onClick={() => setIsOpen(false)}
                   className="text-[12px] font-bold font-['Syne'] uppercase tracking-[0.4em] text-neutral-400 hover:text-orange-500">
                   EXECOM
