@@ -15,6 +15,7 @@
   "/dashboard/my-requests/page": "app/dashboard/my-requests/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/gallery/page": "app/gallery/page.js",
+  "/inventory/page": "app/inventory/page.js",
   "/machinery/page": "app/machinery/page.js",
   "/page": "app/page.js"
 }

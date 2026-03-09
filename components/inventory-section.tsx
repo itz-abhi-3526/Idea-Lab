@@ -44,11 +44,11 @@ export function InventorySection() {
   useEffect(() => {
     const fetchInventory = async () => {
       const { data, error } = await supabase
-        .from("inventory_items")
-        .select("id, name, category, quantity_available")
-        .eq("is_active", true)
-        .order("name")
-        .limit(4)
+      .from("inventory_items")
+      .select("id, name, category, quantity_available")
+      .eq("is_active", true)
+      .eq("is_featured", true)
+      .limit(4)
 
       if (error) {
         console.error("Inventory fetch error:", error)
