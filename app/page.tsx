@@ -8,6 +8,7 @@ import { IdeaSubmissionSection } from "@/components/idea-submission-section"
 import { CoordinatorSection } from "@/components/coordinator-section"
 import { ProjectPortalComingSoonSection } from "@/components/project-portal-3d-section"
 import { SlotReservationSection } from "@/components/slot-reservation-section"
+import GalleryPreview from "@/components/GalleryPreview"
 
 export default function Home() {
   return (
@@ -40,7 +41,9 @@ export default function Home() {
         <InventorySection />
       </section>
 
-      <ProjectPortalComingSoonSection />
+     <section id="inventory">
+        <GalleryPreview />
+      </section>
 
       {/* 6. EXECOM - Target for Navbar "Incubation" or "More" dropdown */}
       <section id="incubation">

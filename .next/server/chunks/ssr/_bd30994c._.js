@@ -1,0 +1,3 @@
+module.exports=[87924,(a,b,c)=>{"use strict";b.exports=a.r(42602).vendored["react-ssr"].ReactJsxRuntime},76252,a=>{"use strict";var b=a.i(87924),c=a.i(72131),d=a.i(50944),e=a.i(78560);function f({children:a}){let f=(0,d.useRouter)(),[g,h]=(0,c.useState)(!0);return((0,c.useEffect)(()=>{e.supabase.auth.getSession().then(({data:a})=>{a.session?h(!1):f.replace("/login")});let{data:{subscription:a}}=e.supabase.auth.onAuthStateChange((a,b)=>{b||f.replace("/login")});return()=>a.unsubscribe()},[f]),g)?(0,b.jsx)("div",{className:"p-6",children:"Checking session..."}):(0,b.jsx)(b.Fragment,{children:a})}a.s(["default",()=>f])}];
+
+//# sourceMappingURL=_bd30994c._.js.map

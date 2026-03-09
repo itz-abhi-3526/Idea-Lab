@@ -75,6 +75,12 @@ const NAV_GROUPS = [
       { id: "14", name: "Requests",      href: "/admin/consultancy/requests" },
     ],
   },
+  {
+    group: "IDEA Gallery",
+    links: [
+      { id: "15", name: "Gallery",  href: "/admin/gallery" },
+    ],
+  },
 ]
 
 function NavLink({ id, name, href, active, onClick }: {

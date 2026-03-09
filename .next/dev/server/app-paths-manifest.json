@@ -1,0 +1,20 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/consultancy/page": "app/admin/consultancy/page.js",
+  "/admin/events/feedback/page": "app/admin/events/feedback/page.js",
+  "/admin/events/page": "app/admin/events/page.js",
+  "/admin/events/registrations/page": "app/admin/events/registrations/page.js",
+  "/admin/execom/page": "app/admin/execom/page.js",
+  "/admin/gallery/page": "app/admin/gallery/page.js",
+  "/admin/ideas/page": "app/admin/ideas/page.js",
+  "/admin/inventory/page": "app/admin/inventory/page.js",
+  "/admin/inventory/requests/page": "app/admin/inventory/requests/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/users/page": "app/admin/users/page.js",
+  "/consultancy/page": "app/consultancy/page.js",
+  "/dashboard/my-requests/page": "app/dashboard/my-requests/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/gallery/page": "app/gallery/page.js",
+  "/machinery/page": "app/machinery/page.js",
+  "/page": "app/page.js"
+}
