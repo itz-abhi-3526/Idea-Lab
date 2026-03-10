@@ -46,9 +46,7 @@ export default function Home() {
       </section>
 
       {/* 6. EXECOM - Target for Navbar "Incubation" or "More" dropdown */}
-      <section id="incubation">
-        <ExecomSection />
-      </section>
+      
 
       <Footer />
     </main>

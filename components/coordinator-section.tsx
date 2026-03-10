@@ -107,56 +107,7 @@ export function CoordinatorSection() {
               </m.div>
             </m.div>
 
-            {/* RIGHT: COORDINATOR PROFILE CARD */}
-            <m.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="relative"
-            >
-              <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-orange-500/40 hidden sm:block" />
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-orange-500/40 hidden sm:block" />
-
-              <div className="relative bg-neutral-900/40 backdrop-blur-3xl border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-2xl group">
-                
-                {/* ID Scan effect */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/30 to-transparent group-hover:top-full transition-all duration-[3s] ease-linear pointer-events-none" />
-
-                <div className="flex flex-col md:flex-row gap-8 sm:gap-10 items-center md:items-start">
-                  
-                  {/* Portrait */}
-                  <div className="relative shrink-0">
-                    <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-2xl overflow-hidden border border-white/10 relative z-10 bg-neutral-800">
-                      <img
-                        src="https://res.cloudinary.com/dudp2imxs/image/upload/v1766381472/IMG-20251218-WA0096_wtyhpd.jpg"
-                        alt="Mr. Jithin Joseph"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
-                      />
-                    </div>
-                    <div className="absolute -inset-4 bg-orange-500/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  </div>
-
-                  {/* Bio Info */}
-                  <div className="space-y-6 sm:space-y-8 flex-1 text-center md:text-left min-w-0">
-                    <div className="space-y-2">
-                      <h4 className="text-2xl sm:text-3xl font-black font-['Syne'] tracking-tight text-white uppercase leading-tight">
-                        Mr. Jithin Joseph
-                      </h4>
-                      <p className="text-[10px] sm:text-xs font-bold font-['Outfit'] text-neutral-500 tracking-[0.15em] uppercase">
-                        Project Coordinator <br className="md:hidden"/> • IDEA Lab
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 sm:gap-5 w-full">
-                      <ContactItem icon={Mail} label="jithinjoseph@fisat.ac.in" href="mailto:jithinjoseph@fisat.ac.in" />
-                      <ContactItem icon={Phone} label="+91 9895221439" href="tel:+919895221439" />
-                      <ContactItem icon={MapPin} label="FISAT, Angamaly" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </m.div>
+            
 
           </div>
         </div>

@@ -346,9 +346,6 @@ function Navbar() {
                 MORE <ChevronDown size={14} className="text-orange-500" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-black/95 border-white/10 backdrop-blur-2xl rounded-2xl p-2 min-w-[180px] shadow-2xl z-[110]">
-                <DropdownMenuItem className="focus:bg-orange-500/10 focus:text-orange-500 rounded-lg cursor-pointer">
-                  <Link href="/execom" className="w-full font-bold uppercase tracking-widest text-[10px] py-2">EXECOM</Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem className="focus:bg-orange-500/10 focus:text-orange-500 rounded-lg cursor-pointer" onClick={() => handleSmoothScroll("incubation")}>
                   <span className="w-full font-bold uppercase tracking-widest text-[10px] py-2">INCUBATION</span>
                 </DropdownMenuItem>
