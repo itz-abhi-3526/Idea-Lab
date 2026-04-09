@@ -134,7 +134,7 @@ export default function AddEditEventModal({ open, onClose, event }: {
     try {
       const data = new FormData()
       data.append("file", file); data.append("upload_preset", "idea_lab_profiles"); data.append("folder", "idea-lab/event-posters")
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: data })
+      const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
       const json = await res.json(); if (!json.secure_url) throw new Error("Upload failed")
       setForm(prev => prev ? { ...prev, poster_url: json.secure_url } : prev)
     } catch { alert("Poster upload failed") } finally { setUploading(false) }
@@ -145,7 +145,7 @@ export default function AddEditEventModal({ open, onClose, event }: {
     try {
       const data = new FormData()
       data.append("file", file); data.append("upload_preset", "idea_lab_profiles"); data.append("folder", "idea-lab/upi-qr")
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: data })
+      const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
       const json = await res.json(); if (!json.secure_url) throw new Error("Upload failed")
       setForm(prev => prev ? { ...prev, upi_qr_url: json.secure_url } : prev)
     } catch { alert("UPI QR upload failed") } finally { setUploading(false) }

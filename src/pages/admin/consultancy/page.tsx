@@ -89,7 +89,7 @@ export default function AdminConsultancy() {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     try {
       const data = new FormData(); data.append("file", file); data.append("upload_preset", "idea_lab_profiles")
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: data })
+      const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
       const json = await res.json(); if (!res.ok) throw new Error(json.error?.message)
       setImageUrl(json.secure_url)
     } catch (err) { console.error(err); alert("Image upload failed") }

@@ -68,7 +68,7 @@ export default function ProfilePhotoUpload({
       const xhr = new XMLHttpRequest()
       xhr.open(
         "POST",
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+        `https://idea-lab-backend.onrender.com/api/upload`
       )
 
       xhr.upload.onprogress = (e) => {

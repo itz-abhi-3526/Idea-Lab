@@ -1,11 +1,14 @@
 export async function uploadImageToCloudinary(file: File) {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+
   const formData = new FormData()
   formData.append("file", file)
-  formData.append("upload_preset", "idea_lab_profiles") // ✅ your unsigned preset
+  formData.append("upload_preset", uploadPreset)
   formData.append("folder", "incubation")
 
   const res = await fetch(
-    "https://api.cloudinary.com/v1_1/dvrc3jqve/image/upload",
+    `https://idea-lab-backend.onrender.com/api/upload`,
     {
       method: "POST",
       body: formData,

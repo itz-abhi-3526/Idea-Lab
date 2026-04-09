@@ -266,7 +266,7 @@ export default function EventRegisterPage() {
     data.append("folder", "idea-lab/payments")
 
     const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      `https://idea-lab-backend.onrender.com/api/upload`,
       { method: "POST", body: data }
     )
     const json = await res.json()
