@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
-import { supabaseAdmin } from "../lib/supabase-admin"; // ✅ FIXED PATH
+import { supabaseAdmin } from "../lib/supabase-admin";
 
 const router = Router();
 
+// ✅ LOGIN ROUTE
 router.post("/auth/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;

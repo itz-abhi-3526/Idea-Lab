@@ -4,16 +4,18 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import authRoutes from "./routes/auth";
+import uploadRoutes from "./routes/upload";
 
-// ✅ Load environment variables
+// ✅ Load env FIRST
 dotenv.config();
 
+// ✅ Create app
 const app = express();
 
-// ✅ CORS (VERY IMPORTANT for Vercel → Render)
+// ✅ CORS (IMPORTANT for Vercel → Render)
 app.use(
   cors({
-    origin: "*", // later you can restrict to your Vercel URL
+    origin: "*", // later restrict to your Vercel URL
     credentials: true,
   })
 );
@@ -24,18 +26,19 @@ app.use(cookieParser());
 
 // ✅ API Routes
 app.use("/api", authRoutes);
+app.use("/api", uploadRoutes); // ✅ moved here
 
-// ✅ Health check route
+// ✅ Health check
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// ✅ Root route (optional)
+// ✅ Root route
 app.get("/", (_req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// ✅ Render PORT (DO NOT CHANGE)
+// ✅ Render PORT
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
