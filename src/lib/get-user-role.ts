@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { supabaseAdmin } from "../../server/lib/supabase-admin"
 
 export async function getUserRole(userId: string) {
   const { data, error } = await supabaseAdmin
