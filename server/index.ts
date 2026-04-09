@@ -1,43 +1,43 @@
-require("dotenv").config({ path: ".env.local" })
-const express = require("express")
-const cookieParser = require("cookie-parser")
-const path = require("path")
-const authRoutes = require("./routes/auth")
+import express from "express";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import cors from "cors";
 
-const app = express()
-const basePort = process.env.PORT ? Number(process.env.PORT) : 4000
-const maxPortAttempts = 10
+import authRoutes from "./routes/auth";
 
-app.use(cookieParser())
-app.use(express.json())
-app.use(express.static(path.join(process.cwd(), "dist")))
+// ✅ Load environment variables
+dotenv.config();
 
-// API routes
-app.use("/api", authRoutes)
+const app = express();
 
+// ✅ CORS (VERY IMPORTANT for Vercel → Render)
+app.use(
+  cors({
+    origin: "*", // later you can restrict to your Vercel URL
+    credentials: true,
+  })
+);
+
+// ✅ Middlewares
+app.use(express.json());
+app.use(cookieParser());
+
+// ✅ API Routes
+app.use("/api", authRoutes);
+
+// ✅ Health check route
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" })
-})
+  res.json({ status: "ok" });
+});
 
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(process.cwd(), "dist", "index.html"))
-})
+// ✅ Root route (optional)
+app.get("/", (_req, res) => {
+  res.send("Backend is running 🚀");
+});
 
-function startServer(port, attempt = 1) {
-  const server = app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`)
-  })
+// ✅ Render PORT (DO NOT CHANGE)
+const PORT = process.env.PORT || 10000;
 
-  server.on("error", (error) => {
-    if (error.code === "EADDRINUSE" && attempt < maxPortAttempts) {
-      const nextPort = port + 1
-      console.warn(`Port ${port} is in use. Trying ${nextPort}...`)
-      startServer(nextPort, attempt + 1)
-    } else {
-      console.error(error)
-      process.exit(1)
-    }
-  })
-}
-
-startServer(basePort)
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
