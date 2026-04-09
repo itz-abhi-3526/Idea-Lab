@@ -262,8 +262,6 @@ export default function EventRegisterPage() {
 
     const data = new FormData()
     data.append("file", file)
-    data.append("upload_preset", "idea_lab_profiles")
-    data.append("folder", "idea-lab/payments")
 
     const res = await fetch(
       `https://idea-lab-backend.onrender.com/api/upload`,
@@ -271,7 +269,8 @@ export default function EventRegisterPage() {
     )
     const json = await res.json()
     setUploading(false)
-    if (json.secure_url) setForm(f => ({ ...f, payment_ss_url: json.secure_url }))
+    if (json.url)
+  setForm(f => ({ ...f, payment_ss_url: json.url }))
   }
 
   /* original validation — unchanged */

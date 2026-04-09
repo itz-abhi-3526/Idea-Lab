@@ -116,12 +116,11 @@ export default function AddExecomModal({ open, onClose, member = null }: Props) 
     setUploading(true)
     try {
       const data = new FormData()
-      data.append('file', file)
-      data.append('upload_preset', 'idea_lab_profiles')
+      data.append("file", file);
       const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: 'POST', body: data })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error?.message || 'Upload failed')
-      setForm(prev => ({ ...prev, image_url: json.secure_url }))
+      setForm(prev => ({ ...prev, image_url: json.url }))
     } catch (err) {
       console.error(err)
       alert('Image upload failed')

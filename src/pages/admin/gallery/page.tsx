@@ -292,10 +292,10 @@ export default function AdminGallery() {
       const blob = await (await fetch(preview)).blob()
       const fd   = new FormData()
       fd.append("file", blob, "cropped.jpg")
-      fd.append("upload_preset", "idea_lab_profiles")
+
       const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: fd })
       const json = await res.json()
-      uploadUrl  = json.secure_url
+      uploadUrl = json.url
     }
     await supabase.from("gallery_images").insert([{ title, image_url: uploadUrl, is_featured: featured }])
     setTitle(""); setImage(""); setPreview(null); setFeatured(true)

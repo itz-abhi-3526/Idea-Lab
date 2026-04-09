@@ -98,7 +98,7 @@ async function uploadToCloudinary(file: File) {
   const res = await fetch("https://idea-lab-backend.onrender.com/api/upload", { method: "POST", body: formData })
   if (!res.ok) throw new Error("Upload failed")
   const data = await res.json()
-  return data.secure_url as string
+  return data.url as string
 }
 
 async function uploadSTL(file: File) {

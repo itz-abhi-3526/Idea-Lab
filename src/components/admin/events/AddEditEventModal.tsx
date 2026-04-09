@@ -133,10 +133,10 @@ export default function AddEditEventModal({ open, onClose, event }: {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     try {
       const data = new FormData()
-      data.append("file", file); data.append("upload_preset", "idea_lab_profiles"); data.append("folder", "idea-lab/event-posters")
+      data.append("file", file); 
       const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
-      const json = await res.json(); if (!json.secure_url) throw new Error("Upload failed")
-      setForm(prev => prev ? { ...prev, poster_url: json.secure_url } : prev)
+      const json = await res.json(); if (!json.url) throw new Error("Upload failed")
+setForm(prev => prev ? { ...prev, poster_url: json.url } : prev)
     } catch { alert("Poster upload failed") } finally { setUploading(false) }
   }
 
@@ -144,10 +144,10 @@ export default function AddEditEventModal({ open, onClose, event }: {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     try {
       const data = new FormData()
-      data.append("file", file); data.append("upload_preset", "idea_lab_profiles"); data.append("folder", "idea-lab/upi-qr")
+      data.append("file", file); 
       const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
-      const json = await res.json(); if (!json.secure_url) throw new Error("Upload failed")
-      setForm(prev => prev ? { ...prev, upi_qr_url: json.secure_url } : prev)
+      const json = await res.json(); if (!json.url) throw new Error("Upload failed")
+setForm(prev => prev ? { ...prev, upi_qr_url: json.url } : prev)
     } catch { alert("UPI QR upload failed") } finally { setUploading(false) }
   }
 

@@ -62,7 +62,6 @@ export default function ProfilePhotoUpload({
 
       const form = new FormData()
       form.append("file", compressed)
-      form.append("upload_preset", UPLOAD_PRESET)
 
       /* ---------- XMLHttpRequest for progress ---------- */
       const xhr = new XMLHttpRequest()
@@ -84,15 +83,15 @@ export default function ProfilePhotoUpload({
         }
 
         const data = JSON.parse(xhr.responseText)
-        if (!data.secure_url) throw data
+        if (!data.url) throw data
 
-        await supabase
-          .from("users")
-          .update({ avatar_url: data.secure_url })
-          .eq("id", userId)
+await supabase
+  .from("users")
+  .update({ avatar_url: data.url })
+  .eq("id", userId)
 
-        setProgress(null)
-        onUploaded(data.secure_url)
+setProgress(null)
+onUploaded(data.url)
       }
 
       xhr.onerror = () => {
