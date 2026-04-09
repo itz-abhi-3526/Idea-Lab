@@ -95,7 +95,6 @@ type UploadState = { file?: File; url?: string; progress: number; error?: string
 async function uploadToCloudinary(file: File) {
   const formData = new FormData()
   formData.append("file", file)
-  formData.append("upload_preset", "idea_lab_profiles")
   const res = await fetch("https://idea-lab-backend.onrender.com/api/upload", { method: "POST", body: formData })
   if (!res.ok) throw new Error("Upload failed")
   const data = await res.json()

@@ -329,7 +329,7 @@ function ProductModal({ open, onClose, product }: {
   async function uploadImage(e: any) {
     const file = e.target.files?.[0]; if (!file) return; setImgLoad(true)
     const data = new FormData(); data.append("file", file); data.append("upload_preset", "idea_lab_profiles")
-    const res  = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: data })
+    const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: data })
     const json = await res.json(); setForm((prev: any) => ({ ...prev, image_url: json.secure_url })); setImgLoad(false)
   }
 

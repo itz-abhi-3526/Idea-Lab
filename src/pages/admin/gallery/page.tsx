@@ -293,7 +293,7 @@ export default function AdminGallery() {
       const fd   = new FormData()
       fd.append("file", blob, "cropped.jpg")
       fd.append("upload_preset", "idea_lab_profiles")
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: fd })
+      const res  = await fetch(`https://idea-lab-backend.onrender.com/api/upload`, { method: "POST", body: fd })
       const json = await res.json()
       uploadUrl  = json.secure_url
     }
