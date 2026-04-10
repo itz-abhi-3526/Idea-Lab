@@ -118,32 +118,42 @@ export default function InventoryPage() {
     setFormError(null)
     try {
       setSubmitting(true)
-      const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:10000"
-      const res = await fetch(`${baseUrl}/api/inventory-request`, {
+      
+      // Construct the API URL
+      // In dev: uses Vite proxy configured in vite.config.ts
+      // In prod: uses VITE_API_BASE_URL env var or falls back to relative path
+      const baseUrl = import.meta.env.VITE_API_BASE_URL
+      const url = baseUrl ? `${baseUrl}/api/inventory-request` : "/api/inventory-request"
+      
+      console.log("Submitting inventory request to:", url)
+      
+      const req = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
-          email: user.email,
           requester: form,
           items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
         }),
       })
 
-      const json = await res.json().catch(() => null)
-      if (!res.ok) {
-        const serverMessage = json?.error || json?.message || `${res.status} ${res.statusText}`
+      const json = await req.json().catch(() => null)
+      
+      if (!req.ok) {
+        const serverMessage = json?.error || json?.message || `${req.status} ${req.statusText}`
+        console.error("Inventory request failed:", serverMessage)
         setFormError(serverMessage || "Request submission failed. Please try again.")
         return
       }
 
+      console.log("Inventory request submitted successfully:", json)
       setCart([])
       setShowCart(false)
       setShowForm(false)
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 2500)
     } catch (err: any) {
-      console.error(err)
+      console.error("Inventory submission error:", err)
       setFormError(err?.message || "Unable to submit request. Please try again.")
     } finally {
       setSubmitting(false)

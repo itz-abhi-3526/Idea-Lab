@@ -5,19 +5,14 @@ const router = Router()
 
 router.post("/inventory-request", async (req, res) => {
   try {
-    const { userId, email, requester, items } = req.body as {
+    const { userId, requester, items } = req.body as {
       userId?: string
-      email?: string
       requester?: { name?: string; college?: string; department?: string; phone?: string; purpose?: string }
       items?: { id: string; quantity: number }[]
     }
 
     if (!userId) {
       return res.status(400).json({ error: "Missing userId" })
-    }
-
-    if (!email) {
-      return res.status(400).json({ error: "Missing email" })
     }
 
     if (!requester || !requester.name || !requester.college || !requester.department || !requester.phone || !requester.purpose) {
@@ -48,7 +43,6 @@ router.post("/inventory-request", async (req, res) => {
       .from("inventory_requests")
       .insert({
         user_id: userId,
-        email,
         requester_name: requester.name,
         college: requester.college,
         department: requester.department,
@@ -110,6 +104,96 @@ router.post("/inventory-request/cancel", async (req, res) => {
   } catch (err: any) {
     console.error("Cancel inventory request error:", err)
     return res.status(500).json({ error: err.message || "Server error" })
+  }
+})
+
+// ═══════════════ ADMIN ENDPOINTS ═══════════════
+
+router.post("/admin/inventory-requests/approve", async (req, res) => {
+  try {
+    const { requestId } = req.body as { requestId?: string }
+
+    if (!requestId) {
+      return res.status(400).json({ error: "Missing requestId" })
+    }
+
+    // Get the request first
+    const { data: request, error: getError } = await supabaseAdmin
+      .from("inventory_requests")
+      .select("id, status")
+      .eq("id", requestId)
+      .single()
+
+    if (getError || !request) {
+      console.error("Failed to fetch inventory request:", getError)
+      return res.status(404).json({ error: "Request not found" })
+    }
+
+    // Update request status to approved
+    const { error: updateError } = await supabaseAdmin
+      .from("inventory_requests")
+      .update({ status: "approved" })
+      .eq("id", requestId)
+
+    if (updateError) {
+      console.error("Failed to approve inventory request:", updateError)
+      return res.status(500).json({ error: updateError.message })
+    }
+
+    return res.json({ success: true })
+  } catch (error: any) {
+    console.error("Admin approve request error:", error)
+    return res.status(500).json({ error: error.message || "Server error" })
+  }
+})
+
+router.post("/admin/inventory-requests/reject", async (req, res) => {
+  try {
+    const { requestId } = req.body as { requestId?: string }
+
+    if (!requestId) {
+      return res.status(400).json({ error: "Missing requestId" })
+    }
+
+    const { error } = await supabaseAdmin
+      .from("inventory_requests")
+      .update({ status: "rejected" })
+      .eq("id", requestId)
+
+    if (error) {
+      console.error("Failed to reject inventory request:", error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    return res.json({ success: true })
+  } catch (error: any) {
+    console.error("Admin reject request error:", error)
+    return res.status(500).json({ error: error.message || "Server error" })
+  }
+})
+
+router.post("/admin/inventory-requests/complete", async (req, res) => {
+  try {
+    const { requestId } = req.body as { requestId?: string }
+
+    if (!requestId) {
+      return res.status(400).json({ error: "Missing requestId" })
+    }
+
+    const { error } = await supabaseAdmin
+      .from("inventory_requests")
+      .update({ status: "completed" })
+      .eq("id", requestId)
+
+    if (error) {
+      console.error("Failed to complete inventory request:", error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    return res.json({ success: true })
+  } catch (error: any) {
+    console.error("Admin complete request error:", error)
+    return res.status(500).json({ error: error.message || "Server error" })
   }
 })
 
