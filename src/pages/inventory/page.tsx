@@ -103,62 +103,51 @@ export default function InventoryPage() {
   }, [])
 
   const submitRequest = async () => {
-    if (!user) return
-    const { name, department, phone, purpose } = form
-    
-    if (!name || !department || !phone || !purpose) {
-      setFormError("Please complete all details before submitting.")
-      return
-    }
-    if (cart.length === 0) {
-      setFormError("Add at least one item to your request.")
-      return
-    }
-
-    setFormError(null)
-    try {
-      setSubmitting(true)
-      
-      // Construct the API URL
-      // In dev: uses Vite proxy configured in vite.config.ts
-      // In prod: uses VITE_API_BASE_URL env var or falls back to relative path
-      const baseUrl = import.meta.env.VITE_API_BASE_URL
-      const url = baseUrl ? `${baseUrl}/api/inventory-request` : "/api/inventory-request"
-      
-      console.log("Submitting inventory request to:", url)
-      
-      const req = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          requester: form,
-          items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
-        }),
-      })
-
-      const json = await req.json().catch(() => null)
-      
-      if (!req.ok) {
-        const serverMessage = json?.error || json?.message || `${req.status} ${req.statusText}`
-        console.error("Inventory request failed:", serverMessage)
-        setFormError(serverMessage || "Request submission failed. Please try again.")
-        return
-      }
-
-      console.log("Inventory request submitted successfully:", json)
-      setCart([])
-      setShowCart(false)
-      setShowForm(false)
-      setSubmitted(true)
-      setTimeout(() => setSubmitted(false), 2500)
-    } catch (err: any) {
-      console.error("Inventory submission error:", err)
-      setFormError(err?.message || "Unable to submit request. Please try again.")
-    } finally {
-      setSubmitting(false)
-    }
+  if (!user) return
+  const { name, department, phone, purpose, college } = form
+  
+  // Frontend-side validation
+  if (!name || !department || !phone || !purpose) {
+    setFormError("All fields are required.")
+    return
   }
+
+  setSubmitting(true)
+  setFormError(null)
+
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL
+    const url = `${baseUrl}/api/inventory-request`
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id,
+        requester: form, // includes name, department, phone, purpose, college
+        items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
+      }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      setFormError(result.error || "Submission failed")
+      return
+    }
+
+    // SUCCESS
+    setCart([])
+    setShowCart(false)
+    setShowForm(false)
+    setSubmitted(true)
+    setTimeout(() => setSubmitted(false), 2500)
+  } catch (err) {
+    setFormError("Could not connect to server.")
+  } finally {
+    setSubmitting(false)
+  }
+}
 
   const categories    = ["all", ...Array.from(new Set(items.map(i => i.category)))]
   const filteredItems = items
@@ -535,17 +524,23 @@ export default function InventoryPage() {
                   </motion.div>
                 )}
 
-                {/* fields */}
+                
                 {[
                   { k: "name",       l: "FULL NAME",     p: "Your full name" },
+                  { k: "college",    l: "COLLEGE",       p: "e.g. FISAT" }, // Add this line!
                   { k: "department", l: "DEPARTMENT",    p: "e.g. ECE, CSE, ME" },
                   { k: "phone",      l: "PHONE",         p: "10-digit mobile number" },
                   { k: "purpose",    l: "PROJECT / USE", p: "Describe your use case briefly" },
                 ].map(({ k, l, p }) => (
                   <div key={k} className="mfield">
                     <label className="mfield-l">{l}</label>
-                    <input className="mfield-i" placeholder={p}
-                      value={(form as any)[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} suppressHydrationWarning />
+                    <input 
+                      className="mfield-i" 
+                      placeholder={p}
+                      value={(form as any)[k]} 
+                      onChange={e => setForm({ ...form, [k]: e.target.value })} 
+                      suppressHydrationWarning 
+                    />
                   </div>
                 ))}
 
@@ -1109,13 +1104,23 @@ const CSS = `
   font-family:'Barlow Condensed',sans-serif;
   font-size:11px;font-weight:700;letter-spacing:0.12em;color:#555;
 }
-.mfield-i{
-  background:#141414;border:1px solid rgba(255,255,255,0.06);
-  border-radius:8px;padding:11px 13px;
-  color:#e0dbd3;font-family:'Barlow',sans-serif;font-size:13px;
-  outline:none;transition:border-color 0.2s,background 0.2s;width:100%;
+.mfield-i {
+  background: #111; /* Slightly lighter than the modal bg */
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 11px 13px;
+  color: #e0dbd3;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
 }
-.mfield-i:focus{border-color:rgba(249,115,22,0.35);background:#171717;}
+
+.mfield-i:focus {
+  border-color: rgba(249,115,22,0.5);
+  background: #151515;
+}
 .mfield-i::placeholder{color:#333;}
 
 .modal-acts{display:flex;gap:10px;}
