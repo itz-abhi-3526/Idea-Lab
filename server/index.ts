@@ -4,8 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import authRoutes from "./routes/auth";
-import uploadRoutes from "./routes/upload";
-
+import uploadRoutes from "./routes/upload";import inventoryRoutes from "./routes/inventory"
 // ✅ Load env FIRST
 dotenv.config();
 
@@ -27,6 +26,7 @@ app.use(cookieParser());
 // ✅ API Routes
 app.use("/api", authRoutes);
 app.use("/api", uploadRoutes); // ✅ moved here
+app.use("/api", inventoryRoutes);
 
 // ✅ Health check
 app.get("/api/health", (_req, res) => {

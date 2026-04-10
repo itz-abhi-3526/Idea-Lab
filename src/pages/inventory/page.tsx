@@ -33,6 +33,7 @@ export default function InventoryPage() {
   const [toastItem,  setToastItem]  = useState<string | null>(null)
   const [submitted,  setSubmitted]  = useState(false)
   const [form, setForm] = useState({ name: "", college: "FISAT", department: "", phone: "", purpose: "" })
+  const [formError,  setFormError]  = useState<string | null>(null)
   const [loading,    setLoading]    = useState(true)
   const [loadPct,    setLoadPct]    = useState(0)
   const [loadPhase,  setLoadPhase]  = useState(0) // 0=init, 1=fetching, 2=done
@@ -104,17 +105,49 @@ export default function InventoryPage() {
   const submitRequest = async () => {
     if (!user) return
     const { name, department, phone, purpose } = form
-    if (!name || !department || !phone || !purpose) return
+    
+    if (!name || !department || !phone || !purpose) {
+      setFormError("Please complete all details before submitting.")
+      return
+    }
+    if (cart.length === 0) {
+      setFormError("Add at least one item to your request.")
+      return
+    }
+
+    setFormError(null)
     try {
       setSubmitting(true)
-      const res = await fetch("/api/inventory-request", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, requester: form, items: cart.map(i => ({ id: i.id, quantity: i.quantity })) }),
+      const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:10000"
+      const res = await fetch(`${baseUrl}/api/inventory-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+          requester: form,
+          items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
+        }),
       })
-      if (!res.ok) return
-      setCart([]); setShowCart(false); setShowForm(false)
-      setSubmitted(true); setTimeout(() => setSubmitted(false), 2500)
-    } finally { setSubmitting(false) }
+
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        const serverMessage = json?.error || json?.message || `${res.status} ${res.statusText}`
+        setFormError(serverMessage || "Request submission failed. Please try again.")
+        return
+      }
+
+      setCart([])
+      setShowCart(false)
+      setShowForm(false)
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 2500)
+    } catch (err: any) {
+      console.error(err)
+      setFormError(err?.message || "Unable to submit request. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const categories    = ["all", ...Array.from(new Set(items.map(i => i.category)))]
@@ -483,6 +516,14 @@ export default function InventoryPage() {
                 </div>
 
                 <div className="modal-rule" />
+
+                {/* error banner */}
+                {formError && (
+                  <motion.div className="error-banner"
+                    initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
+                    <p className="error-text">{formError}</p>
+                  </motion.div>
+                )}
 
                 {/* fields */}
                 {[
@@ -1040,6 +1081,17 @@ const CSS = `
   font-size:20px;font-weight:900;letter-spacing:0.1em;color:#e0dbd3;
 }
 .modal-sub{font-size:11.5px;color:#555;margin-top:3px;letter-spacing:0.02em;}
+
+/* error banner */
+.error-banner{
+  background:rgba(239,68,68,0.1);
+  border:1px solid rgba(239,68,68,0.3);
+  border-radius:8px;padding:11px 13px;
+  margin-bottom:4px;
+}
+.error-text{
+  font-size:12px;color:#ef4444;line-height:1.5;letter-spacing:0.02em;margin:0;
+}
 .modal-rule{height:1px;background:rgba(255,255,255,0.05);}
 
 .mfield{display:flex;flex-direction:column;gap:6px;}

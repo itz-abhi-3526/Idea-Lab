@@ -144,19 +144,38 @@ export default function EventDetailsPage() {
   const navigate = useNavigate()
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   /* original fetch — unchanged */
   useEffect(() => {
     if (!eventId) return
-    supabase
-      .from("events")
-      .select("*")
-      .eq("id", eventId)
-      .maybeSingle()
-      .then(({ data }) => {
-        setEvent(data)
+    
+    const fetchEvent = async () => {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("events")
+          .select("id, title, description, start_datetime, end_datetime, venue, poster_url, registration_deadline, is_paid, price")
+          .eq("id", eventId)
+          .maybeSingle()
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        if (!data) {
+          setError("Event not found")
+        } else {
+          setEvent(data)
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch event:", err)
+        setError(err?.message || "Failed to load event")
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+
+    fetchEvent()
   }, [eventId])
 
   /* original loading — unchanged */
@@ -182,16 +201,18 @@ export default function EventDetailsPage() {
   }
 
   /* original not-found — unchanged */
-  if (!event) {
+  if (!event || error) {
     return (
       <div style={{
         minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
         background: "#080808",
       }}>
-        <span style={{
-          fontFamily: "'Azeret Mono', monospace", fontSize: 11,
-          letterSpacing: "0.3em", color: "rgba(255,255,255,0.2)", textTransform: "uppercase",
-        }}>Event not found</span>
+        <div style={{ textAlign: "center" }}>
+          <span style={{
+            fontFamily: "'Azeret Mono', monospace", fontSize: 11,
+            letterSpacing: "0.3em", color: "rgba(255,255,255,0.2)", textTransform: "uppercase",
+          }}>{error ?? "Event not found"}</span>
+        </div>
       </div>
     )
   }
@@ -598,7 +619,7 @@ export default function EventDetailsPage() {
                 <div style={{ width: isMobile ? "100%" : "auto" }}>
                   {registrationOpen ? (
                     <Link
-                      href={`/events/${event.id}/register`}
+                      to={`/events/${event.id}/register`}
                       className="reg-btn"
                       style={{
                         display: "inline-flex", alignItems: "center",

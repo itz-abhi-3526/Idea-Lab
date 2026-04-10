@@ -346,7 +346,7 @@ function EventTicket({
   /* shared View Details button — same styles everywhere */
   const viewDetailsBtn = (
     <Link
-      href={`/events/${event.id}`}
+      to={`/events/${event.id}`}
       style={{
         display: "inline-flex", alignItems: "center", gap: 6,
         padding: "9px 18px", borderRadius: 99, textDecoration: "none",
@@ -483,7 +483,7 @@ function EventTicket({
 
             {/* full-width CTA */}
             <Link
-              href={`/events/${event.id}`}
+              to={`/events/${event.id}`}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 marginTop: 16, padding: "10px 18px", borderRadius: 99, textDecoration: "none",

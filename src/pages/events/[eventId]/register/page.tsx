@@ -213,7 +213,7 @@ export default function EventRegisterPage() {
     }
 
     load()
-  }, [eventId, router])
+  }, [eventId, navigate])
 
   /* original loading state — unchanged */
   if (loading) {
@@ -263,14 +263,21 @@ export default function EventRegisterPage() {
     const data = new FormData()
     data.append("file", file)
 
-    const res = await fetch(
-      `https://idea-lab-backend.onrender.com/api/upload`,
-      { method: "POST", body: data }
-    )
-    const json = await res.json()
-    setUploading(false)
-    if (json.url)
-  setForm(f => ({ ...f, payment_ss_url: json.url }))
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: data })
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json?.error || "Upload failed")
+      }
+      if (json.url) {
+        setForm(f => ({ ...f, payment_ss_url: json.url }))
+      }
+    } catch (err: any) {
+      console.error(err)
+      setError(err?.message || "Upload failed. Try again.")
+    } finally {
+      setUploading(false)
+    }
   }
 
   /* original validation — unchanged */
@@ -286,14 +293,33 @@ export default function EventRegisterPage() {
   /* original register — unchanged */
   const register = async () => {
     setSubmitting(true)
+    setError(null)
+
     const { data: { user } } = await supabase.auth.getUser()
-    await supabase.from("event_registrations").insert({
-      event_id: event.id,
-      user_id: user!.id,
-      ...form,
-    })
-    setAlreadyRegistered(true)
-    setSubmitting(false)
+    if (!user) {
+      setError("Please login to complete registration.")
+      setSubmitting(false)
+      return
+    }
+
+    try {
+      const { error: insertError } = await supabase.from("event_registrations").insert({
+        event_id: event.id,
+        user_id: user.id,
+        ...form,
+      })
+
+      if (insertError) {
+        throw insertError
+      }
+
+      setAlreadyRegistered(true)
+    } catch (err: any) {
+      console.error("Registration failed:", err)
+      setError(err.message || "Registration failed. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   /* responsive helpers */
@@ -413,6 +439,21 @@ export default function EventRegisterPage() {
 
             {/* ── BODY ── */}
             <div style={{ padding: `32px ${cardPad}px 36px` }}>
+
+              {error && (
+                <div style={{
+                  borderRadius: 16,
+                  padding: "18px 22px",
+                  marginBottom: 20,
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.18)",
+                  color: "#fca5a5",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 13,
+                }}>
+                  {error}
+                </div>
+              )}
 
               {/* ── ALREADY REGISTERED — unchanged ── */}
               {alreadyRegistered ? (

@@ -2,12 +2,7 @@
 import { useEffect, useState } from "react"
 import { LazyMotion, domAnimation, m, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { X, Check, ArrowRight, Rocket, Zap } from "lucide-react"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-)
+import { supabase } from "@/lib/supabase"
 
 /* MAGNETIC BUTTON COMPONENT */
 function MagneticButton({ children, onClick, className = "" }: { children: React.ReactNode, onClick?: () => void, className?: string }) {
@@ -72,28 +67,38 @@ export function IdeaSubmissionSection() {
 
     const form = e.currentTarget
     const formData = new FormData(form)
-    const payload = Object.fromEntries(formData.entries())
-    const { data: sessionData } = await supabase.auth.getSession()
+    const payload = Object.fromEntries(formData.entries()) as Record<string, string>
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setError("Please login before submitting your idea.")
+      setLoading(false)
+      return
+    }
 
     try {
-      const res = await fetch("/api/idea-submission", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
-        },
-        body: JSON.stringify(payload),
+      const { error } = await supabase.from("idea_submissions").insert({
+        student_name: payload.student_name ?? "",
+        email: email || payload.email,
+        phone: payload.phone ?? "",
+        department: payload.department ?? "",
+        year: payload.year ?? "",
+        idea_title: payload.idea_title ?? "",
+        idea_description: payload.idea_description ?? "",
+        domain: payload.domain ?? "",
+        team_size: Number(payload.team_size) || 0,
+        status: "submitted",
+        user_id: user.id,
       })
 
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || "Submission failed")
+      if (error) {
+        throw error
       }
 
       setSuccess(true)
       form.reset()
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || "Submission failed")
     } finally {
       setLoading(false)
     }
