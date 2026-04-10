@@ -1,12 +1,13 @@
+import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import cors from "cors";
 
-import authRoutes from "./routes/auth";
-import uploadRoutes from "./routes/upload";import inventoryRoutes from "./routes/inventory"
-// ✅ Load env FIRST
-dotenv.config();
+// Fix: Added .js extensions. Even in TS, ESM imports often require the 
+// extension of the compiled output to resolve correctly in Node.
+import authRoutes from "./routes/auth.js";
+import uploadRoutes from "./routes/upload.js";
+import inventoryRoutes from "./routes/inventory.js";
 
 // ✅ Create app
 const app = express();
@@ -25,7 +26,7 @@ app.use(cookieParser());
 
 // ✅ API Routes
 app.use("/api", authRoutes);
-app.use("/api", uploadRoutes); // ✅ moved here
+app.use("/api", uploadRoutes);
 app.use("/api", inventoryRoutes);
 
 // ✅ Health check
