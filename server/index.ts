@@ -1,6 +1,6 @@
-import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
 import cors from "cors";
 
 // Fix: Added .js extensions. Even in TS, ESM imports often require the 
@@ -8,6 +8,9 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/upload.js";
 import inventoryRoutes from "./routes/inventory.js";
+
+// ✅ Load env FIRST
+dotenv.config();
 
 // ✅ Create app
 const app = express();

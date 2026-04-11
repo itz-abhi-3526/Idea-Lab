@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FISAT AICTE IDEA Lab</string>
+    <string name="title_activity_main">FISAT AICTE IDEA Lab</string>
+    <string name="package_name">com.fisat.idealab</string>
+    <string name="custom_url_scheme">com.fisat.idealab</string>
+</resources>
