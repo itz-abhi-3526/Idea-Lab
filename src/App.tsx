@@ -42,9 +42,12 @@ import GalleryPage from "./pages/gallery/page"
 import AdminLayout from "./pages/admin/layout"
 import DashboardLayout from "./pages/dashboard/layout"
 
+import NavigationControls from "./components/NavigationControls"
+
 export default function App() {
   return (
     <BrowserRouter>
+      <NavigationControls />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
